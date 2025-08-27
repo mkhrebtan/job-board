@@ -15,6 +15,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Persistence", "src\Persiste
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "src\Infrastructure\Infrastructure.csproj", "{1892C7D2-6C01-498A-B96D-88CCE7017417}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -95,5 +100,8 @@ Global
 		{A482CCE5-BC09-45C0-AF20-20AE05526C29} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{211511D2-9624-4FF5-979C-EEBB78A5173C} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{1892C7D2-6C01-498A-B96D-88CCE7017417} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {225E412D-78DA-44B0-B42C-8B9A337B6C68}
 	EndGlobalSection
 EndGlobal
