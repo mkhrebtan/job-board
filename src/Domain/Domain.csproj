@@ -17,11 +17,4 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Contexts\IdentityContext\" />
-    <Folder Include="Contexts\ApplicationContext\" />
-    <Folder Include="Contexts\RecruitmentContext\Aggregates\" />
-    <Folder Include="Contexts\ResumePostingContext\" />
-  </ItemGroup>
-
 </Project>

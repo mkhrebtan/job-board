@@ -12,6 +12,8 @@ public class RichTextContent : ValueObject
         PlainText = plainText;
     }
 
+    public static RichTextContent Empty => new(string.Empty, string.Empty);
+
     public string Markdown { get; private init; }
 
     public string PlainText { get; private init; }
