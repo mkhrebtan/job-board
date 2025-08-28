@@ -1,11 +1,17 @@
 ﻿namespace Domain.Abstraction;
 
-public abstract record Id
+public abstract record Id<T>
+    where T : struct
 {
-    public Guid Value { get; private init; }
+    public T Value { get; private init; }
 
-    protected Id()
+    protected Id(T id)
     {
-        Value = Guid.NewGuid();
+        Value = id;
+    }
+
+    public override int GetHashCode()
+    {
+        return Value.GetHashCode();
     }
 }

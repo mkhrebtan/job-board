@@ -1,7 +1,7 @@
 ﻿namespace Domain.Abstraction;
 
 public abstract class Entity<T> : IEquatable<Entity<T>>
-    where T : Id
+    where T : Id<Guid>
 {
     protected Entity(T id)
     {
