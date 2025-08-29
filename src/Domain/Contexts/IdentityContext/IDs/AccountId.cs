@@ -2,7 +2,7 @@
 
 namespace Domain.Contexts.IdentityContext.IDs;
 
-public record AccountId : Id<Guid>
+public record AccountId : Id
 {
     public AccountId()
         : base(Guid.NewGuid())

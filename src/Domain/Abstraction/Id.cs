@@ -1,11 +1,10 @@
 ﻿namespace Domain.Abstraction;
 
-public abstract record Id<T>
-    where T : struct
+public abstract record Id
 {
-    public T Value { get; private init; }
+    public Guid Value { get; private init; }
 
-    protected Id(T id)
+    protected Id(Guid id)
     {
         Value = id;
     }

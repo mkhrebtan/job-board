@@ -2,7 +2,7 @@
 
 namespace Domain.Contexts.IdentityContext.IDs;
 
-public record RefreshTokenId : Id<Guid>
+public record RefreshTokenId : Id
 {
     public RefreshTokenId()
         : base(Guid.NewGuid())

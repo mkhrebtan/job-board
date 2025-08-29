@@ -1,21 +1,21 @@
 ﻿namespace Domain.Abstraction;
 
-public abstract class Entity<T> : IEquatable<Entity<T>>
-    where T : Id<Guid>
+public abstract class Entity<TId> : IEquatable<Entity<TId>>
+    where TId : Id
 {
-    protected Entity(T id)
+    protected Entity(TId id)
     {
         Id = id;
     }
 
-    public T Id { get; protected set; }
+    public TId Id { get; protected set; }
 
     public override bool Equals(object? obj)
     {
-        return obj is Entity<T> entity && Equals(entity);
+        return obj is Entity<TId> entity && Equals(entity);
     }
 
-    public bool Equals(Entity<T>? other)
+    public bool Equals(Entity<TId>? other)
     {
         return other is not null && Id == other.Id;
     }

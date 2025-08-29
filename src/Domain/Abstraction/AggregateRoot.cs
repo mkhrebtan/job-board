@@ -1,9 +1,9 @@
 ﻿namespace Domain.Abstraction;
 
-public abstract class AggregateRoot<T> : Entity<T>
-    where T : Id<Guid>
+public abstract class AggregateRoot<TId> : Entity<TId>
+    where TId : Id
 {
-    protected AggregateRoot(T id)
+    protected AggregateRoot(TId id)
         : base(id)
     {
     }
