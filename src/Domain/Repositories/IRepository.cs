@@ -2,8 +2,9 @@
 
 namespace Domain.Repos;
 
-public interface IRepository<TRoot>
-    where TRoot : AggregateRoot
+public interface IRepository<TRoot, TId>
+    where TRoot : AggregateRoot<TId>
+    where TId : Id
 {
     Task<TRoot?> GetByIdAsync(Guid id, CancellationToken ct);
 

@@ -27,8 +27,8 @@ public class Resume : AggregateRoot<ResumeId>
         DesiredPosition desiredPosition,
         Money salary,
         RichTextContent skillsDescription,
-        ICollection<EmploymentType>? employmentTypes,
-        ICollection<WorkArrangement>? workArrangements)
+        ICollection<EmploymentType> employmentTypes,
+        ICollection<WorkArrangement> workArrangements)
             : base(new ResumeId())
     {
         SeekerId = seekerId;
@@ -38,12 +38,8 @@ public class Resume : AggregateRoot<ResumeId>
         DesiredPosition = desiredPosition;
         SalaryExpectation = salary;
         SkillsDescription = skillsDescription;
-        _employmentTypes = employmentTypes is not null
-            ? [.. employmentTypes]
-            : new();
-        _workArrangements = workArrangements is not null
-            ? [.. workArrangements]
-            : new();
+        _employmentTypes = [.. employmentTypes];
+        _workArrangements = [.. workArrangements];
         CreatedAt = DateTime.UtcNow;
         LastUpdatedAt = DateTime.UtcNow;
         Status = ResumeStatus.Draft;
@@ -85,43 +81,6 @@ public class Resume : AggregateRoot<ResumeId>
     public IReadOnlyCollection<Education> Educations => _educations.Values.ToList().AsReadOnly();
 
     public IReadOnlyCollection<LanguageSkill> Languages => _languages.Values.ToList().AsReadOnly();
-
-    public static Result<Resume> Create(
-        UserId seekerId,
-        PersonalInfo personalInfo,
-        Location location,
-        ContactInfo contactInfo,
-        DesiredPosition desiredPosition,
-        Money salary,
-        RichTextContent skillsDescription,
-        ICollection<EmploymentType>? employmentTypes,
-        ICollection<WorkArrangement>? workArrangements)
-    {
-        var validationResult = ValidateCreationProperties(
-            seekerId,
-            personalInfo,
-            location,
-            contactInfo,
-            desiredPosition,
-            salary,
-            skillsDescription);
-        if (validationResult.IsFailure)
-        {
-            return Result<Resume>.Failure(validationResult.Error);
-        }
-
-        var resume = new Resume(
-            seekerId,
-            personalInfo,
-            location,
-            contactInfo,
-            desiredPosition,
-            salary,
-            skillsDescription,
-            employmentTypes,
-            workArrangements);
-        return Result<Resume>.Success(resume);
-    }
 
     public Result Publish()
     {
@@ -329,6 +288,43 @@ public class Resume : AggregateRoot<ResumeId>
         _languages.Remove(languageId);
         LastUpdatedAt = DateTime.UtcNow;
         return Result.Success();
+    }
+
+    internal static Result<Resume> Create(
+        UserId seekerId,
+        PersonalInfo personalInfo,
+        Location location,
+        ContactInfo contactInfo,
+        DesiredPosition desiredPosition,
+        Money salary,
+        RichTextContent skillsDescription,
+        ICollection<EmploymentType> employmentTypes,
+        ICollection<WorkArrangement> workArrangements)
+    {
+        var validationResult = ValidateCreationProperties(
+            seekerId,
+            personalInfo,
+            location,
+            contactInfo,
+            desiredPosition,
+            salary,
+            skillsDescription);
+        if (validationResult.IsFailure)
+        {
+            return Result<Resume>.Failure(validationResult.Error);
+        }
+
+        var resume = new Resume(
+            seekerId,
+            personalInfo,
+            location,
+            contactInfo,
+            desiredPosition,
+            salary,
+            skillsDescription,
+            employmentTypes,
+            workArrangements);
+        return Result<Resume>.Success(resume);
     }
 
     private static Result ValidateCreationProperties(
