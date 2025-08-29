@@ -7,7 +7,7 @@ using Domain.Shared.ErrorHandling;
 
 namespace Domain.Contexts.ApplicationContext.Aggregates;
 
-public abstract class VacancyApplication : Entity<VacancyApplicationId>
+public abstract class VacancyApplication : AggregateRoot<VacancyApplicationId>
 {
     protected VacancyApplication(UserId seekerId, VacancyId vacancyId, CoverLetter coverLetter)
         : base(new VacancyApplicationId())

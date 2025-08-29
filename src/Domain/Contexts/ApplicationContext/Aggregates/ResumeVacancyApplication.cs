@@ -16,7 +16,7 @@ public class ResumeVacancyApplication : VacancyApplication
 
     public ResumeId ResumeId { get; private set; }
 
-    public static Result<ResumeVacancyApplication> Create(UserId seekerId, VacancyId vacancyId, CoverLetter coverLetter, ResumeId resumeId)
+    internal static Result<ResumeVacancyApplication> Create(UserId seekerId, VacancyId vacancyId, CoverLetter coverLetter, ResumeId resumeId)
     {
         var validationResult = ValidateApplication(seekerId, vacancyId, coverLetter);
         if (validationResult.IsFailure)

@@ -16,7 +16,7 @@ public class FileVacancyApplication : VacancyApplication
 
     public FileUrl FileUrl { get; private set; }
 
-    public static Result<FileVacancyApplication> Create(UserId seekerId, VacancyId vacancyId, CoverLetter coverLetter, FileUrl fileUrl)
+    internal static Result<FileVacancyApplication> Create(UserId seekerId, VacancyId vacancyId, CoverLetter coverLetter, FileUrl fileUrl)
     {
         var validationResult = ValidateApplication(seekerId, vacancyId, coverLetter);
         if (validationResult.IsFailure)
