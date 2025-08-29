@@ -18,7 +18,7 @@ public class CompanyUser : AggregateRoot<CompanyUserId>
 
     public CompanyId CompanyId { get; private set; }
 
-    public static Result<CompanyUser> Create(UserId recruiterId, CompanyId companyId)
+    internal static Result<CompanyUser> Create(UserId recruiterId, CompanyId companyId)
     {
         if (recruiterId == null)
         {
