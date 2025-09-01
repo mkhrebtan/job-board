@@ -24,6 +24,11 @@ public class DateRange : ValueObject
             return Result<DateRange>.Failure(new Error("DateRange.InvalidEndDate", "End date cannot be earlier than start date."));
         }
 
+        if (startDate.Year == endDate.Year && startDate.Month == endDate.Month)
+        {
+            return Result<DateRange>.Failure(new Error("DateRange.SameStartAndEndDate", "Start date and end date cannot be in the same month and year."));
+        }
+
         return Result<DateRange>.Success(new DateRange(startDate, endDate));
     }
 
@@ -35,6 +40,6 @@ public class DateRange : ValueObject
     protected override IEnumerable<object> GetAtomicValues()
     {
         yield return StartDate;
-        yield return Duration;
+        yield return EndDate ?? DateTime.MaxValue;
     }
 }
