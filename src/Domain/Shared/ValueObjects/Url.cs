@@ -5,7 +5,7 @@ namespace Domain.Shared.ValueObjects;
 
 public abstract class Url : ValueObject
 {
-    public const string UrlPattern = @"^https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)$";
+    public const string UrlPattern = @"^(http|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?$";
 
     protected Url(string url)
     {
@@ -14,14 +14,14 @@ public abstract class Url : ValueObject
 
     public string Value { get; private set; }
 
-    protected static Result ValidateUrl(string url)
+    protected static Result ValidateUrl(string url, string pattern)
     {
         if (string.IsNullOrWhiteSpace(url))
         {
             return Result.Failure(new Error("Url.Empty", "URL cannot be null or empty."));
         }
 
-        if (!System.Text.RegularExpressions.Regex.IsMatch(url, UrlPattern))
+        if (!System.Text.RegularExpressions.Regex.IsMatch(url, pattern))
         {
             return Result.Failure(new Error("Url.InvalidFormat", "URL format is invalid."));
         }

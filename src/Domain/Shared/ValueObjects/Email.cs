@@ -6,7 +6,7 @@ namespace Domain.Shared.ValueObjects;
 
 public class Email : ValueObject
 {
-    private const string EmailPattern = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
+    private const string EmailPattern = @"^((?!\.)[\w-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$";
 
     private Email(string address)
     {

@@ -1,38 +1,55 @@
 ﻿using System.Text.RegularExpressions;
 using Domain.Abstraction;
 using Domain.Shared.ErrorHandling;
+using PhoneNumbers;
 
 namespace Domain.Shared.ValueObjects;
 
 public class PhoneNumber : ValueObject
 {
-    private const string PhonePattern = @"^\+([0-9]{1,4})[-\s]?([0-9]{1,15})$";
-
-    private PhoneNumber(string number)
+    private PhoneNumber(string number, string regionCode)
     {
         Number = number;
+        RegionCode = regionCode;
     }
 
     public string Number { get; }
 
-    public static Result<PhoneNumber> Create(string number)
+    public string RegionCode { get; }
+
+    public static Result<PhoneNumber> Create(string number, string regionCode)
     {
         if (string.IsNullOrWhiteSpace(number))
         {
             return Result<PhoneNumber>.Failure(new Error("PhoneNumber.InvalidNumber", "Phone number cannot be null or empty."));
         }
 
-        if (!Regex.IsMatch(number, PhonePattern))
+        if (string.IsNullOrWhiteSpace(regionCode) || !Regex.IsMatch(regionCode, @"^[A-Z]{2}$"))
+        {
+            return Result<PhoneNumber>.Failure(new Error("PhoneNumber.InvalidRegionCode", "Region code must be a valid ISO 3166-1 alpha-2 code."));
+        }
+
+        var phoneUtil = PhoneNumberUtil.GetInstance();
+        try
+        {
+            var parsedNumber = phoneUtil.Parse(number, regionCode);
+            if (!phoneUtil.IsValidNumber(parsedNumber))
+            {
+                return Result<PhoneNumber>.Failure(new Error("PhoneNumber.InvalidFormat", "Phone number format is invalid."));
+            }
+        }
+        catch (NumberParseException)
         {
             return Result<PhoneNumber>.Failure(new Error("PhoneNumber.InvalidFormat", "Phone number format is invalid."));
         }
 
-        var phoneNumber = new PhoneNumber(number);
+        var phoneNumber = new PhoneNumber(number, regionCode);
         return Result<PhoneNumber>.Success(phoneNumber);
     }
 
     protected override IEnumerable<object> GetAtomicValues()
     {
         yield return Number;
+        yield return RegionCode;
     }
 }
