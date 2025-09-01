@@ -34,6 +34,7 @@ public class DateRange : ValueObject
 
     protected override IEnumerable<object> GetAtomicValues()
     {
-        throw new NotImplementedException();
+        yield return StartDate;
+        yield return Duration;
     }
 }

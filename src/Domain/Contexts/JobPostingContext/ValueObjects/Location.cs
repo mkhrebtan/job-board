@@ -79,6 +79,12 @@ public class Location : ValueObject
 
     protected override IEnumerable<object> GetAtomicValues()
     {
-        throw new NotImplementedException();
+        yield return Country;
+        yield return City;
+        yield return Region ?? string.Empty;
+        yield return District ?? string.Empty;
+        yield return Address ?? string.Empty;
+        yield return Latitude ?? 0;
+        yield return Longitude ?? 0;
     }
 }
