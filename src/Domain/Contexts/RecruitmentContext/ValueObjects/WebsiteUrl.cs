@@ -14,7 +14,7 @@ public class WebsiteUrl : Url
 
     public static Result<WebsiteUrl> Create(string url)
     {
-        var validationResult = ValidateUrl(url);
+        var validationResult = ValidateUrl(url, UrlPattern);
         if (validationResult.IsFailure)
         {
             return Result<WebsiteUrl>.Failure(validationResult.Error);

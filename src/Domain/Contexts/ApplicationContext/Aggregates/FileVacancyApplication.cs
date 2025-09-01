@@ -1,7 +1,6 @@
 ﻿using Domain.Contexts.ApplicationContext.ValueObjects;
 using Domain.Contexts.IdentityContext.IDs;
 using Domain.Contexts.JobPostingContext.IDs;
-using Domain.Contexts.JobPostingContext.ValueObjects;
 using Domain.Shared.ErrorHandling;
 
 namespace Domain.Contexts.ApplicationContext.Aggregates;

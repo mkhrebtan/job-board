@@ -14,7 +14,7 @@ public class LogoUrl : Url
 
     public static Result<LogoUrl> Create(string url)
     {
-        var validationResult = ValidateUrl(url);
+        var validationResult = ValidateUrl(url, UrlPattern);
         if (validationResult.IsFailure)
         {
             return Result<LogoUrl>.Failure(validationResult.Error);
