@@ -19,12 +19,12 @@ public class CoverLetter : ValueObject
             return Result<CoverLetter>.Failure(new Error("CoverLetter.NullContent", "Cover letter content cannot be null."));
         }
 
-        var letter = new CoverLetter(content);
+        var letter = new CoverLetter(content.Trim());
         return Result<CoverLetter>.Success(letter);
     }
 
     protected override IEnumerable<object> GetAtomicValues()
     {
-        throw new NotImplementedException();
+        yield return Content;
     }
 }
