@@ -34,10 +34,10 @@ public class CompanyUserServiceTests
         _markdownParserMock.Setup(x => x.ToPlainText(It.IsAny<string>()))
                           .Returns<string>(markdown => markdown.Replace("**", "").Replace("*", ""));
 
-        _companyUserRepositoryMock.Setup(x => x.IsAlreadyAssignedToCompany(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+        _companyUserRepositoryMock.Setup(x => x.IsAlreadyAssignedToCompanyAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
                                  .ReturnsAsync(false);
 
-        _companyUserRepositoryMock.Setup(x => x.IsAlreadyAssigned(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+        _companyUserRepositoryMock.Setup(x => x.IsAlreadyAssignedAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
                                  .ReturnsAsync(false);
     }
 
@@ -67,8 +67,8 @@ public class CompanyUserServiceTests
         Assert.Equal(_validCompany.Id, result.Value.CompanyId);
         Assert.NotNull(result.Value.Id);
 
-        _companyUserRepositoryMock.Verify(x => x.IsAlreadyAssignedToCompany(_validEmployerUser.Id.Value, It.IsAny<CancellationToken>()), Times.Once);
-        _companyUserRepositoryMock.Verify(x => x.IsAlreadyAssigned(_validEmployerUser.Id.Value, _validCompany.Id.Value, It.IsAny<CancellationToken>()), Times.Once);
+        _companyUserRepositoryMock.Verify(x => x.IsAlreadyAssignedToCompanyAsync(_validEmployerUser.Id.Value, It.IsAny<CancellationToken>()), Times.Once);
+        _companyUserRepositoryMock.Verify(x => x.IsAlreadyAssignedAsync(_validEmployerUser.Id.Value, _validCompany.Id.Value, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -79,14 +79,14 @@ public class CompanyUserServiceTests
         Assert.True(result.IsFailure);
         Assert.NotNull(result.Error);
 
-        _companyUserRepositoryMock.Verify(x => x.IsAlreadyAssignedToCompany(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
-        _companyUserRepositoryMock.Verify(x => x.IsAlreadyAssigned(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
+        _companyUserRepositoryMock.Verify(x => x.IsAlreadyAssignedToCompanyAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
+        _companyUserRepositoryMock.Verify(x => x.IsAlreadyAssignedAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
     public async Task AssignEmployerToCompanyAsync_WhenUserAlreadyAssignedToAnyCompany_ShouldReturnFailure()
     {
-        _companyUserRepositoryMock.Setup(x => x.IsAlreadyAssignedToCompany(_validEmployerUser.Id.Value, It.IsAny<CancellationToken>()))
+        _companyUserRepositoryMock.Setup(x => x.IsAlreadyAssignedToCompanyAsync(_validEmployerUser.Id.Value, It.IsAny<CancellationToken>()))
                                  .ReturnsAsync(true);
 
         var result = await _companyUserService.AssignEmployerToCompanyAsync(_validEmployerUser, _validCompany, CancellationToken.None);
@@ -94,14 +94,14 @@ public class CompanyUserServiceTests
         Assert.True(result.IsFailure);
         Assert.NotNull(result.Error);
 
-        _companyUserRepositoryMock.Verify(x => x.IsAlreadyAssignedToCompany(_validEmployerUser.Id.Value, It.IsAny<CancellationToken>()), Times.Once);
-        _companyUserRepositoryMock.Verify(x => x.IsAlreadyAssigned(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
+        _companyUserRepositoryMock.Verify(x => x.IsAlreadyAssignedToCompanyAsync(_validEmployerUser.Id.Value, It.IsAny<CancellationToken>()), Times.Once);
+        _companyUserRepositoryMock.Verify(x => x.IsAlreadyAssignedAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
     public async Task AssignEmployerToCompanyAsync_WhenUserAlreadyAssignedToSameCompany_ShouldReturnFailure()
     {
-        _companyUserRepositoryMock.Setup(x => x.IsAlreadyAssigned(_validEmployerUser.Id.Value, _validCompany.Id.Value, It.IsAny<CancellationToken>()))
+        _companyUserRepositoryMock.Setup(x => x.IsAlreadyAssignedAsync(_validEmployerUser.Id.Value, _validCompany.Id.Value, It.IsAny<CancellationToken>()))
                                  .ReturnsAsync(true);
 
         var result = await _companyUserService.AssignEmployerToCompanyAsync(_validEmployerUser, _validCompany, CancellationToken.None);
@@ -109,8 +109,8 @@ public class CompanyUserServiceTests
         Assert.True(result.IsFailure);
         Assert.NotNull(result.Error);
 
-        _companyUserRepositoryMock.Verify(x => x.IsAlreadyAssignedToCompany(_validEmployerUser.Id.Value, It.IsAny<CancellationToken>()), Times.Once);
-        _companyUserRepositoryMock.Verify(x => x.IsAlreadyAssigned(_validEmployerUser.Id.Value, _validCompany.Id.Value, It.IsAny<CancellationToken>()), Times.Once);
+        _companyUserRepositoryMock.Verify(x => x.IsAlreadyAssignedToCompanyAsync(_validEmployerUser.Id.Value, It.IsAny<CancellationToken>()), Times.Once);
+        _companyUserRepositoryMock.Verify(x => x.IsAlreadyAssignedAsync(_validEmployerUser.Id.Value, _validCompany.Id.Value, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     #endregion

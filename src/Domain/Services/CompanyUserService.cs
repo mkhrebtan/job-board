@@ -22,12 +22,12 @@ public sealed class CompanyUserService
             return Result<CompanyUser>.Failure(new Error("CompanyUserService.InvalidUserRole", $"Only users with the '{UserRole.Employer.Name}' role can be assigned to a company."));
         }
 
-        if (await _companyUserRepository.IsAlreadyAssignedToCompany(user.Id.Value, ct))
+        if (await _companyUserRepository.IsAlreadyAssignedToCompanyAsync(user.Id.Value, ct))
         {
             return Result<CompanyUser>.Failure(new Error("CompanyUserService.UserAlreadyAssigned", "This user is already assigned to a company."));
         }
 
-        if (await _companyUserRepository.IsAlreadyAssigned(user.Id.Value, company.Id.Value, ct))
+        if (await _companyUserRepository.IsAlreadyAssignedAsync(user.Id.Value, company.Id.Value, ct))
         {
             return Result<CompanyUser>.Failure(new Error("CompanyUserService.UserAlreadyAssignedToCompany", "This user is already assigned to this company."));
         }
