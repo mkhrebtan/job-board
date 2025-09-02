@@ -87,26 +87,51 @@ public class Vacancy : AggregateRoot<VacancyId>
 
     public Result UpdateDescripiton(RichTextContent newDescripiton)
     {
+        if (!Status.IsEditable)
+        {
+            return Result.Failure(new Error("Vacancy.InvalidStatus", $"Cannot update description when vacancy is in '{Status}' status."));
+        }
+
         return UpdateProperty(newDescripiton, desc => Description = desc, nameof(Description));
     }
 
     public Result UpdateTitle(VacancyTitle newTitle)
     {
+        if (!Status.IsEditable)
+        {
+            return Result.Failure(new Error("Vacancy.InvalidStatus", $"Cannot update title when vacancy is in '{Status}' status."));
+        }
+
         return UpdateProperty(newTitle, title => Title = title, nameof(Title));
     }
 
     public Result UpdateSalary(Salary newSalary)
     {
+        if (!Status.IsEditable)
+        {
+            return Result.Failure(new Error("Vacancy.InvalidStatus", $"Cannot update salary when vacancy is in '{Status}' status."));
+        }
+
         return UpdateProperty(newSalary, sal => Salary = sal, nameof(Salary));
     }
 
     public Result UpdateLocation(Location newLocation)
     {
+        if (!Status.IsEditable)
+        {
+            return Result.Failure(new Error("Vacancy.InvalidStatus", $"Cannot update location when vacancy is in '{Status}' status."));
+        }
+
         return UpdateProperty(newLocation, loc => Location = loc, nameof(Location));
     }
 
     public Result UpdateRecruiterInfo(RecruiterInfo newRecruiterInfo)
     {
+        if (!Status.IsEditable)
+        {
+            return Result.Failure(new Error("Vacancy.InvalidStatus", $"Cannot update recruiter info when vacancy is in '{Status}' status."));
+        }
+
         return UpdateProperty(newRecruiterInfo, info => RecruiterInfo = info, nameof(RecruiterInfo));
     }
 
@@ -228,11 +253,6 @@ public class Vacancy : AggregateRoot<VacancyId>
         if (newValue is null || newValue.Equals(default(T)))
         {
             return Result.Failure(new Error($"Vacancy.Invalid{propertyName}", $"{propertyName} cannot be null or empty."));
-        }
-
-        if (!Status.IsEditable)
-        {
-            return Result.Failure(new Error("Vacancy.InvalidStatus", $"Cannot update {propertyName} when vacancy is in '{Status}' status."));
         }
 
         updateAction(newValue);

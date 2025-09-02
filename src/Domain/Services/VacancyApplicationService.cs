@@ -21,7 +21,7 @@ public sealed class VacancyApplicationService
 
     public async Task<Result<ResumeVacancyApplication>> ApplyToVacancyWithCreatedResumeAsync(User user, Vacancy vacancy, CoverLetter coverLetter, Resume resume)
     {
-        var validationResult = await ValidateVacancyApplication(user, vacancy, CancellationToken.None);
+        var validationResult = await ValidateVacancyApplication(user, vacancy, coverLetter, CancellationToken.None);
         if (validationResult.IsFailure)
         {
             return Result<ResumeVacancyApplication>.Failure(validationResult.Error);
@@ -32,7 +32,7 @@ public sealed class VacancyApplicationService
 
     public async Task<Result<FileVacancyApplication>> ApplyToVacancyWithFileAsync(User user, Vacancy vacancy, CoverLetter coverLetter, FileUrl fileUrl)
     {
-        var validationResult = await ValidateVacancyApplication(user, vacancy, CancellationToken.None);
+        var validationResult = await ValidateVacancyApplication(user, vacancy, coverLetter, CancellationToken.None);
         if (validationResult.IsFailure)
         {
             return Result<FileVacancyApplication>.Failure(validationResult.Error);
@@ -41,7 +41,7 @@ public sealed class VacancyApplicationService
         return FileVacancyApplication.Create(user.Id, vacancy.Id, coverLetter, fileUrl);
     }
 
-    private async Task<Result> ValidateVacancyApplication(User user, Vacancy vacancy, CancellationToken ct)
+    private async Task<Result> ValidateVacancyApplication(User user, Vacancy vacancy, CoverLetter coverLetter, CancellationToken ct)
     {
         if (user.Role != UserRole.JobSeeker)
         {
@@ -51,6 +51,11 @@ public sealed class VacancyApplicationService
         if (vacancy.Status != VacancyStatus.Published)
         {
             return Result.Failure(new Error("VacancyApplicationService.InvalidVacancyStatus", $"Applications can only be made to vacancies that are in the '{VacancyStatus.Published.Name}' status."));
+        }
+
+        if (coverLetter is null)
+        {
+            return Result.Failure(new Error("VacancyApplicationService.NullCoverLetter", "Cover letter cannot be null."));
         }
 
         if (await _vacancyApplicationRepository.HasAlreadyAppliedToVacancyAsync(user.Id.Value, vacancy.Id.Value, ct))

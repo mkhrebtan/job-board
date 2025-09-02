@@ -23,9 +23,4 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Aggregates\" />
-    <Folder Include="Contexts\JobPostingContext\Aggregates\" />
-  </ItemGroup>
-
 </Project>

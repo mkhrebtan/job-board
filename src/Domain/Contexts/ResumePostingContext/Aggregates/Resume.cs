@@ -84,7 +84,7 @@ public class Resume : AggregateRoot<ResumeId>
 
     public Result Publish()
     {
-        if (Status.CanTransitionTo(ResumeStatus.Published))
+        if (!Status.CanTransitionTo(ResumeStatus.Published))
         {
             return Result.Failure(new Error("Resume.InvalidStatusTransition", $"Resume in '{Status.Name}' status cannot be published."));
         }
@@ -101,7 +101,7 @@ public class Resume : AggregateRoot<ResumeId>
 
     public Result Draft()
     {
-        if (Status.CanTransitionTo(ResumeStatus.Draft))
+        if (!Status.CanTransitionTo(ResumeStatus.Draft))
         {
             return Result.Failure(new Error("Resume.InvalidStatusTransition", $"Resume in '{Status.Name}' status cannot be moved to draft."));
         }
@@ -308,7 +308,9 @@ public class Resume : AggregateRoot<ResumeId>
             contactInfo,
             desiredPosition,
             salary,
-            skillsDescription);
+            skillsDescription,
+            employmentTypes,
+            workArrangements);
         if (validationResult.IsFailure)
         {
             return Result<Resume>.Failure(validationResult.Error);
@@ -334,7 +336,9 @@ public class Resume : AggregateRoot<ResumeId>
         ContactInfo contactInfo,
         DesiredPosition desiredPosition,
         Money salary,
-        RichTextContent skillsDescription)
+        RichTextContent skillsDescription,
+        ICollection<EmploymentType> employmentTypes,
+        ICollection<WorkArrangement> workArrangements)
     {
         if (seekerId == null || seekerId.Value == Guid.Empty)
         {
@@ -369,6 +373,16 @@ public class Resume : AggregateRoot<ResumeId>
         if (skillsDescription == null)
         {
             return Result.Failure(new Error("Resume.InvalidSkillsDescription", "SkillsDescription cannot be null."));
+        }
+
+        if (!employmentTypes.Any())
+        {
+            return Result.Failure(new Error("Resume.InvalidEmploymentTypes", "At least one EmploymentType must be specified."));
+        }
+
+        if (!workArrangements.Any())
+        {
+            return Result.Failure(new Error("Resume.InvalidWorkArrangements", "At least one WorkArrangement must be specified."));
         }
 
         return Result.Success();
