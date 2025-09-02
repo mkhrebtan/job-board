@@ -32,13 +32,14 @@ public class Category : AggregateRoot<CategoryId>
 
     public Result UpdateName(string newName, IUniqueCategoryNameSpecification specification)
     {
-        var validationResult = ValidateName(newName, specification, out string trimmedName, out string _);
+        var validationResult = ValidateName(newName, specification, out string trimmedName, out string normalizedName);
         if (validationResult.IsFailure)
         {
             return Result.Failure(validationResult.Error);
         }
 
         Name = trimmedName;
+        NormalizedName = normalizedName;
         return Result.Success();
     }
 
@@ -48,13 +49,15 @@ public class Category : AggregateRoot<CategoryId>
         out string trimmedName,
         out string normalizedName)
     {
-        trimmedName = name.Trim();
-        normalizedName = trimmedName.ToUpper();
+        trimmedName = string.Empty;
+        normalizedName = string.Empty;
         if (string.IsNullOrWhiteSpace(name))
         {
             return Result.Failure(new Error("Category.InvalidName", "Category name cannot be null or empty."));
         }
 
+        trimmedName = name.Trim();
+        normalizedName = trimmedName.ToUpper().Replace(" ", string.Empty);
         if (!specification.IsSatisfiedBy(normalizedName))
         {
             return Result.Failure(new Error("Category.DuplicateName", $"Category name '{name}' already exists."));
