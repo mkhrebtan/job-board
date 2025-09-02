@@ -5,7 +5,7 @@ namespace Domain.Repos;
 
 public interface ICompanyUserRepository : IRepository<CompanyUser, CompanyUserId>
 {
-    Task<bool> IsAlreadyAssigned(Guid userId, Guid companyId, CancellationToken ct);
+    Task<bool> IsAlreadyAssignedAsync(Guid userId, Guid companyId, CancellationToken ct);
 
-    Task<bool> IsAlreadyAssignedToCompany(Guid userId, CancellationToken ct);
+    Task<bool> IsAlreadyAssignedToCompanyAsync(Guid userId, CancellationToken ct);
 }
