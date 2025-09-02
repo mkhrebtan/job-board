@@ -1,0 +1,31 @@
+services:
+  api:
+    image: ${DOCKER_REGISTRY-}api
+    build:
+      context: .
+      dockerfile: src/API/Dockerfile
+    ports:
+      - "5000:80"
+      - "5001:443"
+    env_file:
+      - .env
+    volumes:
+      - ~/.aspnet/https:/https:ro
+  
+  jobboard.database:
+    image: postgres:latest
+    container_name: jobboard.database
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+networks:
+  jobboard-net:
+    driver: bridge
+    external: true
+
+volumes:
+  postgres_data:
