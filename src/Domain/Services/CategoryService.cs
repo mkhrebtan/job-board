@@ -44,6 +44,11 @@ public class CategoryService
             return Result<ValidationResult>.Failure(new Error("Category.InvalidName", "Name cannot be empty."));
         }
 
+        if (name.Length > Category.MaxNameLength)
+        {
+            return Result<ValidationResult>.Failure(new Error("Category.NameTooLong", $"Name cannot exceed {Category.MaxNameLength} characters."));
+        }
+
         var trimmed = name.Trim();
         var normalized = trimmed.ToUpper().Replace(" ", string.Empty);
 
