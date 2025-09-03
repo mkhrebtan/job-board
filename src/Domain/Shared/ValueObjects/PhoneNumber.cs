@@ -27,6 +27,11 @@ public class PhoneNumber : ValueObject
             return Result<PhoneNumber>.Failure(new Error("PhoneNumber.InvalidNumber", "Phone number cannot be null or empty."));
         }
 
+        if (number.Length > MaxNumberLength)
+        {
+            return Result<PhoneNumber>.Failure(new Error("PhoneNumber.NumberTooLong", $"Phone number cannot exceed {MaxNumberLength} characters."));
+        }
+
         if (string.IsNullOrWhiteSpace(regionCode) || !Regex.IsMatch(regionCode, @"^[A-Z]{2}$"))
         {
             return Result<PhoneNumber>.Failure(new Error("PhoneNumber.InvalidRegionCode", "Region code must be a valid ISO 3166-1 alpha-2 code."));
