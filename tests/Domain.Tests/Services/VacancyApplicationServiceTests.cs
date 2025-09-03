@@ -12,7 +12,7 @@ using Domain.Contexts.RecruitmentContext.IDs;
 using Domain.Contexts.ResumePostingContext.Aggregates;
 using Domain.Contexts.ResumePostingContext.Enums;
 using Domain.Contexts.ResumePostingContext.ValueObjects;
-using Domain.Repos;
+using Domain.Repos.VacancyApplications;
 using Domain.Services;
 using Domain.Shared.ValueObjects;
 using Moq;

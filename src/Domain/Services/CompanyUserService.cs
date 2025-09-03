@@ -1,7 +1,7 @@
 ﻿using Domain.Contexts.IdentityContext.Aggregates;
 using Domain.Contexts.IdentityContext.Enums;
 using Domain.Contexts.RecruitmentContext.Aggregates;
-using Domain.Repos;
+using Domain.Repos.CompanyUsers;
 using Domain.Shared.ErrorHandling;
 
 namespace Domain.Services;

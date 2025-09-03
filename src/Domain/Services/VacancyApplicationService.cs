@@ -5,7 +5,7 @@ using Domain.Contexts.IdentityContext.Enums;
 using Domain.Contexts.JobPostingContext.Aggregates;
 using Domain.Contexts.JobPostingContext.Enums;
 using Domain.Contexts.ResumePostingContext.Aggregates;
-using Domain.Repos;
+using Domain.Repos.VacancyApplications;
 using Domain.Shared.ErrorHandling;
 
 namespace Domain.Services;

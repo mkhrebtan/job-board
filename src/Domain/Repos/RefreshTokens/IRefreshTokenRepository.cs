@@ -1,7 +1,7 @@
 ﻿using Domain.Contexts.IdentityContext.Aggregates;
 using Domain.Contexts.IdentityContext.IDs;
 
-namespace Domain.Repos;
+namespace Domain.Repos.RefreshTokens;
 
 public interface IRefreshTokenRepository : IRepository<RefreshToken, RefreshTokenId>
 {

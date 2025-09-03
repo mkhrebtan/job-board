@@ -1,5 +1,5 @@
 ﻿using Domain.Contexts.JobPostingContext.Aggregates;
-using Domain.Repos;
+using Domain.Repos.Categories;
 using Domain.Shared.ErrorHandling;
 
 namespace Domain.Services;

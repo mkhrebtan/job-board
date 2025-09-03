@@ -3,7 +3,7 @@ using Domain.Contexts.IdentityContext.Aggregates;
 using Domain.Contexts.IdentityContext.Enums;
 using Domain.Contexts.RecruitmentContext.Aggregates;
 using Domain.Contexts.RecruitmentContext.ValueObjects;
-using Domain.Repos;
+using Domain.Repos.CompanyUsers;
 using Domain.Services;
 using Domain.Shared.ValueObjects;
 using Moq;
