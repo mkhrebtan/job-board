@@ -6,6 +6,11 @@ namespace Domain.Contexts.IdentityContext.Aggregates;
 
 public class RefreshToken : AggregateRoot<RefreshTokenId>
 {
+    private RefreshToken()
+        : base(new RefreshTokenId())
+    {
+    }
+
     private RefreshToken(AccountId accountId, string token, DateTime expiresAt)
         : base(new RefreshTokenId())
     {

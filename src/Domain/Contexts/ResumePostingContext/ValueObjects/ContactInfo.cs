@@ -6,6 +6,10 @@ namespace Domain.Contexts.ResumePostingContext.ValueObjects;
 
 public class ContactInfo : ValueObject
 {
+    private ContactInfo()
+    {
+    }
+
     private ContactInfo(Email email, PhoneNumber phoneNumber)
     {
         Email = email;

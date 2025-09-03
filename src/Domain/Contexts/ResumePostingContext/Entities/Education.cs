@@ -11,6 +11,11 @@ public class Education : Entity<EducationId>
     public const int MaxDegreeLength = 100;
     public const int MaxFieldOfStudyLength = 100;
 
+    private Education()
+        : base(new EducationId())
+    {
+    }
+
     private Education(ResumeId resumeId, string institutionName, string degree, string fieldOfStudy, DateRange dateRange)
         : base(new EducationId())
     {

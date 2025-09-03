@@ -13,6 +13,11 @@ public class WorkExperience : Entity<WorkExperienceId>
     public const int MaxCompanyNameLength = Company.MaxNameLength;
     public const int MaxPositionLength = 100;
 
+    private WorkExperience()
+        : base(new WorkExperienceId())
+    {
+    }
+
     private WorkExperience(ResumeId resumeId, string companyName, string position, DateRange dateRange, RichTextContent description)
         : base(new WorkExperienceId())
     {

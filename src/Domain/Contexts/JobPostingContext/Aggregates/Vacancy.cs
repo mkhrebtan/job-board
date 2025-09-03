@@ -12,6 +12,11 @@ public class Vacancy : AggregateRoot<VacancyId>
 {
     public const int MaxTitleLength = 100;
 
+    private Vacancy()
+        : base(new VacancyId())
+    {
+    }
+
     private Vacancy(
         VacancyTitle title,
         RichTextContent descripiton,
@@ -39,7 +44,7 @@ public class Vacancy : AggregateRoot<VacancyId>
 
     public VacancyStatus Status { get; private set; }
 
-    public CategoryId CategoryId { get; private set; } = null!;
+    public CategoryId? CategoryId { get; private set; } = null!;
 
     public Salary Salary { get; private set; }
 

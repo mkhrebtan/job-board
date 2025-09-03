@@ -9,6 +9,11 @@ namespace Domain.Contexts.ApplicationContext.Aggregates;
 
 public abstract class VacancyApplication : AggregateRoot<VacancyApplicationId>
 {
+    private VacancyApplication()
+        : base(new VacancyApplicationId())
+    {
+    }
+
     protected VacancyApplication(UserId seekerId, VacancyId vacancyId, CoverLetter coverLetter)
         : base(new VacancyApplicationId())
     {

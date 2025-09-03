@@ -7,6 +7,11 @@ namespace Domain.Contexts.RecruitmentContext.Aggregates;
 
 public class CompanyUser : AggregateRoot<CompanyUserId>
 {
+    private CompanyUser()
+        : base(new CompanyUserId())
+    {
+    }
+
     private CompanyUser(UserId recruiterId, CompanyId companyId)
         : base(new CompanyUserId())
     {

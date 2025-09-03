@@ -1,7 +1,6 @@
 ﻿using Domain.Abstraction;
 using Domain.Contexts.IdentityContext.IDs;
 using Domain.Contexts.JobPostingContext.ValueObjects;
-using Domain.Contexts.RecruitmentContext.Aggregates;
 using Domain.Contexts.ResumePostingContext.Entities;
 using Domain.Contexts.ResumePostingContext.Enums;
 using Domain.Contexts.ResumePostingContext.IDs;
@@ -18,6 +17,11 @@ public class Resume : AggregateRoot<ResumeId>
     private readonly Dictionary<WorkExperienceId, WorkExperience> _workExperiences = [];
     private readonly Dictionary<EducationId, Education> _educations = [];
     private readonly Dictionary<LanguageId, LanguageSkill> _languages = [];
+
+    private Resume()
+        : base(new ResumeId())
+    {
+    }
 
     private Resume(
         UserId seekerId,
@@ -197,7 +201,7 @@ public class Resume : AggregateRoot<ResumeId>
 
     public Result AddWorkExperience(string companyName, string position, DateRange dateRange, RichTextContent description)
     {
-        var creationResult = WorkExperience.Create(companyName, position, dateRange, description);
+        var creationResult = WorkExperience.Create(Id, companyName, position, dateRange, description);
         if (creationResult.IsFailure)
         {
             return Result.Failure(creationResult.Error);
@@ -227,7 +231,7 @@ public class Resume : AggregateRoot<ResumeId>
 
     public Result AddEducation(string institutionName, string degree, string fieldOfStudy, DateRange dateRange)
     {
-        var creationResult = Education.Create(institutionName, degree, fieldOfStudy, dateRange);
+        var creationResult = Education.Create(Id, institutionName, degree, fieldOfStudy, dateRange);
         if (creationResult.IsFailure)
         {
             return Result.Failure(creationResult.Error);
@@ -257,7 +261,7 @@ public class Resume : AggregateRoot<ResumeId>
 
     public Result AddLanguage(string name, LanguageLevel proficiency)
     {
-        var creationResult = LanguageSkill.Create(name, proficiency);
+        var creationResult = LanguageSkill.Create(Id, name, proficiency);
         if (creationResult.IsFailure)
         {
             return Result.Failure(creationResult.Error);

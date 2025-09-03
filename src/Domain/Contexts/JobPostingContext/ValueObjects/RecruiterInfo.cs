@@ -9,6 +9,10 @@ public class RecruiterInfo : ValueObject
 {
     public const int MaxFirstNameLength = User.MaxFirstNameLength;
 
+    private RecruiterInfo()
+    {
+    }
+
     private RecruiterInfo(string firstName, Email email, PhoneNumber phoneNumber)
     {
         FirstName = firstName;

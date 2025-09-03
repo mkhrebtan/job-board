@@ -10,6 +10,11 @@ public class Company : AggregateRoot<CompanyId>
 {
     public const int MaxNameLength = 100;
 
+    private Company()
+        : base(new CompanyId())
+    {
+    }
+
     private Company(string name, RichTextContent description, WebsiteUrl websiteUrl, LogoUrl logoUrl, int? size)
         : base(new CompanyId())
     {
