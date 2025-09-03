@@ -7,6 +7,9 @@ namespace Domain.Shared.ValueObjects;
 
 public class PhoneNumber : ValueObject
 {
+    public const int MaxNumberLength = 15;
+    public const int RegionCodeLength = 2;
+
     private PhoneNumber(string number, string regionCode)
     {
         Number = number;

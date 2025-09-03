@@ -5,6 +5,12 @@ namespace Domain.Contexts.JobPostingContext.ValueObjects;
 
 public class Location : ValueObject
 {
+    public const int MaxCountryLength = 100;
+    public const int MaxCityLength = 100;
+    public const int MaxRegionLength = 100;
+    public const int MaxDistrictLength = 100;
+    public const int MaxAddressLength = 250;
+
     private Location(
         string country,
         string city,
@@ -51,9 +57,34 @@ public class Location : ValueObject
             return Result<Location>.Failure(new Error("Location.InvalidCountry", "Country cannot be null or empty."));
         }
 
+        if (country.Length > MaxCountryLength)
+        {
+            return Result<Location>.Failure(new Error("Location.CountryTooLong", $"Country cannot exceed {MaxCountryLength} characters."));
+        }
+
         if (string.IsNullOrWhiteSpace(city))
         {
             return Result<Location>.Failure(new Error("Location.InvalidCity", "City cannot be null or empty."));
+        }
+
+        if (city.Length > MaxCityLength)
+        {
+            return Result<Location>.Failure(new Error("Location.CityTooLong", $"City cannot exceed {MaxCityLength} characters."));
+        }
+
+        if (region is not null && region.Length > MaxRegionLength)
+        {
+            return Result<Location>.Failure(new Error("Location.RegionTooLong", $"Region cannot exceed {MaxRegionLength} characters."));
+        }
+
+        if (district is not null && district.Length > MaxDistrictLength)
+        {
+            return Result<Location>.Failure(new Error("Location.DistrictTooLong", $"District cannot exceed {MaxDistrictLength} characters."));
+        }
+
+        if (address is not null && address.Length > MaxAddressLength)
+        {
+            return Result<Location>.Failure(new Error("Location.AddressTooLong", $"Address cannot exceed {MaxAddressLength} characters."));
         }
 
         if (latitude is not null && (latitude < -90 || latitude > 90))

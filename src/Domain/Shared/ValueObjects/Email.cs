@@ -6,6 +6,8 @@ namespace Domain.Shared.ValueObjects;
 
 public class Email : ValueObject
 {
+    public const int MaxLength = 256;
+
     private const string EmailPattern = @"^((?!\.)[\w-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$";
 
     private Email(string address)
@@ -20,6 +22,11 @@ public class Email : ValueObject
         if (string.IsNullOrWhiteSpace(address))
         {
             return Result<Email>.Failure(new Error("Email.InvalidAddress", "Email address cannot be null or empty."));
+        }
+
+        if (address.Length > MaxLength)
+        {
+            return Result<Email>.Failure(new Error("Email.AddressTooLong", $"Email address cannot exceed {MaxLength} characters."));
         }
 
         if (!Regex.IsMatch(address, EmailPattern))

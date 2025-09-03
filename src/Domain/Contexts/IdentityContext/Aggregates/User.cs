@@ -10,6 +10,9 @@ namespace Domain.Contexts.IdentityContext.Aggregates;
 
 public class User : AggregateRoot<UserId>
 {
+    public const int MaxFirstNameLength = 50;
+    public const int MaxLastNameLength = 50;
+
     private User(string firstName, string lastName, Email? email, PhoneNumber? phoneNumber, UserRole role)
         : base(new UserId())
     {
@@ -131,9 +134,19 @@ public class User : AggregateRoot<UserId>
             return Result<User>.Failure(new Error("User.InvalidFirstName", "First name cannot be null or empty."));
         }
 
+        if (firstName.Length > MaxFirstNameLength)
+        {
+            return Result<User>.Failure(new Error("User.FirstNameTooLong", $"First name cannot exceed {MaxFirstNameLength} characters."));
+        }
+
         if (string.IsNullOrWhiteSpace(LastName))
         {
             return Result<User>.Failure(new Error("User.InvalidLastName", "Last name cannot be null or empty."));
+        }
+
+        if (LastName.Length > MaxLastNameLength)
+        {
+            return Result<User>.Failure(new Error("User.LastNameTooLong", $"Last name cannot exceed {MaxLastNameLength} characters."));
         }
 
         if (email == null && phoneNumber is null)

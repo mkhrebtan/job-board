@@ -5,6 +5,8 @@ namespace Domain.Contexts.ResumePostingContext.ValueObjects;
 
 public class DesiredPosition : ValueObject
 {
+    public const int MaxLength = 100;
+
     private DesiredPosition(string title)
     {
         Title = title;
@@ -17,6 +19,11 @@ public class DesiredPosition : ValueObject
         if (string.IsNullOrWhiteSpace(title))
         {
             return Result<DesiredPosition>.Failure(new Error("DesiredPosition.InvalidTitle", "Desired position title cannot be null or empty."));
+        }
+
+        if (title.Length > MaxLength)
+        {
+            return Result<DesiredPosition>.Failure(new Error("DesiredPosition.TitleTooLong", $"Desired position title cannot exceed {MaxLength} characters."));
         }
 
         var position = new DesiredPosition(title.Trim());

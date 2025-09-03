@@ -1,10 +1,13 @@
-﻿using Domain.Abstraction;
+﻿using System.Text.RegularExpressions;
+using Domain.Abstraction;
 using Domain.Shared.ErrorHandling;
 
 namespace Domain.Contexts.JobPostingContext.ValueObjects;
 
 public class Salary : ValueObject
 {
+    public const string CurrencyPattern = "^[A-Z]{3}$";
+
     private Salary(decimal minAmount, decimal maxAmount, string currency)
     {
         MinAmount = minAmount;
@@ -30,7 +33,7 @@ public class Salary : ValueObject
             return Result<Salary>.Failure(new Error("Salary.InvalidMaxAmount", "Maximum salary amount cannot be less than minimum amount."));
         }
 
-        if (string.IsNullOrWhiteSpace(currency))
+        if (!IsValidCurrency(currency))
         {
             return Result<Salary>.Failure(new Error("Salary.InvalidCurrency", "Currency cannot be null or empty."));
         }
@@ -46,7 +49,7 @@ public class Salary : ValueObject
             return Result<Salary>.Failure(new Error("Salary.InvalidAmount", "Salary amount cannot be negative."));
         }
 
-        if (string.IsNullOrWhiteSpace(currency))
+        if (!IsValidCurrency(currency))
         {
             return Result<Salary>.Failure(new Error("Salary.InvalidCurrency", "Currency cannot be null or empty."));
         }
@@ -57,7 +60,7 @@ public class Salary : ValueObject
 
     public static Result<Salary> None()
     {
-        var salary = new Salary(0, 0, "N/A");
+        var salary = new Salary(0, 0, "NNA");
         return Result<Salary>.Success(salary);
     }
 
@@ -66,5 +69,10 @@ public class Salary : ValueObject
         yield return MinAmount;
         yield return MaxAmount;
         yield return Currency;
+    }
+
+    private static bool IsValidCurrency(string currency)
+    {
+        return !string.IsNullOrWhiteSpace(currency) && Regex.IsMatch(currency, CurrencyPattern);
     }
 }

@@ -6,6 +6,8 @@ namespace Domain.Shared.ValueObjects;
 
 public class RichTextContent : ValueObject
 {
+    public const int MaxLength = 50000;
+
     private RichTextContent(string markdown, string plainText)
     {
         Markdown = markdown;
@@ -23,6 +25,11 @@ public class RichTextContent : ValueObject
         if (markdown is null)
         {
             return Result<RichTextContent>.Failure(new Error("RichTextContent.NullMarkdown", "Markdown content cannot be null."));
+        }
+
+        if (markdown.Length > MaxLength)
+        {
+            return Result<RichTextContent>.Failure(new Error("RichTextContent.MarkdownTooLong", $"Markdown content cannot exceed {MaxLength} characters."));
         }
 
         string plainText = parser.ToPlainText(markdown);

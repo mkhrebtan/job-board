@@ -7,6 +7,8 @@ namespace Domain.Contexts.JobPostingContext.Aggregates;
 
 public class Category : AggregateRoot<CategoryId>
 {
+    public const int MaxNameLength = 100;
+
     private Category(string name, string normalizedName)
         : base(new CategoryId())
     {

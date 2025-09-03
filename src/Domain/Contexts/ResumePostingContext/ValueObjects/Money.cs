@@ -1,10 +1,13 @@
-﻿using Domain.Abstraction;
+﻿using System.Text.RegularExpressions;
+using Domain.Abstraction;
 using Domain.Shared.ErrorHandling;
 
 namespace Domain.Contexts.ResumePostingContext.ValueObjects;
 
 public class Money : ValueObject
 {
+    public const string CurrencyPattern = "^[A-Z]{3}$";
+
     private Money(decimal value, string currency)
     {
         Value = value;
@@ -43,6 +46,6 @@ public class Money : ValueObject
 
     private static bool IsValidCurrency(string currency)
     {
-        return !string.IsNullOrWhiteSpace(currency);
+        return !string.IsNullOrWhiteSpace(currency) && Regex.IsMatch(currency, CurrencyPattern);
     }
 }

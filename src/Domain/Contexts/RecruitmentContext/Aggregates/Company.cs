@@ -8,6 +8,8 @@ namespace Domain.Contexts.RecruitmentContext.Aggregates;
 
 public class Company : AggregateRoot<CompanyId>
 {
+    public const int MaxNameLength = 100;
+
     private Company(string name, RichTextContent description, WebsiteUrl websiteUrl, LogoUrl logoUrl, int? size)
         : base(new CompanyId())
     {
@@ -36,6 +38,11 @@ public class Company : AggregateRoot<CompanyId>
         if (string.IsNullOrWhiteSpace(name))
         {
             return Result<Company>.Failure(new Error("Company.InvalidName", "Company name cannot be null or empty."));
+        }
+
+        if (name.Length > MaxNameLength)
+        {
+            return Result<Company>.Failure(new Error("Company.NameTooLong", $"Company name cannot exceed {MaxNameLength} characters."));
         }
 
         if (description == null)

@@ -7,6 +7,9 @@ namespace Domain.Contexts.IdentityContext.Entities;
 
 public class Account : Entity<AccountId>
 {
+    public const int MinPasswordLength = 8;
+    public const int MaxPasswordLength = 100;
+
     private Account(UserId userId, string passwordHash)
         : base(new AccountId())
     {
@@ -28,6 +31,11 @@ public class Account : Entity<AccountId>
         if (string.IsNullOrWhiteSpace(password))
         {
             return Result<Account>.Failure(new Error("Account.InvalidPassword", "Password cannot be null or empty."));
+        }
+
+        if (password.Length < 8 || password.Length > 100)
+        {
+            return Result<Account>.Failure(new Error("Account.InvalidPasswordLength", $"Password must be between {MinPasswordLength} and {MaxPasswordLength} characters long."));
         }
 
         string passwordHash = passwordHasher.HashPassword(password);

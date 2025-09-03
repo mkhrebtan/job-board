@@ -5,6 +5,8 @@ namespace Domain.Contexts.ApplicationContext.ValueObjects;
 
 public class CoverLetter : ValueObject
 {
+    public const int MaxLength = 10000;
+
     private CoverLetter(string content)
     {
         Content = content;
@@ -17,6 +19,11 @@ public class CoverLetter : ValueObject
         if (content is null)
         {
             return Result<CoverLetter>.Failure(new Error("CoverLetter.NullContent", "Cover letter content cannot be null."));
+        }
+
+        if (content.Length > MaxLength)
+        {
+            return Result<CoverLetter>.Failure(new Error("CoverLetter.ContentTooLong", $"Cover letter content cannot exceed {MaxLength} characters."));
         }
 
         var letter = new CoverLetter(content.Trim());
