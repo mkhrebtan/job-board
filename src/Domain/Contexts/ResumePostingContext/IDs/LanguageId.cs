@@ -8,4 +8,9 @@ public record LanguageId : Id
         : base(Guid.NewGuid())
     {
     }
+
+    public LanguageId(Guid value)
+        : base(value)
+    {
+    }
 }

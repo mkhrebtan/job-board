@@ -8,4 +8,9 @@ public record CompanyUserId : Id
         : base(Guid.NewGuid())
     {
     }
+
+    public CompanyUserId(Guid value)
+        : base(value)
+    {
+    }
 }

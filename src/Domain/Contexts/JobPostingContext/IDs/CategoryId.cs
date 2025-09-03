@@ -8,4 +8,9 @@ public record CategoryId : Id
         : base(Guid.NewGuid())
     {
     }
+
+    public CategoryId(Guid value)
+        : base(value)
+    {
+    }
 }

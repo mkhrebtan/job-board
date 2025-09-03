@@ -8,4 +8,9 @@ public record AccountId : Id
         : base(Guid.NewGuid())
     {
     }
+
+    public AccountId(Guid id)
+        : base(id)
+    {
+    }
 }

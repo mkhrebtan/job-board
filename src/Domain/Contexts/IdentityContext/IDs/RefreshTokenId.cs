@@ -8,4 +8,9 @@ public record RefreshTokenId : Id
         : base(Guid.NewGuid())
     {
     }
+
+    public RefreshTokenId(Guid id)
+        : base(id)
+    {
+    }
 }

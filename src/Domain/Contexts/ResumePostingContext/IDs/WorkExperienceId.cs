@@ -8,4 +8,9 @@ public record WorkExperienceId : Id
         : base(Guid.NewGuid())
     {
     }
+
+    public WorkExperienceId(Guid value)
+        : base(value)
+    {
+    }
 }

@@ -8,4 +8,9 @@ public record EducationId : Id
         : base(Guid.NewGuid())
     {
     }
+
+    public EducationId(Guid value)
+        : base(value)
+    {
+    }
 }

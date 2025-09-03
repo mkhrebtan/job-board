@@ -8,4 +8,9 @@ public record VacancyId : Id
         : base(Guid.NewGuid())
     {
     }
+
+    public VacancyId(Guid value)
+        : base(value)
+    {
+    }
 }
