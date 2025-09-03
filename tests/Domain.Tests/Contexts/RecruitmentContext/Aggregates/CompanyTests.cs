@@ -62,6 +62,17 @@ public class CompanyTests
     }
 
     [Fact]
+    public void Create_WithNameExceedingMaxLength_ShouldReturnFailure()
+    {
+        var longName = new string('A', Company.MaxNameLength + 1);
+
+        var result = Company.Create(longName, _validDescription, _validWebsiteUrl, _validLogoUrl, 100);
+
+        Assert.True(result.IsFailure);
+        Assert.NotNull(result.Error);
+    }
+
+    [Fact]
     public void Create_WithNullDescription_ShouldReturnFailure()
     {
         var result = Company.Create("Test Company", null, _validWebsiteUrl, _validLogoUrl, 100);

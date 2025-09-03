@@ -50,6 +50,11 @@ public class Account : Entity<AccountId>
             return Result.Failure(new Error("Account.InvalidPassword", "New password cannot be null or empty."));
         }
 
+        if (newPassword.Length < 8 || newPassword.Length > 100)
+        {
+            return Result.Failure(new Error("Account.InvalidPasswordLength", $"Password must be between {MinPasswordLength} and {MaxPasswordLength} characters long."));
+        }
+
         PasswordHash = passwordHasher.HashPassword(newPassword);
         return Result.Success();
     }

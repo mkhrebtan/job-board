@@ -1,3 +1,4 @@
+using Domain.Contexts.ApplicationContext.ValueObjects;
 using Domain.Contexts.RecruitmentContext.ValueObjects;
 
 namespace Domain.Tests.Contexts.RecruitmentContext.ValueObjects;
@@ -19,6 +20,17 @@ public class WebsiteUrlTests
     public void Create_InvalidWebsiteUrl_ShouldReturnFailure(string url)
     {
         var result = WebsiteUrl.Create(url);
+
+        Assert.True(result.IsFailure);
+        Assert.NotNull(result.Error);
+    }
+
+    [Fact]
+    public void Create_WhenExceedingMaxLength_ShouldReturnFailure()
+    {
+        var longUrl = "https://" + new string('a', WebsiteUrl.MaxLength) + ".com/file.pdf";
+
+        var result = WebsiteUrl.Create(longUrl);
 
         Assert.True(result.IsFailure);
         Assert.NotNull(result.Error);

@@ -63,11 +63,13 @@ public class VacancyApplicationServiceTests
     private void SetupTestData()
     {
         var jobSeekerEmail = Email.Create("jobseeker@example.com").Value;
-        _validJobSeekerUser = User.Create("John", "Doe", UserRole.JobSeeker, jobSeekerEmail).Value;
+        var jobSeekerPhoneNumber = PhoneNumber.Create("+14156667777", "US").Value;
+        _validJobSeekerUser = User.Create("John", "Doe", UserRole.JobSeeker, jobSeekerEmail, jobSeekerPhoneNumber).Value;
         _validJobSeekerUser.CreateAccount("password123", _passwordHasherMock.Object);
 
         var employerEmail = Email.Create("employer@example.com").Value;
-        _validEmployerUser = User.Create("Jane", "Smith", UserRole.Employer, employerEmail).Value;
+        var employerPhoneNumber = PhoneNumber.Create("+14156667777", "US").Value;
+        _validEmployerUser = User.Create("Jane", "Smith", UserRole.Employer, employerEmail, employerPhoneNumber).Value;
 
         var title = VacancyTitle.Create("Software Engineer").Value;
         var description = RichTextContent.Create("Job description", _markdownParserMock.Object).Value;
@@ -75,6 +77,7 @@ public class VacancyApplicationServiceTests
         var companyId = new CompanyId();
         var location = Location.Create("USA", "New York").Value;
         var recruiterInfo = RecruiterInfo.Create(
+            "John",
             Email.Create("recruiter@company.com").Value,
             PhoneNumber.Create("+14156667777", "US").Value).Value;
 
@@ -392,6 +395,7 @@ public class VacancyApplicationServiceTests
         var companyId = new CompanyId();
         var location = Location.Create("USA", "Test City").Value;
         var recruiterInfo = RecruiterInfo.Create(
+            "John",
             Email.Create("recruiter@test.com").Value,
             PhoneNumber.Create("+14156667777", "US").Value).Value;
 

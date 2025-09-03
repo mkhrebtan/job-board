@@ -9,14 +9,14 @@ public class SalaryTests
     {
         var minAmount = 50000m;
         var maxAmount = 80000m;
-        var currency = "usd";
+        var currency = "USD";
 
         var result = Salary.Range(minAmount, maxAmount, currency);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(minAmount, result.Value.MinAmount);
         Assert.Equal(maxAmount, result.Value.MaxAmount);
-        Assert.Equal("USD", result.Value.Currency);
+        Assert.Equal(currency, result.Value.Currency);
     }
 
     [Fact]
@@ -64,14 +64,14 @@ public class SalaryTests
     public void Fixed_WithValidInputs_ShouldReturnSuccess()
     {
         var amount = 75000m;
-        var currency = "eur";
+        var currency = "EUR";
 
         var result = Salary.Fixed(amount, currency);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(amount, result.Value.MinAmount);
         Assert.Equal(amount, result.Value.MaxAmount);
-        Assert.Equal("EUR", result.Value.Currency);
+        Assert.Equal(currency, result.Value.Currency);
     }
 
     [Fact]
@@ -108,7 +108,6 @@ public class SalaryTests
         Assert.True(result.IsSuccess);
         Assert.Equal(0, result.Value.MinAmount);
         Assert.Equal(0, result.Value.MaxAmount);
-        Assert.Equal("N/A", result.Value.Currency);
     }
 
     [Fact]

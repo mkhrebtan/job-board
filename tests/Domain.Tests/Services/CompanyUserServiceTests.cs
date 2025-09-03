@@ -44,10 +44,12 @@ public class CompanyUserServiceTests
     private void SetupTestData()
     {
         var email = Email.Create("employer@example.com").Value;
-        _validEmployerUser = User.Create("John", "Doe", UserRole.Employer, email).Value;
+        var phoneNumber = PhoneNumber.Create("+14156667777", "US").Value;
+        _validEmployerUser = User.Create("John", "Doe", UserRole.Employer, email, phoneNumber).Value;
 
         var jobSeekerEmail = Email.Create("jobseeker@example.com").Value;
-        _validJobSeekerUser = User.Create("Jane", "Smith", UserRole.JobSeeker, jobSeekerEmail).Value;
+        var jobSeekerPhoneNumber = PhoneNumber.Create("+14158889999", "US").Value;
+        _validJobSeekerUser = User.Create("Jane", "Smith", UserRole.JobSeeker, jobSeekerEmail, jobSeekerPhoneNumber).Value;
 
         var description = RichTextContent.Create("Company description", _markdownParserMock.Object).Value;
         var websiteUrl = WebsiteUrl.Create("https://example.com").Value;

@@ -50,15 +50,18 @@ public class ResumeServiceTests
     private void SetupTestData()
     {
         var jobSeekerEmail = Email.Create("jobseeker@example.com").Value;
-        _validJobSeekerUser = User.Create("John", "Doe", UserRole.JobSeeker, jobSeekerEmail).Value;
+        var jobSeekerPhoneNumber = PhoneNumber.Create("+14155552671", "US").Value;
+        _validJobSeekerUser = User.Create("John", "Doe", UserRole.JobSeeker, jobSeekerEmail, jobSeekerPhoneNumber).Value;
         _validJobSeekerUser.CreateAccount("password123", _passwordHasherMock.Object);
 
         var employerEmail = Email.Create("employer@example.com").Value;
-        _validEmployerUser = User.Create("Jane", "Smith", UserRole.Employer, employerEmail).Value;
+        var employerPhoneNumber = PhoneNumber.Create("+14155552672", "US").Value;
+        _validEmployerUser = User.Create("Jane", "Smith", UserRole.Employer, employerEmail, employerPhoneNumber).Value;
         _validEmployerUser.CreateAccount("password123", _passwordHasherMock.Object);
 
         var userWithoutAccountEmail = Email.Create("noAccount@example.com").Value;
-        _userWithoutAccount = User.Create("Bob", "Wilson", UserRole.JobSeeker, userWithoutAccountEmail).Value;
+        var userWithoutAccountNumber = PhoneNumber.Create("+14155552673", "US").Value;
+        _userWithoutAccount = User.Create("Bob", "Wilson", UserRole.JobSeeker, userWithoutAccountEmail, userWithoutAccountNumber).Value;
 
         _validPersonalInfo = PersonalInfo.Create("John", "Doe").Value;
         _validLocation = Location.Create("USA", "New York").Value;

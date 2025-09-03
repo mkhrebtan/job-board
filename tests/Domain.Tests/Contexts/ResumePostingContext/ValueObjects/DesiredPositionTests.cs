@@ -40,6 +40,17 @@ public class DesiredPositionTests
     }
 
     [Fact]
+    public void Create_WhenExceedingMaxLength_ShouldReturnFailure()
+    {
+        var longPosition = new string('a', DesiredPosition.MaxLength + 1);
+
+        var result = DesiredPosition.Create(longPosition);
+
+        Assert.True(result.IsFailure);
+        Assert.NotNull(result.Error);
+    }
+
+    [Fact]
     public void Equals_SamePosition_ShouldReturnTrue()
     {
         var position = "Software Engineer";

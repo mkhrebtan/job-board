@@ -24,6 +24,17 @@ public class EmailTests
         Assert.NotNull(result.Error);
     }
 
+    [Fact]
+    public void Create_WhenExceedsMaxLength_ShouldReturnFailure()
+    {
+        var longEmail = new string('a', Email.MaxLength + 1) + "@example.com";
+
+        var result = Email.Create(longEmail);
+
+        Assert.True(result.IsFailure);
+        Assert.NotNull(result.Error);
+    }
+
     [Theory]
     [MemberData(nameof(ValidEmails))]
     public void Equals_SameEmail_ShouldReturnTrue(string email)

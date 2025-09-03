@@ -13,7 +13,12 @@ public class User : AggregateRoot<UserId>
     public const int MaxFirstNameLength = 50;
     public const int MaxLastNameLength = 50;
 
-    private User(string firstName, string lastName, Email? email, PhoneNumber? phoneNumber, UserRole role)
+    private User()
+        : base(new UserId())
+    {
+    }
+
+    private User(string firstName, string lastName, Email email, PhoneNumber phoneNumber, UserRole role)
         : base(new UserId())
     {
         FirstName = firstName;
@@ -27,22 +32,24 @@ public class User : AggregateRoot<UserId>
 
     public string LastName { get; private set; }
 
-    public Email? Email { get; private set; }
+    public Email Email { get; private set; }
 
-    public PhoneNumber? PhoneNumber { get; private set; }
+    public PhoneNumber PhoneNumber { get; private set; }
 
     public Account? Account { get; private set; }
 
     public UserRole Role { get; private set; }
 
-    public static Result<User> Create(string firstName, string lastName, UserRole role, Email email)
+    public static Result<User> Create(string firstName, string lastName, UserRole role, Email email, PhoneNumber phoneNumber)
     {
-        return Create(firstName, lastName, role, email, null);
-    }
+        var validationResult = ValidateCreationParameters(firstName, lastName, role, email, phoneNumber);
+        if (validationResult.IsFailure)
+        {
+            return Result<User>.Failure(validationResult.Error);
+        }
 
-    public static Result<User> Create(string firstName, string lastName, UserRole role, PhoneNumber phoneNumber)
-    {
-        return Create(firstName, lastName, role, null, phoneNumber);
+        var user = new User(firstName, lastName, email, phoneNumber, role);
+        return Result<User>.Success(user);
     }
 
     public Result CreateAccount(string password, IPasswordHasher passwordHasher)
@@ -127,39 +134,43 @@ public class User : AggregateRoot<UserId>
         return Result.Success();
     }
 
-    private static Result<User> Create(string firstName, string LastName, UserRole role, Email? email, PhoneNumber? phoneNumber)
+    private static Result ValidateCreationParameters(string firstName, string LastName, UserRole role, Email email, PhoneNumber phoneNumber)
     {
         if (string.IsNullOrWhiteSpace(firstName))
         {
-            return Result<User>.Failure(new Error("User.InvalidFirstName", "First name cannot be null or empty."));
+            return Result.Failure(new Error("User.InvalidFirstName", "First name cannot be null or empty."));
         }
 
         if (firstName.Length > MaxFirstNameLength)
         {
-            return Result<User>.Failure(new Error("User.FirstNameTooLong", $"First name cannot exceed {MaxFirstNameLength} characters."));
+            return Result.Failure(new Error("User.FirstNameTooLong", $"First name cannot exceed {MaxFirstNameLength} characters."));
         }
 
         if (string.IsNullOrWhiteSpace(LastName))
         {
-            return Result<User>.Failure(new Error("User.InvalidLastName", "Last name cannot be null or empty."));
+            return Result.Failure(new Error("User.InvalidLastName", "Last name cannot be null or empty."));
         }
 
         if (LastName.Length > MaxLastNameLength)
         {
-            return Result<User>.Failure(new Error("User.LastNameTooLong", $"Last name cannot exceed {MaxLastNameLength} characters."));
+            return Result.Failure(new Error("User.LastNameTooLong", $"Last name cannot exceed {MaxLastNameLength} characters."));
         }
 
-        if (email == null && phoneNumber is null)
+        if (email is null)
         {
-            return Result<User>.Failure(new Error("User.InvalidContactInfo", "At least one contact information (email or phone number) must be provided."));
+            return Result.Failure(new Error("User.NullEmail", "Email cannot be null."));
+        }
+
+        if (phoneNumber is null)
+        {
+            return Result.Failure(new Error("User.NullPhoneNumber", "Phone number cannot be null."));
         }
 
         if (role == UserRole.Admin)
         {
-            return Result<User>.Failure(new Error("User.InaccesibleRole", "Cannot create user with Admin role."));
+            return Result.Failure(new Error("User.InaccesibleRole", "Cannot create user with Admin role."));
         }
 
-        var user = new User(firstName, LastName, email, phoneNumber, role);
-        return Result<User>.Success(user);
+        return Result.Success();
     }
 }

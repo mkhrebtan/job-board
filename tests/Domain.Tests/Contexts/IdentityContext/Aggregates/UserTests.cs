@@ -1,5 +1,6 @@
 ﻿using Domain.Abstraction.Interfaces;
 using Domain.Contexts.IdentityContext.Aggregates;
+using Domain.Contexts.IdentityContext.Entities;
 using Domain.Contexts.IdentityContext.Enums;
 using Domain.Shared.ValueObjects;
 using Moq;
@@ -9,11 +10,14 @@ namespace Domain.Tests.Contexts.IdentityContext.Aggregates;
 public class UserTests
 {
     private readonly Mock<IPasswordHasher> _passwordHasherMock;
+    private Email _validEmail;
+    private PhoneNumber _validPhoneNumber;
 
     public UserTests()
     {
         _passwordHasherMock = new Mock<IPasswordHasher>();
         SetupPasswordHasherMock();
+        SetupData();
     }
 
     private void SetupPasswordHasherMock()
@@ -31,37 +35,25 @@ public class UserTests
                           });
     }
 
+    private void SetupData()
+    {
+        _validEmail = Email.Create("test@example.com").Value;
+        _validPhoneNumber = PhoneNumber.Create("+14156667777", "US").Value;
+    }
+
     #region Create Tests
 
     [Fact]
-    public void Create_WithValidEmailAndRole_ShouldReturnSuccess()
+    public void Create_WithValidEmailPhoneNumberAndRole_ShouldReturnSuccess()
     {
-        var email = Email.Create("test@example.com").Value;
-
-        var result = User.Create("John", "Doe", UserRole.JobSeeker, email);
+        var result = User.Create("John", "Doe", UserRole.JobSeeker, _validEmail, _validPhoneNumber);
 
         Assert.True(result.IsSuccess);
         Assert.Equal("John", result.Value.FirstName);
         Assert.Equal("Doe", result.Value.LastName);
         Assert.Equal(UserRole.JobSeeker, result.Value.Role);
-        Assert.Equal(email, result.Value.Email);
-        Assert.Null(result.Value.PhoneNumber);
-        Assert.Null(result.Value.Account);
-    }
-
-    [Fact]
-    public void Create_WithValidPhoneNumberAndRole_ShouldReturnSuccess()
-    {
-        var phoneNumber = PhoneNumber.Create("+14156667777", "US").Value;
-
-        var result = User.Create("Jane", "Smith", UserRole.Employer, phoneNumber);
-
-        Assert.True(result.IsSuccess);
-        Assert.Equal("Jane", result.Value.FirstName);
-        Assert.Equal("Smith", result.Value.LastName);
-        Assert.Equal(UserRole.Employer, result.Value.Role);
-        Assert.Null(result.Value.Email);
-        Assert.Equal(phoneNumber, result.Value.PhoneNumber);
+        Assert.Equal(_validEmail, result.Value.Email);
+        Assert.Equal(_validPhoneNumber, result.Value.PhoneNumber);
         Assert.Null(result.Value.Account);
     }
 
@@ -71,9 +63,7 @@ public class UserTests
     [InlineData(null)]
     public void Create_WithInvalidFirstName_ShouldReturnFailure(string firstName)
     {
-        var email = Email.Create("test@example.com").Value;
-
-        var result = User.Create(firstName, "Doe", UserRole.JobSeeker, email);
+        var result = User.Create(firstName, "Doe", UserRole.JobSeeker, _validEmail, _validPhoneNumber);
 
         Assert.True(result.IsFailure);
         Assert.NotNull(result.Error);
@@ -85,33 +75,56 @@ public class UserTests
     [InlineData(null)]
     public void Create_WithInvalidLastName_ShouldReturnFailure(string lastName)
     {
-        var email = Email.Create("test@example.com").Value;
-
-        var result = User.Create("John", lastName, UserRole.JobSeeker, email);
+        var result = User.Create("John", lastName, UserRole.JobSeeker, _validEmail, _validPhoneNumber);
 
         Assert.True(result.IsFailure);
         Assert.NotNull(result.Error);
     }
 
     [Fact]
-    public void Create_WithoutEmailOrPhoneNumber_ShouldReturnFailure()
+    public void Create_WithFirstNameExceedingMaxLength_ShouldReturnFailure()
     {
-        var result = User.Create("John", "Doe", UserRole.JobSeeker, (Email)null);
-        var result2 = User.Create("John", "Doe", UserRole.JobSeeker, (PhoneNumber)null);
+        var longFirstName = new string('a', User.MaxFirstNameLength + 1);
+
+        var result = User.Create(longFirstName, "Doe", UserRole.JobSeeker, _validEmail, _validPhoneNumber);
 
         Assert.True(result.IsFailure);
         Assert.NotNull(result.Error);
+    }
 
-        Assert.True(result2.IsFailure);
-        Assert.NotNull(result2.Error);
+    [Fact]
+    public void Create_WithLastNameExceedingMaxLength_ShouldReturnFailure()
+    {
+        var longLastName = new string('a', User.MaxLastNameLength + 1);
+
+        var result = User.Create("John", longLastName, UserRole.JobSeeker, _validEmail, _validPhoneNumber);
+
+        Assert.True(result.IsFailure);
+        Assert.NotNull(result.Error);
+    }
+
+    [Fact]
+    public void Create_WithNullEmail_ShouldReturnFailure()
+    {
+        var result = User.Create("John", "Doe", UserRole.JobSeeker, null!, _validPhoneNumber);
+
+        Assert.True(result.IsFailure);
+        Assert.NotNull(result.Error);
+    }
+
+    [Fact]
+    public void Create_WithNullPhoneNumber_ShouldReturnFailure()
+    {
+        var result = User.Create("John", "Doe", UserRole.JobSeeker, _validEmail, null!);
+
+        Assert.True(result.IsFailure);
+        Assert.NotNull(result.Error);
     }
 
     [Fact]
     public void Create_WithAdminRole_ShouldReturnFailure()
     {
-        var email = Email.Create("admin@example.com").Value;
-
-        var result = User.Create("Admin", "User", UserRole.Admin, email);
+        var result = User.Create("Admin", "User", UserRole.Admin, _validEmail, _validPhoneNumber);
 
         Assert.True(result.IsFailure);
         Assert.NotNull(result.Error);
@@ -124,8 +137,7 @@ public class UserTests
     [Fact]
     public void CreateAccount_WithValidPassword_ShouldReturnSuccess()
     {
-        var email = Email.Create("test@example.com").Value;
-        var user = User.Create("John", "Doe", UserRole.JobSeeker, email).Value;
+        var user = User.Create("John", "Doe", UserRole.JobSeeker, _validEmail, _validPhoneNumber).Value;
         string password = "SecurePassword123!";
 
         var result = user.CreateAccount(password, _passwordHasherMock.Object);
@@ -140,8 +152,7 @@ public class UserTests
     [Fact]
     public void CreateAccount_WhenAccountAlreadyExists_ShouldReturnFailure()
     {
-        var email = Email.Create("test@example.com").Value;
-        var user = User.Create("John", "Doe", UserRole.JobSeeker, email).Value;
+        var user = User.Create("John", "Doe", UserRole.JobSeeker, _validEmail, _validPhoneNumber).Value;
         const string password = "SecurePassword123!";
         user.CreateAccount(password, _passwordHasherMock.Object);
 
@@ -157,8 +168,20 @@ public class UserTests
     [InlineData(null)]
     public void CreateAccount_WithInvalidPassword_ShouldReturnFailure(string password)
     {
-        var email = Email.Create("test@example.com").Value;
-        var user = User.Create("John", "Doe", UserRole.JobSeeker, email).Value;
+        var user = User.Create("John", "Doe", UserRole.JobSeeker, _validEmail, _validPhoneNumber).Value;
+
+        var result = user.CreateAccount(password, _passwordHasherMock.Object);
+
+        Assert.True(result.IsFailure);
+        Assert.NotNull(result.Error);
+        Assert.Null(user.Account);
+    }
+
+    [Theory]
+    [MemberData(nameof(PasswordsNotInRange))]
+    public void CreateAccount_WithPasswordNotInRange_ShouldReturnFailure(string password)
+    {
+        var user = User.Create("John", "Doe", UserRole.JobSeeker, _validEmail, _validPhoneNumber).Value;
 
         var result = user.CreateAccount(password, _passwordHasherMock.Object);
 
@@ -174,8 +197,7 @@ public class UserTests
     [Fact]
     public void UpdateEmail_WithValidEmail_ShouldReturnSuccess()
     {
-        var originalEmail = Email.Create("original@example.com").Value;
-        var user = User.Create("John", "Doe", UserRole.JobSeeker, originalEmail).Value;
+        var user = User.Create("John", "Doe", UserRole.JobSeeker, _validEmail, _validPhoneNumber).Value;
         var newEmail = Email.Create("new@example.com").Value;
 
         var result = user.UpdateEmail(newEmail);
@@ -187,14 +209,13 @@ public class UserTests
     [Fact]
     public void UpdateEmail_WithNullEmail_ShouldReturnFailure()
     {
-        var originalEmail = Email.Create("original@example.com").Value;
-        var user = User.Create("John", "Doe", UserRole.JobSeeker, originalEmail).Value;
+        var user = User.Create("John", "Doe", UserRole.JobSeeker, _validEmail, _validPhoneNumber).Value;
 
-        var result = user.UpdateEmail(null);
+        var result = user.UpdateEmail(null!);
 
         Assert.True(result.IsFailure);
         Assert.NotNull(result.Error);
-        Assert.Equal(originalEmail, user.Email);
+        Assert.Equal(_validEmail, user.Email);
     }
 
     #endregion
@@ -204,8 +225,7 @@ public class UserTests
     [Fact]
     public void UpdatePhoneNumber_WithValidPhoneNumber_ShouldReturnSuccess()
     {
-        var originalPhone = PhoneNumber.Create("+14156667777", "US").Value;
-        var user = User.Create("John", "Doe", UserRole.JobSeeker, originalPhone).Value;
+        var user = User.Create("John", "Doe", UserRole.JobSeeker, _validEmail, _validPhoneNumber).Value;
         var newPhone = PhoneNumber.Create("+380501234567", "UA").Value;
 
         var result = user.UpdatePhoneNumber(newPhone);
@@ -217,14 +237,13 @@ public class UserTests
     [Fact]
     public void UpdatePhoneNumber_WithNullPhoneNumber_ShouldReturnFailure()
     {
-        var originalPhone = PhoneNumber.Create("+14156667777", "US").Value;
-        var user = User.Create("John", "Doe", UserRole.JobSeeker, originalPhone).Value;
+        var user = User.Create("John", "Doe", UserRole.JobSeeker, _validEmail, _validPhoneNumber).Value;
 
-        var result = user.UpdatePhoneNumber(null);
+        var result = user.UpdatePhoneNumber(null!);
 
         Assert.True(result.IsFailure);
         Assert.NotNull(result.Error);
-        Assert.Equal(originalPhone, user.PhoneNumber);
+        Assert.Equal(_validPhoneNumber, user.PhoneNumber);
     }
 
     #endregion
@@ -234,8 +253,7 @@ public class UserTests
     [Fact]
     public void UpdateFirstName_WithValidName_ShouldReturnSuccess()
     {
-        var email = Email.Create("test@example.com").Value;
-        var user = User.Create("John", "Doe", UserRole.JobSeeker, email).Value;
+        var user = User.Create("John", "Doe", UserRole.JobSeeker, _validEmail, _validPhoneNumber).Value;
         var newName = "Jane";
 
         var result = user.UpdateFirstName(newName);
@@ -250,9 +268,8 @@ public class UserTests
     [InlineData(null)]
     public void UpdateFirstName_WithInvalidName_ShouldReturnFailure(string firstName)
     {
-        var email = Email.Create("test@example.com").Value;
         var originalFirstName = "John";
-        var user = User.Create(originalFirstName, "Doe", UserRole.JobSeeker, email).Value;
+        var user = User.Create(originalFirstName, "Doe", UserRole.JobSeeker, _validEmail, _validPhoneNumber).Value;
 
         var result = user.UpdateFirstName(firstName);
 
@@ -269,7 +286,7 @@ public class UserTests
     public void UpdateLastName_WithValidName_ShouldReturnSuccess()
     {
         var email = Email.Create("test@example.com").Value;
-        var user = User.Create("John", "Doe", UserRole.JobSeeker, email).Value;
+        var user = User.Create("John", "Doe", UserRole.JobSeeker, _validEmail, _validPhoneNumber).Value;
         var newLastName = "Smith";
 
         var result = user.UpdateLastName(newLastName);
@@ -284,9 +301,8 @@ public class UserTests
     [InlineData(null)]
     public void UpdateLastName_WithInvalidName_ShouldReturnFailure(string lastName)
     {
-        var email = Email.Create("test@example.com").Value;
         var originalLastName = "Doe";
-        var user = User.Create("John", originalLastName, UserRole.JobSeeker, email).Value;
+        var user = User.Create("John", originalLastName, UserRole.JobSeeker, _validEmail, _validPhoneNumber).Value;
 
         var result = user.UpdateLastName(lastName);
 
@@ -302,8 +318,7 @@ public class UserTests
     [Fact]
     public void UpdatePassword_WithValidPasswordAndExistingAccount_ShouldReturnSuccess()
     {
-        var email = Email.Create("test@example.com").Value;
-        var user = User.Create("John", "Doe", UserRole.JobSeeker, email).Value;
+        var user = User.Create("John", "Doe", UserRole.JobSeeker, _validEmail, _validPhoneNumber).Value;
         user.CreateAccount("OldPassword123!", _passwordHasherMock.Object);
         string newPassword = "NewPassword456!";
 
@@ -317,8 +332,7 @@ public class UserTests
     [Fact]
     public void UpdatePassword_WithoutAccount_ShouldReturnFailure()
     {
-        var email = Email.Create("test@example.com").Value;
-        var user = User.Create("John", "Doe", UserRole.JobSeeker, email).Value;
+        var user = User.Create("John", "Doe", UserRole.JobSeeker, _validEmail, _validPhoneNumber).Value;
 
         var result = user.UpdatePassword("NewPassword123!", _passwordHasherMock.Object);
 
@@ -332,8 +346,22 @@ public class UserTests
     [InlineData(null)]
     public void UpdatePassword_WithInvalidPassword_ShouldReturnFailure(string password)
     {
-        var email = Email.Create("test@example.com").Value;
-        var user = User.Create("John", "Doe", UserRole.JobSeeker, email).Value;
+        var user = User.Create("John", "Doe", UserRole.JobSeeker, _validEmail, _validPhoneNumber).Value;
+        string originalPassword = "OldPassword123!";
+        user.CreateAccount(originalPassword, _passwordHasherMock.Object);
+
+        var result = user.UpdatePassword(password, _passwordHasherMock.Object);
+
+        Assert.True(result.IsFailure);
+        Assert.NotNull(result.Error);
+        Assert.True(_passwordHasherMock.Object.VerifyHashedPassword(user.Account!.PasswordHash, originalPassword));
+    }
+
+    [Theory]
+    [MemberData(nameof(PasswordsNotInRange))]
+    public void UpdatePassword_WithPasswordNotInRange_ShouldReturnFailure(string password)
+    {
+        var user = User.Create("John", "Doe", UserRole.JobSeeker, _validEmail, _validPhoneNumber).Value;
         string originalPassword = "OldPassword123!";
         user.CreateAccount(originalPassword, _passwordHasherMock.Object);
 
@@ -352,7 +380,7 @@ public class UserTests
     public void DeleteAccount_WithExistingAccount_ShouldReturnSuccess()
     {
         var email = Email.Create("test@example.com").Value;
-        var user = User.Create("John", "Doe", UserRole.JobSeeker, email).Value;
+        var user = User.Create("John", "Doe", UserRole.JobSeeker, _validEmail, _validPhoneNumber).Value;
         user.CreateAccount("Password123!", _passwordHasherMock.Object);
 
         var result = user.DeleteAccount();
@@ -365,7 +393,7 @@ public class UserTests
     public void DeleteAccount_WithoutAccount_ShouldReturnFailure()
     {
         var email = Email.Create("test@example.com").Value;
-        var user = User.Create("John", "Doe", UserRole.JobSeeker, email).Value;
+        var user = User.Create("John", "Doe", UserRole.JobSeeker, _validEmail, _validPhoneNumber).Value;
 
         var result = user.DeleteAccount();
 
@@ -374,4 +402,10 @@ public class UserTests
     }
 
     #endregion
+
+    public static readonly TheoryData<string> PasswordsNotInRange = new()
+    {
+        new string('a', Account.MinPasswordLength - 1),
+        new string('a', Account.MaxPasswordLength + 1)
+    };
 }

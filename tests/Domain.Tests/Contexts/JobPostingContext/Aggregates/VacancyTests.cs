@@ -31,6 +31,7 @@ public class VacancyTests
         _validCompanyId = new CompanyId();
         _validLocation = Location.Create("USA", "New York").Value;
         _validRecruiterInfo = RecruiterInfo.Create(
+            "John Doe",
             Email.Create("recruiter@company.com").Value,
             PhoneNumber.Create("+14156667777", "US").Value).Value;
     }
@@ -643,6 +644,7 @@ public class VacancyTests
             _validLocation,
             _validRecruiterInfo).Value;
         var newRecruiterInfo = RecruiterInfo.Create(
+            "Jane Smith",
             Email.Create("newrecruiter@company.com").Value,
             PhoneNumber.Create("+442034567890", "GB").Value).Value;
 
@@ -683,6 +685,7 @@ public class VacancyTests
             _validRecruiterInfo).Value;
         var originalRecruiterInfo = vacancy.RecruiterInfo;
         var newRecruiterInfo = RecruiterInfo.Create(
+            "Test Recruiter",
             Email.Create("test@example.com").Value,
             PhoneNumber.Create("+14156667777", "US").Value).Value;
 
@@ -699,6 +702,7 @@ public class VacancyTests
         var vacancy = CreatePublishedVacancy();
         var originalRecruiterInfo = vacancy.RecruiterInfo;
         var newRecruiterInfo = RecruiterInfo.Create(
+            "Test Recruiter",
             Email.Create("test@example.com").Value,
             PhoneNumber.Create("+14156667777", "US").Value).Value;
 
@@ -714,6 +718,7 @@ public class VacancyTests
         var vacancy = CreateArchivedVacancy();
         var originalRecruiterInfo = vacancy.RecruiterInfo;
         var newRecruiterInfo = RecruiterInfo.Create(
+            "Test Recruiter",
             Email.Create("test@example.com").Value,
             PhoneNumber.Create("+14156667777", "US").Value).Value;
 

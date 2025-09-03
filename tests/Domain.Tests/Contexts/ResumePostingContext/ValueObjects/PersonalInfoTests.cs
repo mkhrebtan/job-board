@@ -50,6 +50,28 @@ public class PersonalInfoTests
         Assert.Equal(expectedLastName, result.Value.LastName);
     }
 
+    [Fact]
+    public void Create_WithFirstNameExceedingMaxLength_ShouldReturnFailure()
+    {
+        var longFirstName = new string('a', PersonalInfo.MaxFirstNameLength + 1);
+
+        var result = PersonalInfo.Create(longFirstName, "Doe");
+
+        Assert.True(result.IsFailure);
+        Assert.NotNull(result.Error);
+    }
+
+    [Fact]
+    public void Create_WithLastNameExceedingMaxLength_ShouldReturnFailure()
+    {
+        var longLastName = new string('a', PersonalInfo.MaxLastNameLength + 1);
+
+        var result = PersonalInfo.Create("John", longLastName);
+
+        Assert.True(result.IsFailure);
+        Assert.NotNull(result.Error);
+    }
+
     [Theory]
     [MemberData(nameof(ValidPersonalInfo))]
     public void Equals_SamePersonalInfo_ShouldReturnTrue(string firstName, string lastName)

@@ -144,6 +144,61 @@ public class LocationTests
     }
 
     [Fact]
+    public void Create_WithCountryExceedingMaxLength_ShouldReturnFailure()
+    {
+        var country = new string('A', Location.MaxCountryLength + 1);
+
+        var result = Location.Create(country, "New York");
+
+        Assert.True(result.IsFailure);
+        Assert.NotNull(result.Error);
+    }
+
+    [Fact]
+    public void Create_WithCityExceedingMaxLength_ShouldReturnFailure()
+    {
+        var city = new string('B', Location.MaxCityLength + 1);
+
+        var result = Location.Create("USA", city);
+
+        Assert.True(result.IsFailure);
+        Assert.NotNull(result.Error);
+    }
+
+    [Fact]
+    public void Create_WithRegionExceedingMaxLength_ShouldReturnFailure()
+    {
+        var region = new string('C', Location.MaxRegionLength + 1);
+
+        var result = Location.Create("USA", "New York", region);
+
+        Assert.True(result.IsFailure);
+        Assert.NotNull(result.Error);
+    }
+
+    [Fact]
+    public void Create_WithDistrictExceedingMaxLength_ShouldReturnFailure()
+    {
+        var district = new string('D', Location.MaxDistrictLength + 1);
+
+        var result = Location.Create("USA", "New York", "NY", district);
+
+        Assert.True(result.IsFailure);
+        Assert.NotNull(result.Error);
+    }
+
+    [Fact]
+    public void Create_WithAddressExceedingMaxLength_ShouldReturnFailure()
+    {
+        var address = new string('E', Location.MaxAddressLength + 1);
+
+        var result = Location.Create("USA", "New York", "NY", "Manhattan", address);
+
+        Assert.True(result.IsFailure);
+        Assert.NotNull(result.Error);
+    }
+
+    [Fact]
     public void Equals_WithSameValues_ShouldReturnTrue()
     {
         var location1 = Location.Create("USA", "New York", "NY", "Manhattan", "123 Main St", 40.7128m, -74.0060m).Value;

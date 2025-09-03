@@ -24,6 +24,17 @@ public class FileUrlTests
         Assert.NotNull(result.Error);
     }
 
+    [Fact]
+    public void Create_WhenExceedingMaxLength_ShouldReturnFailure()
+    {
+        var longUrl = "https://" + new string('a', FileUrl.MaxLength) + ".com/file.pdf";
+
+        var result = FileUrl.Create(longUrl);
+
+        Assert.True(result.IsFailure);
+        Assert.NotNull(result.Error);
+    }
+
     [Theory]
     [MemberData(nameof(ValidFileUrls))]
     public void Equals_SameFileUrl_ShouldReturnTrue(string url)

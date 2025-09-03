@@ -52,11 +52,13 @@ public class ResumeTests
     private void SetupTestData()
     {
         var jobSeekerEmail = Email.Create("jobseeker@example.com").Value;
-        _validJobSeekerUser = User.Create("John", "Doe", UserRole.JobSeeker, jobSeekerEmail).Value;
+        var jobSeekerPhoneNumber = PhoneNumber.Create("+14155551234", "US").Value;
+        _validJobSeekerUser = User.Create("John", "Doe", UserRole.JobSeeker, jobSeekerEmail, jobSeekerPhoneNumber).Value;
         _validJobSeekerUser.CreateAccount("password123", _passwordHasherMock.Object);
 
         var employerEmail = Email.Create("employer@example.com").Value;
-        _validEmployerUser = User.Create("Jane", "Smith", UserRole.Employer, employerEmail).Value;
+        var employerPhoneNumber = PhoneNumber.Create("+14155559876", "US").Value;
+        _validEmployerUser = User.Create("Jane", "Smith", UserRole.Employer, employerEmail, employerPhoneNumber).Value;
         _validEmployerUser.CreateAccount("password123", _passwordHasherMock.Object);
 
         _validPersonalInfo = PersonalInfo.Create("John", "Doe").Value;
@@ -430,6 +432,34 @@ public class ResumeTests
     }
 
     [Fact]
+    public void AddWorkExperience_WithCompanyNameExceedingMaxLength_ShouldReturnFailure()
+    {
+        var resume = CreateValidResume();
+        var longCompanyName = new string('C', WorkExperience.MaxCompanyNameLength + 1);
+        var dateRange = DateRange.Create(new DateTime(2020, 1, 1), new DateTime(2023, 12, 31)).Value;
+        var description = RichTextContent.Create("Software development", _markdownParserMock.Object).Value;
+
+        var result = resume.AddWorkExperience(longCompanyName, "Software Engineer", dateRange, description);
+
+        Assert.True(result.IsFailure);
+        Assert.NotNull(result.Error);
+    }
+
+    [Fact]
+    public void AddWorkExperience_WithPositionExceedingMaxLength_ShouldReturnFailure()
+    {
+        var resume = CreateValidResume();
+        var longPosition = new string('P', WorkExperience.MaxPositionLength + 1);
+        var dateRange = DateRange.Create(new DateTime(2020, 1, 1), new DateTime(2023, 12, 31)).Value;
+        var description = RichTextContent.Create("Software development", _markdownParserMock.Object).Value;
+
+        var result = resume.AddWorkExperience("Tech Company", longPosition, dateRange, description);
+
+        Assert.True(result.IsFailure);
+        Assert.NotNull(result.Error);
+    }
+
+    [Fact]
     public void RemoveWorkExperience_WithExistingId_ShouldReturnSuccess()
     {
         var resume = CreateValidResume();
@@ -482,6 +512,45 @@ public class ResumeTests
 
         Assert.True(result.IsSuccess);
         Assert.Single(resume.Educations);
+    }
+
+    [Fact]
+    public void AddEducation_WithInstitutionExceedingMaxLength_ShouldReturnFailure()
+    {
+        var resume = CreateValidResume();
+        var longInstitutionName = new string('A', Education.MaxInstitutionNameLength + 1);
+        var dateRange = DateRange.Create(new DateTime(2015, 9, 1), new DateTime(2019, 6, 30)).Value;
+
+        var result = resume.AddEducation(longInstitutionName, "Bachelor of Science", "Computer Science", dateRange);
+
+        Assert.True(result.IsFailure);
+        Assert.NotNull(result.Error);
+    }
+
+    [Fact]
+    public void AddEducation_WithDegreeExceedingMaxLength_ShouldReturnFailure()
+    {
+        var resume = CreateValidResume();
+        var longDegree = new string('D', Education.MaxDegreeLength + 1);
+        var dateRange = DateRange.Create(new DateTime(2015, 9, 1), new DateTime(2019, 6, 30)).Value;
+
+        var result = resume.AddEducation("University of Technology", longDegree, "Computer Science", dateRange);
+
+        Assert.True(result.IsFailure);
+        Assert.NotNull(result.Error);
+    }
+
+    [Fact]
+    public void AddEducation_WithFieldOfStudyExceedingMaxLength_ShouldReturnFailure()
+    {
+        var resume = CreateValidResume();
+        var longFieldOfStudy = new string('F', Education.MaxFieldOfStudyLength + 1);
+        var dateRange = DateRange.Create(new DateTime(2015, 9, 1), new DateTime(2019, 6, 30)).Value;
+
+        var result = resume.AddEducation("University of Technology", "Bachelor of Science", longFieldOfStudy, dateRange);
+
+        Assert.True(result.IsFailure);
+        Assert.NotNull(result.Error);
     }
 
     [Fact]
@@ -545,6 +614,18 @@ public class ResumeTests
         resume.AddLanguage("English", LanguageLevel.C2);
 
         var result = resume.AddLanguage("english", LanguageLevel.B1);
+
+        Assert.True(result.IsFailure);
+        Assert.NotNull(result.Error);
+    }
+
+    [Fact]
+    public void AddLanguage_WithLanguageExceedingMaxLength_ShouldReturnFailure()
+    {
+        var resume = CreateValidResume();
+        var longLanguageName = new string('L', LanguageSkill.MaxLanguageLength + 1);
+
+        var result = resume.AddLanguage(longLanguageName, LanguageLevel.A1);
 
         Assert.True(result.IsFailure);
         Assert.NotNull(result.Error);

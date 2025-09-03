@@ -39,6 +39,18 @@ public class RichTextContentTests
     }
 
     [Fact]
+    public void Create_WhenExceedingMaxLength_ShouldReturnFailure()
+    {
+        var longMarkdown = new string('a', RichTextContent.MaxLength + 1);
+
+        var result = RichTextContent.Create(longMarkdown, _mockParser.Object);
+
+        Assert.False(result.IsSuccess);
+        Assert.NotNull(result.Error);
+        _mockParser.Verify(x => x.ToPlainText(It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
     public void Empty_ShouldReturnEmptyRichTextContent()
     {
         var empty = RichTextContent.Empty;

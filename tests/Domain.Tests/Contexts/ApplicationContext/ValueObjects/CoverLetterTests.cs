@@ -50,6 +50,17 @@ public class CoverLetterTests
     }
 
     [Fact]
+    public void Create_WithExceedingMaxLength_ShouldReturnFailure()
+    {
+        var content = new string('a', CoverLetter.MaxLength + 1);
+
+        var result = CoverLetter.Create(content);
+
+        Assert.True(result.IsFailure);
+        Assert.NotNull(result.Error);
+    }
+
+    [Fact]
     public void Equals_WithSameContent_ShouldReturnTrue()
     {
         var content = "Sample cover letter content";
