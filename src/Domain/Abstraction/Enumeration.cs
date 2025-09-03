@@ -45,6 +45,11 @@ public abstract class Enumeration<TEnum> : IEquatable<Enumeration<TEnum>>
         return Code.GetHashCode();
     }
 
+    public override string ToString()
+    {
+        return Code;
+    }
+
     private static Dictionary<string, TEnum> CreateEnumerations()
     {
         var enumerationType = typeof(TEnum);
