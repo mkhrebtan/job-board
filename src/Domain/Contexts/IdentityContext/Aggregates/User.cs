@@ -44,7 +44,7 @@ public class User : AggregateRoot<UserId>
     {
         if (Account != null)
         {
-            return Result.Failure(new Error("User.AccountAlreadyExists", "User already has an associated account."));
+            return Result.Failure(Error.Conflict("User.AccountAlreadyExists", "User already has an associated account."));
         }
 
         var accountResult = Account.Create(Id, password, passwordHasher);
@@ -61,7 +61,7 @@ public class User : AggregateRoot<UserId>
     {
         if (string.IsNullOrWhiteSpace(newFirstName))
         {
-            return Result.Failure(new Error("User.InvalidFirstName", "First name cannot be null or empty."));
+            return Result.Failure(Error.Problem("User.InvalidFirstName", "First name cannot be null or empty."));
         }
 
         FirstName = newFirstName;
@@ -72,7 +72,7 @@ public class User : AggregateRoot<UserId>
     {
         if (string.IsNullOrWhiteSpace(newLastName))
         {
-            return Result.Failure(new Error("User.InvalidLastName", "Last name cannot be null or empty."));
+            return Result.Failure(Error.Problem("User.InvalidLastName", "Last name cannot be null or empty."));
         }
 
         LastName = newLastName;
@@ -83,7 +83,7 @@ public class User : AggregateRoot<UserId>
     {
         if (Account == null)
         {
-            return Result.Failure(new Error("User.NoAssociatedAccount", "User does not have an associated account."));
+            return Result.Failure(Error.Conflict("User.NoAssociatedAccount", "User does not have an associated account."));
         }
 
         return Account.UpdatePassword(newPassword, passwordHasher);
@@ -93,7 +93,7 @@ public class User : AggregateRoot<UserId>
     {
         if (Account == null)
         {
-            return Result.Failure(new Error("User.NoAssociatedAccount", "User does not have an associated account."));
+            return Result.Failure(Error.Conflict("User.NoAssociatedAccount", "User does not have an associated account."));
         }
 
         Account = null;
@@ -116,7 +116,7 @@ public class User : AggregateRoot<UserId>
     {
         if (newEmail is null)
         {
-            return Result.Failure(new Error("User.NullEmail", "Email cannot be null."));
+            return Result.Failure(Error.Problem("User.NullEmail", "Email cannot be null."));
         }
 
         Email = newEmail;
@@ -127,7 +127,7 @@ public class User : AggregateRoot<UserId>
     {
         if (newPhoneNumber is null)
         {
-            return Result.Failure(new Error("User.NullPhoneNumber", "Phone number cannot be null."));
+            return Result.Failure(Error.Problem("User.NullPhoneNumber", "Phone number cannot be null."));
         }
 
         PhoneNumber = newPhoneNumber;
@@ -138,37 +138,37 @@ public class User : AggregateRoot<UserId>
     {
         if (string.IsNullOrWhiteSpace(firstName))
         {
-            return Result.Failure(new Error("User.InvalidFirstName", "First name cannot be null or empty."));
+            return Result.Failure(Error.Problem("User.InvalidFirstName", "First name cannot be null or empty."));
         }
 
         if (firstName.Length > MaxFirstNameLength)
         {
-            return Result.Failure(new Error("User.FirstNameTooLong", $"First name cannot exceed {MaxFirstNameLength} characters."));
+            return Result.Failure(Error.Problem("User.FirstNameTooLong", $"First name cannot exceed {MaxFirstNameLength} characters."));
         }
 
         if (string.IsNullOrWhiteSpace(LastName))
         {
-            return Result.Failure(new Error("User.InvalidLastName", "Last name cannot be null or empty."));
+            return Result.Failure(Error.Problem("User.InvalidLastName", "Last name cannot be null or empty."));
         }
 
         if (LastName.Length > MaxLastNameLength)
         {
-            return Result.Failure(new Error("User.LastNameTooLong", $"Last name cannot exceed {MaxLastNameLength} characters."));
+            return Result.Failure(Error.Problem("User.LastNameTooLong", $"Last name cannot exceed {MaxLastNameLength} characters."));
         }
 
         if (email is null)
         {
-            return Result.Failure(new Error("User.NullEmail", "Email cannot be null."));
+            return Result.Failure(Error.Problem("User.NullEmail", "Email cannot be null."));
         }
 
         if (phoneNumber is null)
         {
-            return Result.Failure(new Error("User.NullPhoneNumber", "Phone number cannot be null."));
+            return Result.Failure(Error.Problem("User.NullPhoneNumber", "Phone number cannot be null."));
         }
 
         if (role == UserRole.Admin)
         {
-            return Result.Failure(new Error("User.InaccesibleRole", "Cannot create user with Admin role."));
+            return Result.Failure(Error.Problem("User.InaccesibleRole", "Cannot create user with Admin role."));
         }
 
         return Result.Success();

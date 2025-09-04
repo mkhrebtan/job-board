@@ -21,17 +21,17 @@ public class Email : ValueObject
     {
         if (string.IsNullOrWhiteSpace(address))
         {
-            return Result<Email>.Failure(new Error("Email.InvalidAddress", "Email address cannot be null or empty."));
+            return Result<Email>.Failure(Error.Problem("Email.InvalidAddress", "Email address cannot be null or empty."));
         }
 
         if (address.Length > MaxLength)
         {
-            return Result<Email>.Failure(new Error("Email.AddressTooLong", $"Email address cannot exceed {MaxLength} characters."));
+            return Result<Email>.Failure(Error.Problem("Email.AddressTooLong", $"Email address cannot exceed {MaxLength} characters."));
         }
 
         if (!Regex.IsMatch(address, EmailPattern))
         {
-            return Result<Email>.Failure(new Error("Email.InvalidFormat", "Email address format is invalid."));
+            return Result<Email>.Failure(Error.Problem("Email.InvalidFormat", "Email address format is invalid."));
         }
 
         var email = new Email(address);

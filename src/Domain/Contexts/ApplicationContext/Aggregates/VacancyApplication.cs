@@ -9,17 +9,17 @@ namespace Domain.Contexts.ApplicationContext.Aggregates;
 
 public abstract class VacancyApplication : AggregateRoot<VacancyApplicationId>
 {
-    private VacancyApplication()
-        : base(new VacancyApplicationId())
-    {
-    }
-
     protected VacancyApplication(UserId seekerId, VacancyId vacancyId, CoverLetter coverLetter)
         : base(new VacancyApplicationId())
     {
         SeekerId = seekerId;
         VacancyId = vacancyId;
         CoverLetter = coverLetter;
+    }
+
+    private VacancyApplication()
+        : base(new VacancyApplicationId())
+    {
     }
 
     public UserId SeekerId { get; private set; }
@@ -32,17 +32,17 @@ public abstract class VacancyApplication : AggregateRoot<VacancyApplicationId>
     {
         if (seekerId == null || seekerId.Value == Guid.Empty)
         {
-            return Result.Failure(new Error("VacancyApplication.InvalidSeekerId", "SeekerId cannot be null or empty."));
+            return Result.Failure(Error.Problem("VacancyApplication.InvalidSeekerId", "SeekerId cannot be null or empty."));
         }
 
         if (vacancyId == null || vacancyId.Value == Guid.Empty)
         {
-            return Result.Failure(new Error("VacancyApplication.InvalidVacancyId", "VacancyId cannot be null or empty."));
+            return Result.Failure(Error.Problem("VacancyApplication.InvalidVacancyId", "VacancyId cannot be null or empty."));
         }
 
         if (coverLetter == null)
         {
-            return Result.Failure(new Error("VacancyApplication.NullCoverLetter", "Cover letter cannot be null."));
+            return Result.Failure(Error.Problem("VacancyApplication.NullCoverLetter", "Cover letter cannot be null."));
         }
 
         return Result.Success();

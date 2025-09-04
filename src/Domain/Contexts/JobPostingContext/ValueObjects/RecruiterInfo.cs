@@ -30,22 +30,22 @@ public class RecruiterInfo : ValueObject
     {
         if (string.IsNullOrWhiteSpace(firstName))
         {
-            return Result<RecruiterInfo>.Failure(new Error("RecruiterInfo.InvalidFirstName", "First name cannot be null or empty."));
+            return Result<RecruiterInfo>.Failure(Error.Problem("RecruiterInfo.InvalidFirstName", "First name cannot be null or empty."));
         }
 
         if (firstName.Length > MaxFirstNameLength)
         {
-            return Result<RecruiterInfo>.Failure(new Error("RecruiterInfo.FirstNameTooLong", $"First name cannot exceed {MaxFirstNameLength} characters."));
+            return Result<RecruiterInfo>.Failure(Error.Problem("RecruiterInfo.FirstNameTooLong", $"First name cannot exceed {MaxFirstNameLength} characters."));
         }
 
         if (email is null)
         {
-            return Result<RecruiterInfo>.Failure(new Error("RecruiterInfo.NullEmail", "Email cannot be null."));
+            return Result<RecruiterInfo>.Failure(Error.Problem("RecruiterInfo.NullEmail", "Email cannot be null."));
         }
 
         if (phoneNumber is null)
         {
-            return Result<RecruiterInfo>.Failure(new Error("RecruiterInfo.NullPhoneNumber", "Phone number cannot be null."));
+            return Result<RecruiterInfo>.Failure(Error.Problem("RecruiterInfo.NullPhoneNumber", "Phone number cannot be null."));
         }
 
         var recruiterInfo = new RecruiterInfo(firstName, email, phoneNumber);

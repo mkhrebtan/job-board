@@ -42,32 +42,32 @@ public class Company : AggregateRoot<CompanyId>
     {
         if (string.IsNullOrWhiteSpace(name))
         {
-            return Result<Company>.Failure(new Error("Company.InvalidName", "Company name cannot be null or empty."));
+            return Result<Company>.Failure(Error.Problem("Company.InvalidName", "Company name cannot be null or empty."));
         }
 
         if (name.Length > MaxNameLength)
         {
-            return Result<Company>.Failure(new Error("Company.NameTooLong", $"Company name cannot exceed {MaxNameLength} characters."));
+            return Result<Company>.Failure(Error.Problem("Company.NameTooLong", $"Company name cannot exceed {MaxNameLength} characters."));
         }
 
         if (description == null)
         {
-            return Result<Company>.Failure(new Error("Company.NullDescription", "Description cannot be null."));
+            return Result<Company>.Failure(Error.Problem("Company.NullDescription", "Description cannot be null."));
         }
 
         if (websiteUrl == null)
         {
-            return Result<Company>.Failure(new Error("Company.NullWebsiteUrl", "Website URL cannot be null."));
+            return Result<Company>.Failure(Error.Problem("Company.NullWebsiteUrl", "Website URL cannot be null."));
         }
 
         if (logoUrl == null)
         {
-            return Result<Company>.Failure(new Error("Company.NullLogoUrl", "Logo URL cannot be null."));
+            return Result<Company>.Failure(Error.Problem("Company.NullLogoUrl", "Logo URL cannot be null."));
         }
 
         if (size.HasValue && size <= 0)
         {
-            return Result<Company>.Failure(new Error("Company.InvalidSize", "Company size must be a positive integer."));
+            return Result<Company>.Failure(Error.Problem("Company.InvalidSize", "Company size must be a positive integer."));
         }
 
         var company = new Company(name.Trim(), description, websiteUrl, logoUrl, size);
@@ -78,7 +78,7 @@ public class Company : AggregateRoot<CompanyId>
     {
         if (IsVerified)
         {
-            return Result.Failure(new Error("Company.AlreadyVerified", "Company is already verified."));
+            return Result.Failure(Error.Conflict("Company.AlreadyVerified", "Company is already verified."));
         }
 
         IsVerified = true;
@@ -89,7 +89,7 @@ public class Company : AggregateRoot<CompanyId>
     {
         if (string.IsNullOrWhiteSpace(name))
         {
-            return Result.Failure(new Error("Company.InvalidName", "Company name cannot be null or empty."));
+            return Result.Failure(Error.Problem("Company.InvalidName", "Company name cannot be null or empty."));
         }
 
         Name = name.Trim();
@@ -109,7 +109,7 @@ public class Company : AggregateRoot<CompanyId>
     {
         if (size.HasValue && size <= 0)
         {
-            return Result.Failure(new Error("Company.InvalidSize", "Company size must be a positive integer."));
+            return Result.Failure(Error.Problem("Company.InvalidSize", "Company size must be a positive integer."));
         }
 
         Size = size;
@@ -120,7 +120,7 @@ public class Company : AggregateRoot<CompanyId>
     {
         if (newValue is null || newValue.Equals(default(T)))
         {
-            return Result.Failure(new Error($"Vacancy.Invalid{propertyName}", $"{propertyName} cannot be null or empty."));
+            return Result.Failure(Error.Problem($"Vacancy.Invalid{propertyName}", $"{propertyName} cannot be null or empty."));
         }
 
         updateAction(newValue);

@@ -40,42 +40,42 @@ public class Education : Entity<EducationId>
     {
         if (resumeId == null || resumeId.Value == Guid.Empty)
         {
-            return Result<Education>.Failure(new Error("Education.InvalidResumeId", "ResumeId cannot be null or empty."));
+            return Result<Education>.Failure(Error.Problem("Education.InvalidResumeId", "ResumeId cannot be null or empty."));
         }
 
         if (string.IsNullOrWhiteSpace(institutionName))
         {
-            return Result<Education>.Failure(new Error("Education.InvalidInstitutionName", "Institution name cannot be null or empty."));
+            return Result<Education>.Failure(Error.Problem("Education.InvalidInstitutionName", "Institution name cannot be null or empty."));
         }
 
         if (institutionName.Length > MaxInstitutionNameLength)
         {
-            return Result<Education>.Failure(new Error("Education.InstitutionNameTooLong", $"Institution name cannot exceed {MaxInstitutionNameLength} characters."));
+            return Result<Education>.Failure(Error.Problem("Education.InstitutionNameTooLong", $"Institution name cannot exceed {MaxInstitutionNameLength} characters."));
         }
 
         if (string.IsNullOrWhiteSpace(degree))
         {
-            return Result<Education>.Failure(new Error("Education.InvalidDegree", "Degree cannot be null or empty."));
+            return Result<Education>.Failure(Error.Problem("Education.InvalidDegree", "Degree cannot be null or empty."));
         }
 
         if (degree.Length > MaxDegreeLength)
         {
-            return Result<Education>.Failure(new Error("Education.DegreeTooLong", $"Degree cannot exceed {MaxDegreeLength} characters."));
+            return Result<Education>.Failure(Error.Problem("Education.DegreeTooLong", $"Degree cannot exceed {MaxDegreeLength} characters."));
         }
 
         if (string.IsNullOrWhiteSpace(fieldOfStudy))
         {
-            return Result<Education>.Failure(new Error("Education.InvalidFieldOfStudy", "Field of study cannot be null or empty."));
+            return Result<Education>.Failure(Error.Problem("Education.InvalidFieldOfStudy", "Field of study cannot be null or empty."));
         }
 
         if (fieldOfStudy.Length > MaxFieldOfStudyLength)
         {
-            return Result<Education>.Failure(new Error("Education.FieldOfStudyTooLong", $"Field of study cannot exceed {MaxFieldOfStudyLength} characters."));
+            return Result<Education>.Failure(Error.Problem("Education.FieldOfStudyTooLong", $"Field of study cannot exceed {MaxFieldOfStudyLength} characters."));
         }
 
         if (dateRange == null)
         {
-            return Result<Education>.Failure(new Error("Education.NullDateRange", "Date range cannot be null."));
+            return Result<Education>.Failure(Error.Problem("Education.NullDateRange", "Date range cannot be null."));
         }
 
         var education = new Education(resumeId, institutionName.Trim(), degree.Trim(), fieldOfStudy.Trim(), dateRange);

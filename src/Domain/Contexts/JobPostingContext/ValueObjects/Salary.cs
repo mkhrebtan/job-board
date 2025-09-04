@@ -25,17 +25,17 @@ public class Salary : ValueObject
     {
         if (minAmount < 0)
         {
-            return Result<Salary>.Failure(new Error("Salary.InvalidMinAmount", "Minimum salary amount cannot be negative."));
+            return Result<Salary>.Failure(Error.Problem("Salary.InvalidMinAmount", "Minimum salary amount cannot be negative."));
         }
 
         if (maxAmount < minAmount)
         {
-            return Result<Salary>.Failure(new Error("Salary.InvalidMaxAmount", "Maximum salary amount cannot be less than minimum amount."));
+            return Result<Salary>.Failure(Error.Problem("Salary.InvalidMaxAmount", "Maximum salary amount cannot be less than minimum amount."));
         }
 
         if (!IsValidCurrency(currency))
         {
-            return Result<Salary>.Failure(new Error("Salary.InvalidCurrency", "Currency cannot be null or empty."));
+            return Result<Salary>.Failure(Error.Problem("Salary.InvalidCurrency", "Currency cannot be null or empty."));
         }
 
         var salary = new Salary(minAmount, maxAmount, currency.Trim().ToUpperInvariant());
@@ -46,12 +46,12 @@ public class Salary : ValueObject
     {
         if (amount < 0)
         {
-            return Result<Salary>.Failure(new Error("Salary.InvalidAmount", "Salary amount cannot be negative."));
+            return Result<Salary>.Failure(Error.Problem("Salary.InvalidAmount", "Salary amount cannot be negative."));
         }
 
         if (!IsValidCurrency(currency))
         {
-            return Result<Salary>.Failure(new Error("Salary.InvalidCurrency", "Currency cannot be null or empty."));
+            return Result<Salary>.Failure(Error.Problem("Salary.InvalidCurrency", "Currency cannot be null or empty."));
         }
 
         var salary = new Salary(amount, amount, currency.Trim().ToUpperInvariant());

@@ -45,22 +45,22 @@ public sealed class VacancyApplicationService
     {
         if (user.Role != UserRole.JobSeeker)
         {
-            return Result.Failure(new Error("VacancyApplicationService.InvalidUserRole", $"Only users with the '{UserRole.JobSeeker.Name}' role can apply to vacancies."));
+            return Result.Failure(Error.Problem("VacancyApplicationService.InvalidUserRole", $"Only users with the '{UserRole.JobSeeker.Name}' role can apply to vacancies."));
         }
 
         if (vacancy.Status != VacancyStatus.Published)
         {
-            return Result.Failure(new Error("VacancyApplicationService.InvalidVacancyStatus", $"Applications can only be made to vacancies that are in the '{VacancyStatus.Published.Name}' status."));
+            return Result.Failure(Error.Problem("VacancyApplicationService.InvalidVacancyStatus", $"Applications can only be made to vacancies that are in the '{VacancyStatus.Published.Name}' status."));
         }
 
         if (coverLetter is null)
         {
-            return Result.Failure(new Error("VacancyApplicationService.NullCoverLetter", "Cover letter cannot be null."));
+            return Result.Failure(Error.Problem("VacancyApplicationService.NullCoverLetter", "Cover letter cannot be null."));
         }
 
         if (await _vacancyApplicationRepository.HasAlreadyAppliedToVacancyAsync(user.Id.Value, vacancy.Id.Value, ct))
         {
-            return Result.Failure(new Error("VacancyApplicationService.AlreadyApplied", "User has already applied to this vacancy."));
+            return Result.Failure(Error.Conflict("VacancyApplicationService.AlreadyApplied", "User has already applied to this vacancy."));
         }
 
         return Result.Success();

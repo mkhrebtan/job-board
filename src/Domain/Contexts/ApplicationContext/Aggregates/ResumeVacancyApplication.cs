@@ -26,7 +26,7 @@ public class ResumeVacancyApplication : VacancyApplication
 
         if (resumeId is null || resumeId.Value == Guid.Empty)
         {
-            return Result<ResumeVacancyApplication>.Failure(new Error("ResumeVacancyApplication.InvalidResumeId", "ResumeId cannot be null or empty."));
+            return Result<ResumeVacancyApplication>.Failure(Error.Problem("ResumeVacancyApplication.InvalidResumeId", "ResumeId cannot be null or empty."));
         }
 
         var application = new ResumeVacancyApplication(seekerId, vacancyId, coverLetter, resumeId);

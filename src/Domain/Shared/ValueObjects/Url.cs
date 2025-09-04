@@ -19,17 +19,17 @@ public abstract class Url : ValueObject
     {
         if (string.IsNullOrWhiteSpace(url))
         {
-            return Result.Failure(new Error("Url.Empty", "URL cannot be null or empty."));
+            return Result.Failure(Error.Problem("Url.Empty", "URL cannot be null or empty."));
         }
 
         if (url.Length > MaxLength)
         {
-            return Result.Failure(new Error("Url.TooLong", $"URL cannot exceed {MaxLength} characters."));
+            return Result.Failure(Error.Problem("Url.TooLong", $"URL cannot exceed {MaxLength} characters."));
         }
 
         if (!System.Text.RegularExpressions.Regex.IsMatch(url, pattern))
         {
-            return Result.Failure(new Error("Url.InvalidFormat", "URL format is invalid."));
+            return Result.Failure(Error.Problem("Url.InvalidFormat", "URL format is invalid."));
         }
 
         return Result.Success();

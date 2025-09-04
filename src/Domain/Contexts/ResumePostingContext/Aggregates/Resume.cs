@@ -90,7 +90,7 @@ public class Resume : AggregateRoot<ResumeId>
     {
         if (!Status.CanTransitionTo(ResumeStatus.Published))
         {
-            return Result.Failure(new Error("Resume.InvalidStatusTransition", $"Resume in '{Status.Name}' status cannot be published."));
+            return Result.Failure(Error.Conflict("Resume.InvalidStatusTransition", $"Resume in '{Status.Name}' status cannot be published."));
         }
 
         var updateResult = UpdateProperty(ResumeStatus.Published, status => Status = status, nameof(ResumeStatus.Published));
@@ -107,7 +107,7 @@ public class Resume : AggregateRoot<ResumeId>
     {
         if (!Status.CanTransitionTo(ResumeStatus.Draft))
         {
-            return Result.Failure(new Error("Resume.InvalidStatusTransition", $"Resume in '{Status.Name}' status cannot be moved to draft."));
+            return Result.Failure(Error.Conflict("Resume.InvalidStatusTransition", $"Resume in '{Status.Name}' status cannot be moved to draft."));
         }
 
         return UpdateProperty(ResumeStatus.Draft, status => Status = status, nameof(ResumeStatus.Draft));
@@ -135,12 +135,12 @@ public class Resume : AggregateRoot<ResumeId>
     {
         if (employmentType is null)
         {
-            return Result.Failure(new Error("Resume.InvalidEmploymentType", "EmploymentType cannot be null."));
+            return Result.Failure(Error.Problem("Resume.InvalidEmploymentType", "EmploymentType cannot be null."));
         }
 
         if (_employmentTypes.Contains(employmentType))
         {
-            return Result.Failure(new Error("Resume.DuplicateEmploymentType", "EmploymentType already exists."));
+            return Result.Failure(Error.Problem("Resume.DuplicateEmploymentType", "EmploymentType already exists."));
         }
 
         _employmentTypes.Add(employmentType);
@@ -152,12 +152,12 @@ public class Resume : AggregateRoot<ResumeId>
     {
         if (employmentType is null)
         {
-            return Result.Failure(new Error("Resume.InvalidEmploymentType", "EmploymentType cannot be null."));
+            return Result.Failure(Error.Problem("Resume.InvalidEmploymentType", "EmploymentType cannot be null."));
         }
 
         if (!_employmentTypes.Contains(employmentType))
         {
-            return Result.Failure(new Error("Resume.EmploymentTypeNotFound", "EmploymentType not found."));
+            return Result.Failure(Error.Problem("Resume.EmploymentTypeNotFound", "EmploymentType not found."));
         }
 
         _employmentTypes.Remove(employmentType);
@@ -169,12 +169,12 @@ public class Resume : AggregateRoot<ResumeId>
     {
         if (workArrangement is null)
         {
-            return Result.Failure(new Error("Resume.InvalidWorkArrangement", "WorkArrangement cannot be null."));
+            return Result.Failure(Error.Problem("Resume.InvalidWorkArrangement", "WorkArrangement cannot be null."));
         }
 
         if (_workArrangements.Contains(workArrangement))
         {
-            return Result.Failure(new Error("Resume.DuplicateWorkArrangement", "WorkArrangement already exists."));
+            return Result.Failure(Error.Problem("Resume.DuplicateWorkArrangement", "WorkArrangement already exists."));
         }
 
         _workArrangements.Add(workArrangement);
@@ -186,12 +186,12 @@ public class Resume : AggregateRoot<ResumeId>
     {
         if (workArrangement is null)
         {
-            return Result.Failure(new Error("Resume.InvalidWorkArrangement", "WorkArrangement cannot be null."));
+            return Result.Failure(Error.Problem("Resume.InvalidWorkArrangement", "WorkArrangement cannot be null."));
         }
 
         if (!_workArrangements.Contains(workArrangement))
         {
-            return Result.Failure(new Error("Resume.WorkArrangementNotFound", "WorkArrangement not found."));
+            return Result.Failure(Error.Problem("Resume.WorkArrangementNotFound", "WorkArrangement not found."));
         }
 
         _workArrangements.Remove(workArrangement);
@@ -216,12 +216,12 @@ public class Resume : AggregateRoot<ResumeId>
     {
         if (workExperienceId is null || workExperienceId.Value == Guid.Empty)
         {
-            return Result.Failure(new Error("Resume.InvalidWorkExperienceId", "WorkExperienceId cannot be null or empty."));
+            return Result.Failure(Error.Problem("Resume.InvalidWorkExperienceId", "WorkExperienceId cannot be null or empty."));
         }
 
         if (!_workExperiences.ContainsKey(workExperienceId))
         {
-            return Result.Failure(new Error("Resume.WorkExperienceNotFound", "WorkExperience not found."));
+            return Result.Failure(Error.Problem("Resume.WorkExperienceNotFound", "WorkExperience not found."));
         }
 
         _workExperiences.Remove(workExperienceId);
@@ -246,12 +246,12 @@ public class Resume : AggregateRoot<ResumeId>
     {
         if (educationId is null || educationId.Value == Guid.Empty)
         {
-            return Result.Failure(new Error("Resume.InvalidEducationId", "EducationId cannot be null or empty."));
+            return Result.Failure(Error.Problem("Resume.InvalidEducationId", "EducationId cannot be null or empty."));
         }
 
         if (!_educations.ContainsKey(educationId))
         {
-            return Result.Failure(new Error("Resume.EducationNotFound", "Education not found."));
+            return Result.Failure(Error.Problem("Resume.EducationNotFound", "Education not found."));
         }
 
         _educations.Remove(educationId);
@@ -269,7 +269,7 @@ public class Resume : AggregateRoot<ResumeId>
 
         if (_languages.Values.Any(lang => lang.Language.Equals(name, StringComparison.OrdinalIgnoreCase)))
         {
-            return Result.Failure(new Error("Resume.DuplicateLanguage", "Language already exists."));
+            return Result.Failure(Error.Problem("Resume.DuplicateLanguage", "Language already exists."));
         }
 
         _languages.Add(creationResult.Value.Id, creationResult.Value);
@@ -281,12 +281,12 @@ public class Resume : AggregateRoot<ResumeId>
     {
         if (languageId is null || languageId.Value == Guid.Empty)
         {
-            return Result.Failure(new Error("Resume.InvalidLanguageId", "LanguageId cannot be null or empty."));
+            return Result.Failure(Error.Problem("Resume.InvalidLanguageId", "LanguageId cannot be null or empty."));
         }
 
         if (!_languages.ContainsKey(languageId))
         {
-            return Result.Failure(new Error("Resume.LanguageNotFound", "Language not found."));
+            return Result.Failure(Error.Problem("Resume.LanguageNotFound", "Language not found."));
         }
 
         _languages.Remove(languageId);
@@ -346,47 +346,47 @@ public class Resume : AggregateRoot<ResumeId>
     {
         if (seekerId == null || seekerId.Value == Guid.Empty)
         {
-            return Result.Failure(new Error("Resume.InvalidSeekerId", "SeekerId cannot be null or empty."));
+            return Result.Failure(Error.Problem("Resume.InvalidSeekerId", "SeekerId cannot be null or empty."));
         }
 
         if (personalInfo == null)
         {
-            return Result.Failure(new Error("Resume.InvalidPersonalInfo", "PersonalInfo cannot be null."));
+            return Result.Failure(Error.Problem("Resume.InvalidPersonalInfo", "PersonalInfo cannot be null."));
         }
 
         if (location == null)
         {
-            return Result.Failure(new Error("Resume.InvalidLocation", "Location cannot be null."));
+            return Result.Failure(Error.Problem("Resume.InvalidLocation", "Location cannot be null."));
         }
 
         if (contactInfo == null)
         {
-            return Result.Failure(new Error("Resume.InvalidContactInfo", "ContactInfo cannot be null."));
+            return Result.Failure(Error.Problem("Resume.InvalidContactInfo", "ContactInfo cannot be null."));
         }
 
         if (desiredPosition == null)
         {
-            return Result.Failure(new Error("Resume.InvalidDesiredPosition", "DesiredPosition cannot be null."));
+            return Result.Failure(Error.Problem("Resume.InvalidDesiredPosition", "DesiredPosition cannot be null."));
         }
 
         if (salary == null)
         {
-            return Result.Failure(new Error("Resume.InvalidSalaryExpectation", "SalaryExpectation cannot be null."));
+            return Result.Failure(Error.Problem("Resume.InvalidSalaryExpectation", "SalaryExpectation cannot be null."));
         }
 
         if (skillsDescription == null)
         {
-            return Result.Failure(new Error("Resume.InvalidSkillsDescription", "SkillsDescription cannot be null."));
+            return Result.Failure(Error.Problem("Resume.InvalidSkillsDescription", "SkillsDescription cannot be null."));
         }
 
         if (!employmentTypes.Any())
         {
-            return Result.Failure(new Error("Resume.InvalidEmploymentTypes", "At least one EmploymentType must be specified."));
+            return Result.Failure(Error.Problem("Resume.InvalidEmploymentTypes", "At least one EmploymentType must be specified."));
         }
 
         if (!workArrangements.Any())
         {
-            return Result.Failure(new Error("Resume.InvalidWorkArrangements", "At least one WorkArrangement must be specified."));
+            return Result.Failure(Error.Problem("Resume.InvalidWorkArrangements", "At least one WorkArrangement must be specified."));
         }
 
         return Result.Success();
@@ -396,7 +396,7 @@ public class Resume : AggregateRoot<ResumeId>
     {
         if (newValue is null || newValue.Equals(default(T)))
         {
-            return Result.Failure(new Error($"Resume.Invalid{propertyName}", $"{propertyName} cannot be null or empty."));
+            return Result.Failure(Error.Problem($"Resume.Invalid{propertyName}", $"{propertyName} cannot be null or empty."));
         }
 
         updateAction(newValue);

@@ -32,17 +32,17 @@ public class RefreshToken : AggregateRoot<RefreshTokenId>
     {
         if (accountId == null || accountId.Value == Guid.Empty)
         {
-            return Result<RefreshToken>.Failure(new Error("RefreshToken.InvalidAccountId", "AccountId cannot be null or empty."));
+            return Result<RefreshToken>.Failure(Error.Problem("RefreshToken.InvalidAccountId", "AccountId cannot be null or empty."));
         }
 
         if (string.IsNullOrWhiteSpace(token))
         {
-            return Result<RefreshToken>.Failure(new Error("RefreshToken.InvalidToken", "Token cannot be null or empty."));
+            return Result<RefreshToken>.Failure(Error.Problem("RefreshToken.InvalidToken", "Token cannot be null or empty."));
         }
 
         if (expiresAt <= DateTime.UtcNow)
         {
-            return Result<RefreshToken>.Failure(new Error("RefreshToken.InvalidExpiry", "Expiry date must be in the future."));
+            return Result<RefreshToken>.Failure(Error.Problem("RefreshToken.InvalidExpiry", "Expiry date must be in the future."));
         }
 
         var refreshToken = new RefreshToken(accountId, token, expiresAt);
@@ -53,7 +53,7 @@ public class RefreshToken : AggregateRoot<RefreshTokenId>
     {
         if (IsRevoked)
         {
-            return Result.Failure(new Error("RefreshToken.AlreadyRevoked", "Refresh token is already revoked."));
+            return Result.Failure(Error.Conflict("RefreshToken.AlreadyRevoked", "Refresh token is already revoked."));
         }
 
         IsRevoked = true;

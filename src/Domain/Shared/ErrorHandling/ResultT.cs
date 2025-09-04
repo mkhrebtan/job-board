@@ -20,4 +20,14 @@ public class Result<T>
     public static Result<T> Success(T value) => new(true, value, Error.None);
 
     public static Result<T> Failure(Error error) => new(false, default!, error);
+
+    public Result ToStandardResult()
+    {
+        if (IsSuccess)
+        {
+            return Result.Success();
+        }
+
+        return Result.Failure(Error);
+    }
 }

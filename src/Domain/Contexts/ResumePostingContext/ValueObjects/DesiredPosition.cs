@@ -18,12 +18,12 @@ public class DesiredPosition : ValueObject
     {
         if (string.IsNullOrWhiteSpace(title))
         {
-            return Result<DesiredPosition>.Failure(new Error("DesiredPosition.InvalidTitle", "Desired position title cannot be null or empty."));
+            return Result<DesiredPosition>.Failure(Error.Problem("DesiredPosition.InvalidTitle", "Desired position title cannot be null or empty."));
         }
 
         if (title.Length > MaxLength)
         {
-            return Result<DesiredPosition>.Failure(new Error("DesiredPosition.TitleTooLong", $"Desired position title cannot exceed {MaxLength} characters."));
+            return Result<DesiredPosition>.Failure(Error.Problem("DesiredPosition.TitleTooLong", $"Desired position title cannot exceed {MaxLength} characters."));
         }
 
         var position = new DesiredPosition(title.Trim());

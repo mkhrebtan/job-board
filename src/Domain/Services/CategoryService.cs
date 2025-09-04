@@ -41,12 +41,12 @@ public class CategoryService
     {
         if (string.IsNullOrWhiteSpace(name))
         {
-            return Result<ValidationResult>.Failure(new Error("Category.InvalidName", "Name cannot be empty."));
+            return Result<ValidationResult>.Failure(Error.Problem("Category.InvalidName", "Name cannot be empty."));
         }
 
         if (name.Length > Category.MaxNameLength)
         {
-            return Result<ValidationResult>.Failure(new Error("Category.NameTooLong", $"Name cannot exceed {Category.MaxNameLength} characters."));
+            return Result<ValidationResult>.Failure(Error.Problem("Category.NameTooLong", $"Name cannot exceed {Category.MaxNameLength} characters."));
         }
 
         var trimmed = name.Trim();
@@ -54,7 +54,7 @@ public class CategoryService
 
         if (!await _repository.IsUniqueNameAsync(normalized, ct))
         {
-            return Result<ValidationResult>.Failure(new Error("Category.DuplicateName", $"Name '{name}' already exists."));
+            return Result<ValidationResult>.Failure(Error.Conflict("Category.DuplicateName", $"Name '{name}' already exists."));
         }
 
         return Result<ValidationResult>.Success(new ValidationResult(true, trimmed, normalized));

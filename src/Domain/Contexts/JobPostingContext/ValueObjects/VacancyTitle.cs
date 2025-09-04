@@ -18,12 +18,12 @@ public class VacancyTitle : ValueObject
     {
         if (string.IsNullOrWhiteSpace(value))
         {
-            return Result<VacancyTitle>.Failure(new Error("Vacancy.InvalidTitle", "Title cannot be null or empty."));
+            return Result<VacancyTitle>.Failure(Error.Problem("Vacancy.InvalidTitle", "Title cannot be null or empty."));
         }
 
         if (value.Length > MaxLength)
         {
-            return Result<VacancyTitle>.Failure(new Error("Vacancy.TitleTooLong", $"Title cannot exceed {MaxLength} characters."));
+            return Result<VacancyTitle>.Failure(Error.Problem("Vacancy.TitleTooLong", $"Title cannot exceed {MaxLength} characters."));
         }
 
         return Result<VacancyTitle>.Success(new VacancyTitle(value));

@@ -94,7 +94,7 @@ public class Vacancy : AggregateRoot<VacancyId>
     {
         if (!Status.IsEditable)
         {
-            return Result.Failure(new Error("Vacancy.InvalidStatus", $"Cannot update description when vacancy is in '{Status}' status."));
+            return Result.Failure(Error.Conflict("Vacancy.InvalidStatus", $"Cannot update description when vacancy is in '{Status}' status."));
         }
 
         return UpdateProperty(newDescripiton, desc => Description = desc, nameof(Description));
@@ -104,7 +104,7 @@ public class Vacancy : AggregateRoot<VacancyId>
     {
         if (!Status.IsEditable)
         {
-            return Result.Failure(new Error("Vacancy.InvalidStatus", $"Cannot update title when vacancy is in '{Status}' status."));
+            return Result.Failure(Error.Conflict("Vacancy.InvalidStatus", $"Cannot update title when vacancy is in '{Status}' status."));
         }
 
         return UpdateProperty(newTitle, title => Title = title, nameof(Title));
@@ -114,7 +114,7 @@ public class Vacancy : AggregateRoot<VacancyId>
     {
         if (!Status.IsEditable)
         {
-            return Result.Failure(new Error("Vacancy.InvalidStatus", $"Cannot update salary when vacancy is in '{Status}' status."));
+            return Result.Failure(Error.Conflict("Vacancy.InvalidStatus", $"Cannot update salary when vacancy is in '{Status}' status."));
         }
 
         return UpdateProperty(newSalary, sal => Salary = sal, nameof(Salary));
@@ -124,7 +124,7 @@ public class Vacancy : AggregateRoot<VacancyId>
     {
         if (!Status.IsEditable)
         {
-            return Result.Failure(new Error("Vacancy.InvalidStatus", $"Cannot update location when vacancy is in '{Status}' status."));
+            return Result.Failure(Error.Conflict("Vacancy.InvalidStatus", $"Cannot update location when vacancy is in '{Status}' status."));
         }
 
         return UpdateProperty(newLocation, loc => Location = loc, nameof(Location));
@@ -134,7 +134,7 @@ public class Vacancy : AggregateRoot<VacancyId>
     {
         if (!Status.IsEditable)
         {
-            return Result.Failure(new Error("Vacancy.InvalidStatus", $"Cannot update recruiter info when vacancy is in '{Status}' status."));
+            return Result.Failure(Error.Conflict("Vacancy.InvalidStatus", $"Cannot update recruiter info when vacancy is in '{Status}' status."));
         }
 
         return UpdateProperty(newRecruiterInfo, info => RecruiterInfo = info, nameof(RecruiterInfo));
@@ -144,7 +144,7 @@ public class Vacancy : AggregateRoot<VacancyId>
     {
         if (Status != VacancyStatus.Registered)
         {
-            return Result.Failure(new Error("Vacancy.InvalidStatus", $"Category can only be assigned when the vacancy is in '{VacancyStatus.Registered.Name}' status."));
+            return Result.Failure(Error.Conflict("Vacancy.InvalidStatus", $"Category can only be assigned when the vacancy is in '{VacancyStatus.Registered.Name}' status."));
         }
 
         return UpdateProperty(newCategoryId, catId => CategoryId = catId, nameof(CategoryId));
@@ -154,7 +154,7 @@ public class Vacancy : AggregateRoot<VacancyId>
     {
         if (!Status.CanTransitionTo(VacancyStatus.Registered))
         {
-            return Result.Failure(new Error("Vacancy.InvalidStatusTransition", $"Vacancy in '{Status.Name}' status cannot be registered."));
+            return Result.Failure(Error.Conflict("Vacancy.InvalidStatusTransition", $"Vacancy in '{Status.Name}' status cannot be registered."));
         }
 
         Status = VacancyStatus.Registered;
@@ -167,12 +167,12 @@ public class Vacancy : AggregateRoot<VacancyId>
     {
         if (!Status.CanTransitionTo(VacancyStatus.Published))
         {
-            return Result.Failure(new Error("Vacancy.InvalidStatusTransition", $"Vacancy in '{Status.Name}' status cannot be published."));
+            return Result.Failure(Error.Conflict("Vacancy.InvalidStatusTransition", $"Vacancy in '{Status.Name}' status cannot be published."));
         }
 
         if (CategoryId == null)
         {
-            return Result.Failure(new Error("Vacancy.MissingCategory", "Category must be assigned before publishing the vacancy."));
+            return Result.Failure(Error.Conflict("Vacancy.MissingCategory", "Category must be assigned before publishing the vacancy."));
         }
 
         Status = VacancyStatus.Published;
@@ -185,7 +185,7 @@ public class Vacancy : AggregateRoot<VacancyId>
     {
         if (!Status.CanTransitionTo(VacancyStatus.Archived))
         {
-            return Result.Failure(new Error("Vacancy.InvalidStatusTransition", $"Vacancy in '{Status.Name}' status cannot be archived."));
+            return Result.Failure(Error.Conflict("Vacancy.InvalidStatusTransition", $"Vacancy in '{Status.Name}' status cannot be archived."));
         }
 
         Status = VacancyStatus.Archived;
@@ -222,32 +222,32 @@ public class Vacancy : AggregateRoot<VacancyId>
     {
         if (title == null)
         {
-            return Result.Failure(new Error("Vacancy.InvalidTitle", "Title cannot be null."));
+            return Result.Failure(Error.Problem("Vacancy.InvalidTitle", "Title cannot be null."));
         }
 
         if (descripiton == null)
         {
-            return Result.Failure(new Error("Vacancy.InvalidDescription", "Description cannot be null."));
+            return Result.Failure(Error.Problem("Vacancy.InvalidDescription", "Description cannot be null."));
         }
 
         if (salary == null)
         {
-            return Result.Failure(new Error("Vacancy.InvalidSalary", "Salary cannot be null."));
+            return Result.Failure(Error.Problem("Vacancy.InvalidSalary", "Salary cannot be null."));
         }
 
         if (companyId == null)
         {
-            return Result.Failure(new Error("Vacancy.InvalidCompanyId", "CompanyId cannot be null."));
+            return Result.Failure(Error.Problem("Vacancy.InvalidCompanyId", "CompanyId cannot be null."));
         }
 
         if (location == null)
         {
-            return Result.Failure(new Error("Vacancy.InvalidLocation", "Location cannot be null."));
+            return Result.Failure(Error.Problem("Vacancy.InvalidLocation", "Location cannot be null."));
         }
 
         if (recruiterInfo == null)
         {
-            return Result.Failure(new Error("Vacancy.InvalidRecruiterInfo", "RecruiterInfo cannot be null."));
+            return Result.Failure(Error.Problem("Vacancy.InvalidRecruiterInfo", "RecruiterInfo cannot be null."));
         }
 
         return Result.Success();
@@ -257,7 +257,7 @@ public class Vacancy : AggregateRoot<VacancyId>
     {
         if (newValue is null || newValue.Equals(default(T)))
         {
-            return Result.Failure(new Error($"Vacancy.Invalid{propertyName}", $"{propertyName} cannot be null or empty."));
+            return Result.Failure(Error.Problem($"Vacancy.Invalid{propertyName}", $"{propertyName} cannot be null or empty."));
         }
 
         updateAction(newValue);

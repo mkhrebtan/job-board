@@ -27,17 +27,17 @@ public class LanguageSkill : Entity<LanguageId>
     {
         if (resumeId == null || resumeId.Value == Guid.Empty)
         {
-            return Result<LanguageSkill>.Failure(new Error("LanguageSkill.InvalidResumeId", "ResumeId cannot be null or empty."));
+            return Result<LanguageSkill>.Failure(Error.Problem("LanguageSkill.InvalidResumeId", "ResumeId cannot be null or empty."));
         }
 
         if (string.IsNullOrWhiteSpace(language))
         {
-            return Result<LanguageSkill>.Failure(new Error("LanguageSkill.InvalidLanguage", "Language cannot be null or empty."));
+            return Result<LanguageSkill>.Failure(Error.Problem("LanguageSkill.InvalidLanguage", "Language cannot be null or empty."));
         }
 
         if (language.Length > MaxLanguageLength)
         {
-            return Result<LanguageSkill>.Failure(new Error("LanguageSkill.LanguageTooLong", $"Language cannot exceed {MaxLanguageLength} characters."));
+            return Result<LanguageSkill>.Failure(Error.Problem("LanguageSkill.LanguageTooLong", $"Language cannot exceed {MaxLanguageLength} characters."));
         }
 
         var skill = new LanguageSkill(resumeId, language.Trim(), proficiencyLevel);

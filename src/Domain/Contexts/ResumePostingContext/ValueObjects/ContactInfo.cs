@@ -24,12 +24,12 @@ public class ContactInfo : ValueObject
     {
         if (email is null)
         {
-            return Result<ContactInfo>.Failure(new Error("ContactInfo.NullEmail", "Email cannot be null."));
+            return Result<ContactInfo>.Failure(Error.Problem("ContactInfo.NullEmail", "Email cannot be null."));
         }
 
         if (phoneNumber is null)
         {
-            return Result<ContactInfo>.Failure(new Error("ContactInfo.NullPhoneNumber", "Phone number cannot be null."));
+            return Result<ContactInfo>.Failure(Error.Problem("ContactInfo.NullPhoneNumber", "Phone number cannot be null."));
         }
 
         var info = new ContactInfo(email, phoneNumber);

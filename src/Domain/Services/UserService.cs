@@ -60,12 +60,12 @@ public class UserService
     {
         if (email == null)
         {
-            return Result.Failure(new Error("User.InvalidEmail", "Email cannot be null."));
+            return Result.Failure(Error.Problem("User.InvalidEmail", "Email cannot be null."));
         }
 
         if (!await _repository.IsUniqueEmailAsync(email.Address, ct))
         {
-            return Result.Failure(new Error("User.DuplicateEmail", $"Email '{email.Address}' is already in use."));
+            return Result.Failure(Error.Conflict("User.DuplicateEmail", $"Email '{email.Address}' is already in use."));
         }
 
         return Result.Success();
@@ -75,12 +75,12 @@ public class UserService
     {
         if (phoneNumber == null)
         {
-            return Result.Failure(new Error("User.InvalidPhoneNumber", "Phone number cannot be null."));
+            return Result.Failure(Error.Problem("User.InvalidPhoneNumber", "Phone number cannot be null."));
         }
 
         if (!await _repository.IsUniquePhoneNumberAsync(phoneNumber.Number, ct))
         {
-            return Result.Failure(new Error("User.DuplicatePhoneNumber", $"Phone number '{phoneNumber.Number}' is already in use."));
+            return Result.Failure(Error.Conflict("User.DuplicatePhoneNumber", $"Phone number '{phoneNumber.Number}' is already in use."));
         }
 
         return Result.Success();

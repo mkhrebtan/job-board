@@ -22,12 +22,12 @@ public class Money : ValueObject
     {
         if (!IsValidCurrency(currency))
         {
-            return Result<Money>.Failure(new Error("Money.EmptyCurrency", "Currency cannot be null or empty."));
+            return Result<Money>.Failure(Error.Problem("Money.EmptyCurrency", "Currency cannot be null or empty."));
         }
 
         if (value < 0)
         {
-            return Result<Money>.Failure(new Error("Money.NegativeValue", "Money amount cannot be negative."));
+            return Result<Money>.Failure(Error.Problem("Money.NegativeValue", "Money amount cannot be negative."));
         }
 
         return Result<Money>.Success(new Money(value, currency));

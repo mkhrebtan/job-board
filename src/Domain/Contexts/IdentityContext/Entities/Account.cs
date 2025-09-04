@@ -25,17 +25,17 @@ public class Account : Entity<AccountId>
     {
         if (userId == null || userId.Value == Guid.Empty)
         {
-            return Result<Account>.Failure(new Error("Account.InvalidUserId", "UserId cannot be null or empty."));
+            return Result<Account>.Failure(Error.Problem("Account.InvalidUserId", "UserId cannot be null or empty."));
         }
 
         if (string.IsNullOrWhiteSpace(password))
         {
-            return Result<Account>.Failure(new Error("Account.InvalidPassword", "Password cannot be null or empty."));
+            return Result<Account>.Failure(Error.Problem("Account.InvalidPassword", "Password cannot be null or empty."));
         }
 
         if (password.Length < 8 || password.Length > 100)
         {
-            return Result<Account>.Failure(new Error("Account.InvalidPasswordLength", $"Password must be between {MinPasswordLength} and {MaxPasswordLength} characters long."));
+            return Result<Account>.Failure(Error.Problem("Account.InvalidPasswordLength", $"Password must be between {MinPasswordLength} and {MaxPasswordLength} characters long."));
         }
 
         string passwordHash = passwordHasher.HashPassword(password);
@@ -47,12 +47,12 @@ public class Account : Entity<AccountId>
     {
         if (string.IsNullOrWhiteSpace(newPassword))
         {
-            return Result.Failure(new Error("Account.InvalidPassword", "New password cannot be null or empty."));
+            return Result.Failure(Error.Problem("Account.InvalidPassword", "New password cannot be null or empty."));
         }
 
         if (newPassword.Length < 8 || newPassword.Length > 100)
         {
-            return Result.Failure(new Error("Account.InvalidPasswordLength", $"Password must be between {MinPasswordLength} and {MaxPasswordLength} characters long."));
+            return Result.Failure(Error.Problem("Account.InvalidPasswordLength", $"Password must be between {MinPasswordLength} and {MaxPasswordLength} characters long."));
         }
 
         PasswordHash = passwordHasher.HashPassword(newPassword);

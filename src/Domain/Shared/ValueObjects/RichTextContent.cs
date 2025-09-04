@@ -24,12 +24,12 @@ public class RichTextContent : ValueObject
     {
         if (markdown is null)
         {
-            return Result<RichTextContent>.Failure(new Error("RichTextContent.NullMarkdown", "Markdown content cannot be null."));
+            return Result<RichTextContent>.Failure(Error.Problem("RichTextContent.NullMarkdown", "Markdown content cannot be null."));
         }
 
         if (markdown.Length > MaxLength)
         {
-            return Result<RichTextContent>.Failure(new Error("RichTextContent.MarkdownTooLong", $"Markdown content cannot exceed {MaxLength} characters."));
+            return Result<RichTextContent>.Failure(Error.Problem("RichTextContent.MarkdownTooLong", $"Markdown content cannot exceed {MaxLength} characters."));
         }
 
         string plainText = parser.ToPlainText(markdown);

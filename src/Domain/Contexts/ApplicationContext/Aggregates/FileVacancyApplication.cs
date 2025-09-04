@@ -1,6 +1,7 @@
 ﻿using Domain.Contexts.ApplicationContext.ValueObjects;
 using Domain.Contexts.IdentityContext.IDs;
 using Domain.Contexts.JobPostingContext.IDs;
+using Domain.Shared;
 using Domain.Shared.ErrorHandling;
 
 namespace Domain.Contexts.ApplicationContext.Aggregates;
@@ -25,7 +26,7 @@ public class FileVacancyApplication : VacancyApplication
 
         if (fileUrl is null)
         {
-            return Result<FileVacancyApplication>.Failure(new Error("FileVacancyApplication.NullFileUrl", "FileUrl cannot be null."));
+            return Result<FileVacancyApplication>.Failure(Error.Problem("FileVacancyApplication.NullFileUrl", "FileUrl cannot be null."));
         }
 
         var application = new FileVacancyApplication(seekerId, vacancyId, coverLetter, fileUrl);

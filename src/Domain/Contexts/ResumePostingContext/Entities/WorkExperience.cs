@@ -42,37 +42,37 @@ public class WorkExperience : Entity<WorkExperienceId>
     {
         if (resumeId == null || resumeId.Value == Guid.Empty)
         {
-            return Result<WorkExperience>.Failure(new Error("WorkExperience.InvalidResumeId", "ResumeId cannot be null or empty."));
+            return Result<WorkExperience>.Failure(Error.Problem("WorkExperience.InvalidResumeId", "ResumeId cannot be null or empty."));
         }
 
         if (string.IsNullOrWhiteSpace(companyName))
         {
-            return Result<WorkExperience>.Failure(new Error("WorkExperience.InvalidCompanyName", "Company name cannot be null or empty."));
+            return Result<WorkExperience>.Failure(Error.Problem("WorkExperience.InvalidCompanyName", "Company name cannot be null or empty."));
         }
 
         if (companyName.Length > MaxCompanyNameLength)
         {
-            return Result<WorkExperience>.Failure(new Error("WorkExperience.CompanyNameTooLong", $"Company name cannot exceed {MaxCompanyNameLength} characters."));
+            return Result<WorkExperience>.Failure(Error.Problem("WorkExperience.CompanyNameTooLong", $"Company name cannot exceed {MaxCompanyNameLength} characters."));
         }
 
         if (string.IsNullOrWhiteSpace(position))
         {
-            return Result<WorkExperience>.Failure(new Error("WorkExperience.InvalidPosition", "Position cannot be null or empty."));
+            return Result<WorkExperience>.Failure(Error.Problem("WorkExperience.InvalidPosition", "Position cannot be null or empty."));
         }
 
         if (position.Length > MaxPositionLength)
         {
-            return Result<WorkExperience>.Failure(new Error("WorkExperience.PositionTooLong", $"Position name cannot exceed {MaxPositionLength} characters."));
+            return Result<WorkExperience>.Failure(Error.Problem("WorkExperience.PositionTooLong", $"Position name cannot exceed {MaxPositionLength} characters."));
         }
 
         if (dateRange == null)
         {
-            return Result<WorkExperience>.Failure(new Error("WorkExperience.NullDateRange", "Date range cannot be null."));
+            return Result<WorkExperience>.Failure(Error.Problem("WorkExperience.NullDateRange", "Date range cannot be null."));
         }
 
         if (description == null)
         {
-            return Result<WorkExperience>.Failure(new Error("WorkExperience.NullDescription", "Description cannot be null."));
+            return Result<WorkExperience>.Failure(Error.Problem("WorkExperience.NullDescription", "Description cannot be null."));
         }
 
         return Result<WorkExperience>.Success(new WorkExperience(resumeId, companyName.Trim(), position.Trim(), dateRange, description));

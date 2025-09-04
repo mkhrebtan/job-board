@@ -28,12 +28,12 @@ public sealed class ResumeService
     {
         if (user.Role != UserRole.JobSeeker)
         {
-            return Result<Resume>.Failure(new Error("ResumeService.InvalidUserRole", $"Only users with the '{UserRole.JobSeeker.Name}' role can create resumes."));
+            return Result<Resume>.Failure(Error.Problem("ResumeService.InvalidUserRole", $"Only users with the '{UserRole.JobSeeker.Name}' role can create resumes."));
         }
 
         if (user.Account is null)
         {
-            return Result<Resume>.Failure(new Error("ResumeService.UserHasNoAccount", "User must have an associated account to create a resume."));
+            return Result<Resume>.Failure(Error.Conflict("ResumeService.UserHasNoAccount", "User must have an associated account to create a resume."));
         }
 
         return Resume.Create(

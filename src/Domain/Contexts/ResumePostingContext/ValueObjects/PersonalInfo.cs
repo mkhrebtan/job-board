@@ -23,22 +23,22 @@ public class PersonalInfo : ValueObject
     {
         if (string.IsNullOrWhiteSpace(firstName))
         {
-            return Result<PersonalInfo>.Failure(new Error("PersonalInfo.InvalidFirstName", "First name cannot be null or empty."));
+            return Result<PersonalInfo>.Failure(Error.Problem("PersonalInfo.InvalidFirstName", "First name cannot be null or empty."));
         }
 
         if (firstName.Length > MaxFirstNameLength)
         {
-            return Result<PersonalInfo>.Failure(new Error("PersonalInfo.FirstNameTooLong", $"First name cannot exceed {MaxFirstNameLength} characters."));
+            return Result<PersonalInfo>.Failure(Error.Problem("PersonalInfo.FirstNameTooLong", $"First name cannot exceed {MaxFirstNameLength} characters."));
         }
 
         if (string.IsNullOrWhiteSpace(lastName))
         {
-            return Result<PersonalInfo>.Failure(new Error("PersonalInfo.InvalidLastName", "Last name cannot be null or empty."));
+            return Result<PersonalInfo>.Failure(Error.Problem("PersonalInfo.InvalidLastName", "Last name cannot be null or empty."));
         }
 
         if (lastName.Length > MaxLastNameLength)
         {
-            return Result<PersonalInfo>.Failure(new Error("PersonalInfo.LastNameTooLong", $"Last name cannot exceed {MaxLastNameLength} characters."));
+            return Result<PersonalInfo>.Failure(Error.Problem("PersonalInfo.LastNameTooLong", $"Last name cannot exceed {MaxLastNameLength} characters."));
         }
 
         var info = new PersonalInfo(firstName.Trim(), lastName.Trim());

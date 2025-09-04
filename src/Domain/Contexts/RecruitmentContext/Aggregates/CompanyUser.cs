@@ -27,12 +27,12 @@ public class CompanyUser : AggregateRoot<CompanyUserId>
     {
         if (recruiterId == null)
         {
-            return Result<CompanyUser>.Failure(new Error("CompanyUser.NullRecruiterId", "Recruiter ID cannot be null."));
+            return Result<CompanyUser>.Failure(Error.Problem("CompanyUser.NullRecruiterId", "Recruiter ID cannot be null."));
         }
 
         if (companyId == null)
         {
-            return Result<CompanyUser>.Failure(new Error("CompanyUser.NullCompanyId", "Company ID cannot be null."));
+            return Result<CompanyUser>.Failure(Error.Problem("CompanyUser.NullCompanyId", "Company ID cannot be null."));
         }
 
         var companyUser = new CompanyUser(recruiterId, companyId);
