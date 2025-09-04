@@ -13,5 +13,5 @@ public interface IUserRepository : IRepository<User, UserId>
 
     Task<bool> IsUniqueEmailAsync(string email, CancellationToken ct);
 
-    Task<bool> IsUniquePhoneNumber(string phoneNumber, CancellationToken ct);
+    Task<bool> IsUniquePhoneNumberAsync(string phoneNumber, CancellationToken ct);
 }

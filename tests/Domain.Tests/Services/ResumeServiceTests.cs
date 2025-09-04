@@ -4,16 +4,20 @@ using Domain.Contexts.IdentityContext.Enums;
 using Domain.Contexts.JobPostingContext.ValueObjects;
 using Domain.Contexts.ResumePostingContext.Enums;
 using Domain.Contexts.ResumePostingContext.ValueObjects;
+using Domain.Repos.Users;
 using Domain.Services;
 using Domain.Shared.ValueObjects;
 using Moq;
+using System.Threading.Tasks;
 
 namespace Domain.Tests.Services;
 
 public class ResumeServiceTests
 {
-    private readonly Mock<IMarkdownParser> _markdownParserMock;
-    private readonly Mock<IPasswordHasher> _passwordHasherMock;
+    private readonly Mock<IMarkdownParser> _markdownParserMock = new();
+    private readonly Mock<IPasswordHasher> _passwordHasherMock = new();
+    private readonly Mock<IUserRepository> _userRepositoryMock = new();
+    private readonly UserService _userService;
     private User _validJobSeekerUser;
     private User _validEmployerUser;
     private User _userWithoutAccount;
@@ -28,8 +32,7 @@ public class ResumeServiceTests
 
     public ResumeServiceTests()
     {
-        _markdownParserMock = new Mock<IMarkdownParser>();
-        _passwordHasherMock = new Mock<IPasswordHasher>();
+        _userService = new UserService(_userRepositoryMock.Object);
         SetupMocks();
         SetupTestData();
     }
@@ -45,23 +48,29 @@ public class ResumeServiceTests
         _passwordHasherMock.Setup(x => x.VerifyHashedPassword(It.IsAny<string>(), It.IsAny<string>()))
                           .Returns<string, string>((hashedPassword, providedPassword) =>
                               hashedPassword == $"hashed_{providedPassword}");
+
+        _userRepositoryMock.Setup(x => x.IsUniqueEmailAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        _userRepositoryMock.Setup(x => x.IsUniquePhoneNumberAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
     }
 
-    private void SetupTestData()
+    private async Task SetupTestData()
     {
         var jobSeekerEmail = Email.Create("jobseeker@example.com").Value;
         var jobSeekerPhoneNumber = PhoneNumber.Create("+14155552671", "US").Value;
-        _validJobSeekerUser = User.Create("John", "Doe", UserRole.JobSeeker, jobSeekerEmail, jobSeekerPhoneNumber).Value;
+        _validJobSeekerUser = (await _userService.CreateUserAsync("John", "Doe", UserRole.JobSeeker, jobSeekerEmail, jobSeekerPhoneNumber, CancellationToken.None)).Value;
         _validJobSeekerUser.CreateAccount("password123", _passwordHasherMock.Object);
 
         var employerEmail = Email.Create("employer@example.com").Value;
         var employerPhoneNumber = PhoneNumber.Create("+14155552672", "US").Value;
-        _validEmployerUser = User.Create("Jane", "Smith", UserRole.Employer, employerEmail, employerPhoneNumber).Value;
+        _validEmployerUser = (await _userService.CreateUserAsync("Jane", "Smith", UserRole.Employer, employerEmail, employerPhoneNumber, CancellationToken.None)).Value;
         _validEmployerUser.CreateAccount("password123", _passwordHasherMock.Object);
 
         var userWithoutAccountEmail = Email.Create("noAccount@example.com").Value;
         var userWithoutAccountNumber = PhoneNumber.Create("+14155552673", "US").Value;
-        _userWithoutAccount = User.Create("Bob", "Wilson", UserRole.JobSeeker, userWithoutAccountEmail, userWithoutAccountNumber).Value;
+        _userWithoutAccount = (await _userService.CreateUserAsync("Bob", "Wilson", UserRole.JobSeeker, userWithoutAccountEmail, userWithoutAccountNumber, CancellationToken.None)).Value;
 
         _validPersonalInfo = PersonalInfo.Create("John", "Doe").Value;
         _validLocation = Location.Create("USA", "New York").Value;

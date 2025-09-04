@@ -4,9 +4,11 @@ using Domain.Contexts.IdentityContext.Enums;
 using Domain.Contexts.RecruitmentContext.Aggregates;
 using Domain.Contexts.RecruitmentContext.ValueObjects;
 using Domain.Repos.CompanyUsers;
+using Domain.Repos.Users;
 using Domain.Services;
 using Domain.Shared.ValueObjects;
 using Moq;
+using System.Threading.Tasks;
 
 namespace Domain.Tests.Services;
 
@@ -18,12 +20,15 @@ public class CompanyUserServiceTests
     private User _validEmployerUser;
     private User _validJobSeekerUser;
     private Company _validCompany;
+    private readonly Mock<IUserRepository> _userRepositoryMock = new();
+    private readonly UserService _userService;
 
     public CompanyUserServiceTests()
     {
         _companyUserRepositoryMock = new Mock<ICompanyUserRepository>();
         _markdownParserMock = new Mock<IMarkdownParser>();
         _companyUserService = new CompanyUserService(_companyUserRepositoryMock.Object);
+        _userService = new UserService(_userRepositoryMock.Object);
 
         SetupMocks();
         SetupTestData();
@@ -39,17 +44,23 @@ public class CompanyUserServiceTests
 
         _companyUserRepositoryMock.Setup(x => x.IsAlreadyAssignedAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
                                  .ReturnsAsync(false);
+
+        _userRepositoryMock.Setup(x => x.IsUniqueEmailAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        _userRepositoryMock.Setup(x => x.IsUniquePhoneNumberAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
     }
 
-    private void SetupTestData()
+    private async Task SetupTestData()
     {
         var email = Email.Create("employer@example.com").Value;
         var phoneNumber = PhoneNumber.Create("+14156667777", "US").Value;
-        _validEmployerUser = User.Create("John", "Doe", UserRole.Employer, email, phoneNumber).Value;
+        _validEmployerUser = (await _userService.CreateUserAsync("John", "Doe", UserRole.Employer, email, phoneNumber, CancellationToken.None)).Value;
 
         var jobSeekerEmail = Email.Create("jobseeker@example.com").Value;
         var jobSeekerPhoneNumber = PhoneNumber.Create("+14158889999", "US").Value;
-        _validJobSeekerUser = User.Create("Jane", "Smith", UserRole.JobSeeker, jobSeekerEmail, jobSeekerPhoneNumber).Value;
+        _validJobSeekerUser =(await _userService.CreateUserAsync("Jane", "Smith", UserRole.JobSeeker, jobSeekerEmail, jobSeekerPhoneNumber, CancellationToken.None)).Value;
 
         var description = RichTextContent.Create("Company description", _markdownParserMock.Object).Value;
         var websiteUrl = WebsiteUrl.Create("https://example.com").Value;

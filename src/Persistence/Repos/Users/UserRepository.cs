@@ -39,7 +39,7 @@ internal class UserRepository : GenericRepository<User, UserId>, IUserRepository
         return _dbSet.AnyAsync(x => x.Email.Address == email, ct);
     }
 
-    public Task<bool> IsUniquePhoneNumber(string phoneNumber, CancellationToken ct)
+    public Task<bool> IsUniquePhoneNumberAsync(string phoneNumber, CancellationToken ct)
     {
         return _dbSet.AnyAsync(x => x.PhoneNumber.Number == phoneNumber, ct);
     }

@@ -40,18 +40,6 @@ public class User : AggregateRoot<UserId>
 
     public UserRole Role { get; private set; }
 
-    public static Result<User> Create(string firstName, string lastName, UserRole role, Email email, PhoneNumber phoneNumber)
-    {
-        var validationResult = ValidateCreationParameters(firstName, lastName, role, email, phoneNumber);
-        if (validationResult.IsFailure)
-        {
-            return Result<User>.Failure(validationResult.Error);
-        }
-
-        var user = new User(firstName, lastName, email, phoneNumber, role);
-        return Result<User>.Success(user);
-    }
-
     public Result CreateAccount(string password, IPasswordHasher passwordHasher)
     {
         if (Account != null)
@@ -66,28 +54,6 @@ public class User : AggregateRoot<UserId>
         }
 
         Account = accountResult.Value;
-        return Result.Success();
-    }
-
-    public Result UpdateEmail(Email newEmail)
-    {
-        if (newEmail is null)
-        {
-            return Result.Failure(new Error("User.NullEmail", "Email cannot be null."));
-        }
-
-        Email = newEmail;
-        return Result.Success();
-    }
-
-    public Result UpdatePhoneNumber(PhoneNumber newPhoneNumber)
-    {
-        if (newPhoneNumber is null)
-        {
-            return Result.Failure(new Error("User.NullPhoneNumber", "Phone number cannot be null."));
-        }
-
-        PhoneNumber = newPhoneNumber;
         return Result.Success();
     }
 
@@ -131,6 +97,40 @@ public class User : AggregateRoot<UserId>
         }
 
         Account = null;
+        return Result.Success();
+    }
+
+    internal static Result<User> Create(string firstName, string lastName, UserRole role, Email email, PhoneNumber phoneNumber)
+    {
+        var validationResult = ValidateCreationParameters(firstName, lastName, role, email, phoneNumber);
+        if (validationResult.IsFailure)
+        {
+            return Result<User>.Failure(validationResult.Error);
+        }
+
+        var user = new User(firstName, lastName, email, phoneNumber, role);
+        return Result<User>.Success(user);
+    }
+
+    internal Result UpdateEmail(Email newEmail)
+    {
+        if (newEmail is null)
+        {
+            return Result.Failure(new Error("User.NullEmail", "Email cannot be null."));
+        }
+
+        Email = newEmail;
+        return Result.Success();
+    }
+
+    internal Result UpdatePhoneNumber(PhoneNumber newPhoneNumber)
+    {
+        if (newPhoneNumber is null)
+        {
+            return Result.Failure(new Error("User.NullPhoneNumber", "Phone number cannot be null."));
+        }
+
+        PhoneNumber = newPhoneNumber;
         return Result.Success();
     }
 

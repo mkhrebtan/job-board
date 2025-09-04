@@ -12,18 +12,22 @@ using Domain.Contexts.RecruitmentContext.IDs;
 using Domain.Contexts.ResumePostingContext.Aggregates;
 using Domain.Contexts.ResumePostingContext.Enums;
 using Domain.Contexts.ResumePostingContext.ValueObjects;
+using Domain.Repos.Users;
 using Domain.Repos.VacancyApplications;
 using Domain.Services;
 using Domain.Shared.ValueObjects;
 using Moq;
+using System.Threading.Tasks;
 
 namespace Domain.Tests.Services;
 
 public class VacancyApplicationServiceTests
 {
-    private readonly Mock<IVacancyApplicationRepository> _vacancyApplicationRepositoryMock;
-    private readonly Mock<IMarkdownParser> _markdownParserMock;
-    private readonly Mock<IPasswordHasher> _passwordHasherMock;
+    private readonly Mock<IVacancyApplicationRepository> _vacancyApplicationRepositoryMock = new();
+    private readonly Mock<IMarkdownParser> _markdownParserMock = new();
+    private readonly Mock<IPasswordHasher> _passwordHasherMock = new();
+    private readonly Mock<IUserRepository> _userRepositoryMock = new();
+    private readonly UserService _userService;
     private readonly VacancyApplicationService _vacancyApplicationService;
     private User _validJobSeekerUser;
     private User _validEmployerUser;
@@ -35,10 +39,8 @@ public class VacancyApplicationServiceTests
 
     public VacancyApplicationServiceTests()
     {
-        _vacancyApplicationRepositoryMock = new Mock<IVacancyApplicationRepository>();
-        _markdownParserMock = new Mock<IMarkdownParser>();
-        _passwordHasherMock = new Mock<IPasswordHasher>();
         _vacancyApplicationService = new VacancyApplicationService(_vacancyApplicationRepositoryMock.Object);
+        _userService = new UserService(_userRepositoryMock.Object);
 
         SetupMocks();
         SetupTestData();
@@ -58,18 +60,24 @@ public class VacancyApplicationServiceTests
 
         _vacancyApplicationRepositoryMock.Setup(x => x.HasAlreadyAppliedToVacancyAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
                                         .ReturnsAsync(false);
+
+        _userRepositoryMock.Setup(x => x.IsUniqueEmailAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        _userRepositoryMock.Setup(x => x.IsUniquePhoneNumberAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
     }
 
-    private void SetupTestData()
+    private async Task SetupTestData()
     {
         var jobSeekerEmail = Email.Create("jobseeker@example.com").Value;
         var jobSeekerPhoneNumber = PhoneNumber.Create("+14156667777", "US").Value;
-        _validJobSeekerUser = User.Create("John", "Doe", UserRole.JobSeeker, jobSeekerEmail, jobSeekerPhoneNumber).Value;
+        _validJobSeekerUser = (await _userService.CreateUserAsync("John", "Doe", UserRole.JobSeeker, jobSeekerEmail, jobSeekerPhoneNumber, CancellationToken.None)).Value;
         _validJobSeekerUser.CreateAccount("password123", _passwordHasherMock.Object);
 
         var employerEmail = Email.Create("employer@example.com").Value;
         var employerPhoneNumber = PhoneNumber.Create("+14156667777", "US").Value;
-        _validEmployerUser = User.Create("Jane", "Smith", UserRole.Employer, employerEmail, employerPhoneNumber).Value;
+        _validEmployerUser = (await _userService.CreateUserAsync("Jane", "Smith", UserRole.Employer, employerEmail, employerPhoneNumber, CancellationToken.None)).Value;
 
         var title = VacancyTitle.Create("Software Engineer").Value;
         var description = RichTextContent.Create("Job description", _markdownParserMock.Object).Value;
