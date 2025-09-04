@@ -1,42 +1,84 @@
+using API.Extensions;
+using Api.Middlewares.Exceptions;
+using Application;
+using Application.Abstractions.Messaging;
+using Application.TestData.Commands.TestCommand;
+using Application.TestData.Queries.TestQuery;
 using Persistence;
+using Serilog;
+using Serilog.Events;
 
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddOpenApi();
-
-builder.Services.AddPersistence(builder.Configuration);
-
-var app = builder.Build();
-
-if (app.Environment.IsDevelopment())
+internal class Program
 {
-    app.MapOpenApi();
-}
+    private static async Task Main(string[] args)
+    {
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+            .WriteTo.Console()
+            .Enrich.FromLogContext()
+            .CreateBootstrapLogger();
 
-app.UseHttpsRedirection();
+        try
+        {
+            Log.Information("Starting up");
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+            var builder = WebApplication.CreateBuilder(args);
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+            builder.Host.UseSerilog((context, loggerConfiguration) =>
+                    loggerConfiguration.ReadFrom.Configuration(context.Configuration));
 
-app.Run();
+            builder.Services.AddOpenApi();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+            builder.Services.AddPersistence(builder.Configuration);
+            builder.Services.AddApplication();
+
+            builder.Services.AddSwaggerGen();
+
+            builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+            builder.Services.AddProblemDetails();
+
+            var app = builder.Build();
+
+            if (app.Environment.IsDevelopment())
+            {
+                app.MapOpenApi();
+                app.UseSwagger();
+                app.UseSwaggerUI(setup =>
+                {
+                    setup.SwaggerEndpoint("/swagger/v1/swagger.json", "API V1");
+                    setup.RoutePrefix = string.Empty;
+                });
+            }
+
+            app.UseHttpsRedirection();
+            app.MapSwagger().RequireAuthorization();
+
+            app.MapGet("/testquery", async (IQueryHandler<TestQuery, string> queryHandler, CancellationToken cancellationToken) =>
+            {
+                var query = new TestQuery();
+                var result = await queryHandler.Handle(query, cancellationToken);
+                return result.IsSuccess ? Results.Ok(result.Value) : result.GetProblem();
+            })
+            .WithName("GetTestQuery");
+
+            app.MapPost("/testcommand", async (TestCommand command, ICommandHandler<TestCommand, string> commandHandler) =>
+            {
+                var result = await commandHandler.Handle(command);
+                return result.IsSuccess ? Results.Ok(result.Value) : result.GetProblem();
+            })
+            .WithName("ExecuteTestCommand");
+
+            app.UseSerilogRequestLogging();
+
+            await app.RunAsync();
+        }
+        catch (Exception ex)
+        {
+            Log.Fatal(ex, "Application start-up failed");
+        }
+        finally
+        {
+            await Log.CloseAndFlushAsync();
+        }
+    }
 }

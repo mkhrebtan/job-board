@@ -1,6 +1,7 @@
 services:
   api:
     image: ${DOCKER_REGISTRY-}api
+    container_name: jobboard-api
     build:
       context: .
       dockerfile: src/API/Dockerfile
@@ -11,10 +12,13 @@ services:
       - .env
     volumes:
       - ~/.aspnet/https:/https:ro
+    depends_on:
+      - jobboard.seq
+      - jobboard.database
   
   jobboard.database:
     image: postgres:latest
-    container_name: jobboard.database
+    container_name: jobboard-database
     env_file:
       - .env
     volumes:
@@ -22,10 +26,15 @@ services:
     ports:
       - "5432:5432"
 
-networks:
-  jobboard-net:
-    driver: bridge
-    external: true
+  jobboard.seq:
+    image: datalust/seq:latest
+    container_name: jobboard-seq
+    ports:
+      - "5341:5341"
+      - "8081:80"
+    restart: unless-stopped
+    env_file:
+      - .env
 
 volumes:
   postgres_data:

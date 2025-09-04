@@ -123,3 +123,9 @@ dotnet_diagnostic.SA1010.severity = none
 
 # SA1413: Use trailing comma in multi-line initializers
 dotnet_diagnostic.SA1413.severity = suggestion
+
+# S1118: Utility classes should not have public constructors
+dotnet_diagnostic.S1118.severity = none
+
+# S3903: Types should be defined in named namespaces
+dotnet_diagnostic.S3903.severity = none
