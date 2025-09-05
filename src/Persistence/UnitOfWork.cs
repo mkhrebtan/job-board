@@ -17,17 +17,17 @@ internal class UnitOfWork : IUnitOfWork, IDisposable
         _context = context;
     }
 
-    public async Task CreateTransactionAsync()
+    public async Task CreateTransactionAsync(CancellationToken cancellationToken = default)
     {
         _contextTransaction = await _context.Database.BeginTransactionAsync();
     }
 
-    public async Task CommitTransactionAsync()
+    public async Task CommitTransactionAsync(CancellationToken cancellationToken = default)
     {
         await _contextTransaction!.CommitAsync();
     }
 
-    public async Task RollbackTransactionAsync()
+    public async Task RollbackTransactionAsync(CancellationToken cancellationToken = default)
     {
         await _contextTransaction!.RollbackAsync();
         await Task.Run(() =>
@@ -36,7 +36,7 @@ internal class UnitOfWork : IUnitOfWork, IDisposable
         });
     }
 
-    public async Task SaveChangesAsync()
+    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         try
         {

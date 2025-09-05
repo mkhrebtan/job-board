@@ -10,6 +10,9 @@
     <DockerServiceName>api</DockerServiceName>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="Application.Tests\Behaviours\Validation\CommandBaseHandlerTests.cs" />
+    <None Include="Application.Tests\Behaviours\Validation\CommandHandlerTests.cs" />
+    <None Include="Application.Tests\CommandHandlers\Categories\DeleteCategoryCommandHandlerTests.cs" />
     <None Include="docker-compose.override.yml">
       <DependentUpon>docker-compose.yml</DependentUpon>
     </None>
