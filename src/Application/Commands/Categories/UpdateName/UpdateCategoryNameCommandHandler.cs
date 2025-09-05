@@ -7,7 +7,7 @@ using Domain.Shared.ErrorHandling;
 
 namespace Application.Commands.Categories.UpdateName;
 
-internal class UpdateCategoryNameCommandHandler : ICommandHandler<UpdateCategoryNameCommand>
+internal sealed class UpdateCategoryNameCommandHandler : ICommandHandler<UpdateCategoryNameCommand>
 {
     private readonly ICategoryRepository _categoryRepository;
     private readonly CategoryService _categoryService;

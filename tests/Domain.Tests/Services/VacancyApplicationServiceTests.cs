@@ -12,6 +12,7 @@ using Domain.Contexts.RecruitmentContext.IDs;
 using Domain.Contexts.ResumePostingContext.Aggregates;
 using Domain.Contexts.ResumePostingContext.Enums;
 using Domain.Contexts.ResumePostingContext.ValueObjects;
+using Domain.Repos.CompanyUsers;
 using Domain.Repos.Users;
 using Domain.Repos.VacancyApplications;
 using Domain.Services;
@@ -27,7 +28,9 @@ public class VacancyApplicationServiceTests
     private readonly Mock<IMarkdownParser> _markdownParserMock = new();
     private readonly Mock<IPasswordHasher> _passwordHasherMock = new();
     private readonly Mock<IUserRepository> _userRepositoryMock = new();
+    private readonly Mock<ICompanyUserRepository> _companyUserRepositoryMock = new();
     private readonly UserService _userService;
+    private readonly VacancyService _vacancyService;
     private readonly VacancyApplicationService _vacancyApplicationService;
     private User _validJobSeekerUser;
     private User _validEmployerUser;
@@ -41,6 +44,7 @@ public class VacancyApplicationServiceTests
     {
         _vacancyApplicationService = new VacancyApplicationService(_vacancyApplicationRepositoryMock.Object);
         _userService = new UserService(_userRepositoryMock.Object);
+        _vacancyService = new VacancyService(_companyUserRepositoryMock.Object);
 
         SetupMocks();
         SetupTestData();
@@ -66,6 +70,9 @@ public class VacancyApplicationServiceTests
 
         _userRepositoryMock.Setup(x => x.IsUniquePhoneNumberAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
+
+        _companyUserRepositoryMock.Setup(x => x.GetCompanyIdByUserId(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Guid.NewGuid());
     }
 
     private async Task SetupTestData()
@@ -78,23 +85,25 @@ public class VacancyApplicationServiceTests
         var employerEmail = Email.Create("employer@example.com").Value;
         var employerPhoneNumber = PhoneNumber.Create("+14156667777", "US").Value;
         _validEmployerUser = (await _userService.CreateUserAsync("Jane", "Smith", UserRole.Employer, employerEmail, employerPhoneNumber, CancellationToken.None)).Value;
+        _validEmployerUser.CreateAccount("password123", _passwordHasherMock.Object);
 
         var title = VacancyTitle.Create("Software Engineer").Value;
         var description = RichTextContent.Create("Job description", _markdownParserMock.Object).Value;
         var salary = Salary.Range(50000m, 80000m, "USD").Value;
-        var companyId = new CompanyId();
         var location = Location.Create("USA", "New York").Value;
         var recruiterInfo = RecruiterInfo.Create(
             "John",
             Email.Create("recruiter@company.com").Value,
             PhoneNumber.Create("+14156667777", "US").Value).Value;
 
-        _validPublishedVacancy = Vacancy.CreateAndRegister(title, description, salary, companyId, location, recruiterInfo).Value;
+        _validPublishedVacancy = (await _vacancyService.CreateVacancyInRegisteredStatusAsync(
+            _validEmployerUser, title, description, salary, location, recruiterInfo, CancellationToken.None)).Value;
         var categoryId = new CategoryId();
         _validPublishedVacancy.UpdateCategoryId(categoryId);
         _validPublishedVacancy.Publish();
 
-        _validDraftVacancy = Vacancy.CreateDraft(title, description, salary, companyId, location, recruiterInfo).Value;
+        _validDraftVacancy = (await _vacancyService.CreateVacancyInDraftStatusAsync(
+            _validEmployerUser, title, description, salary, location, recruiterInfo, CancellationToken.None)).Value;
 
         var personalInfo = PersonalInfo.Create("John", "Doe").Value;
         var contactInfo = ContactInfo.Create(
@@ -302,7 +311,7 @@ public class VacancyApplicationServiceTests
     [MemberData(nameof(NonPublishedStatuses))]
     public async Task ApplyToVacancyWithCreatedResumeAsync_WithNonPublishedVacancyStatus_ShouldReturnFailure(VacancyStatus status)
     {
-        var vacancy = CreateVacancyWithStatus(status);
+        var vacancy = await CreateVacancyWithStatus(status);
 
         var result = await _vacancyApplicationService.ApplyToVacancyWithCreatedResumeAsync(
             _validJobSeekerUser,
@@ -318,7 +327,7 @@ public class VacancyApplicationServiceTests
     [MemberData(nameof(NonPublishedStatuses))]
     public async Task ApplyToVacancyWithFileAsync_WithNonPublishedVacancyStatus_ShouldReturnFailure(VacancyStatus status)
     {
-        var vacancy = CreateVacancyWithStatus(status);
+        var vacancy = await CreateVacancyWithStatus(status);
 
         var result = await _vacancyApplicationService.ApplyToVacancyWithFileAsync(
             _validJobSeekerUser,
@@ -395,31 +404,38 @@ public class VacancyApplicationServiceTests
 
     #region Helper Methods
 
-    private Vacancy CreateVacancyWithStatus(VacancyStatus status)
+    private async Task<Vacancy> CreateVacancyWithStatus(VacancyStatus status)
     {
         var title = VacancyTitle.Create("Test Position").Value;
         var description = RichTextContent.Create("Test description", _markdownParserMock.Object).Value;
         var salary = Salary.Range(50000m, 80000m, "USD").Value;
-        var companyId = new CompanyId();
         var location = Location.Create("USA", "Test City").Value;
         var recruiterInfo = RecruiterInfo.Create(
             "John",
             Email.Create("recruiter@test.com").Value,
             PhoneNumber.Create("+14156667777", "US").Value).Value;
 
+        var employerEmail = Email.Create("test-employer@test.com").Value;
+        var employerPhoneNumber = PhoneNumber.Create("+14156667778", "US").Value;
+        var employerUser = (await _userService.CreateUserAsync("Test", "Employer", UserRole.Employer, employerEmail, employerPhoneNumber, CancellationToken.None)).Value;
+        employerUser.CreateAccount("password123", _passwordHasherMock.Object);
+
         if (status == VacancyStatus.Draft)
         {
-            return Vacancy.CreateDraft(title, description, salary, companyId, location, recruiterInfo).Value;
+            return (await _vacancyService.CreateVacancyInDraftStatusAsync(
+                employerUser, title, description, salary, location, recruiterInfo, CancellationToken.None)).Value;
         }
 
         if (status == VacancyStatus.Registered)
         {
-            return Vacancy.CreateAndRegister(title, description, salary, companyId, location, recruiterInfo).Value;
+            return (await _vacancyService.CreateVacancyInRegisteredStatusAsync(
+                employerUser, title, description, salary, location, recruiterInfo, CancellationToken.None)).Value;
         }
 
         if (status == VacancyStatus.Published)
         {
-            var vacancy = Vacancy.CreateAndRegister(title, description, salary, companyId, location, recruiterInfo).Value;
+            var vacancy = (await _vacancyService.CreateVacancyInRegisteredStatusAsync(
+                employerUser, title, description, salary, location, recruiterInfo, CancellationToken.None)).Value;
             var categoryId = new CategoryId();
             vacancy.UpdateCategoryId(categoryId);
             vacancy.Publish();
@@ -428,7 +444,8 @@ public class VacancyApplicationServiceTests
 
         if (status == VacancyStatus.Archived)
         {
-            var vacancy = Vacancy.CreateAndRegister(title, description, salary, companyId, location, recruiterInfo).Value;
+            var vacancy = (await _vacancyService.CreateVacancyInRegisteredStatusAsync(
+                employerUser, title, description, salary, location, recruiterInfo, CancellationToken.None)).Value;
             var categoryId = new CategoryId();
             vacancy.UpdateCategoryId(categoryId);
             vacancy.Publish();

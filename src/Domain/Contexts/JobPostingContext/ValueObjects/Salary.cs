@@ -23,7 +23,7 @@ public class Salary : ValueObject
 
     public static Result<Salary> Range(decimal minAmount, decimal maxAmount, string currency)
     {
-        if (minAmount < 0)
+        if (minAmount < 1)
         {
             return Result<Salary>.Failure(Error.Problem("Salary.InvalidMinAmount", "Minimum salary amount cannot be negative."));
         }
@@ -44,7 +44,7 @@ public class Salary : ValueObject
 
     public static Result<Salary> Fixed(decimal amount, string currency)
     {
-        if (amount < 0)
+        if (amount < 1)
         {
             return Result<Salary>.Failure(Error.Problem("Salary.InvalidAmount", "Salary amount cannot be negative."));
         }

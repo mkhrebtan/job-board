@@ -10,4 +10,6 @@ public interface ICompanyUserRepository : IRepository<CompanyUser, CompanyUserId
     Task<bool> IsAlreadyAssignedToCompanyAsync(Guid userId, CancellationToken ct);
 
     Task<CompanyUser?> GetByIdAsync(Guid id, CancellationToken ct);
+
+    Task<Guid?> GetCompanyIdByUserId(Guid userId, CancellationToken ct);
 }

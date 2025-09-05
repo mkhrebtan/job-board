@@ -4,11 +4,11 @@ namespace Domain.Tests.Contexts.JobPostingContext.ValueObjects;
 
 public class SalaryTests
 {
-    [Fact]
-    public void Range_WithValidInputs_ShouldReturnSuccess()
+    [Theory]
+    [InlineData(50000, 80000)]
+    [InlineData(1, 5)]
+    public void Range_WithValidInputs_ShouldReturnSuccess(decimal minAmount, decimal maxAmount)
     {
-        var minAmount = 50000m;
-        var maxAmount = 80000m;
         var currency = "USD";
 
         var result = Salary.Range(minAmount, maxAmount, currency);
@@ -19,11 +19,11 @@ public class SalaryTests
         Assert.Equal(currency, result.Value.Currency);
     }
 
-    [Fact]
-    public void Range_WithNegativeMinAmount_ShouldReturnFailure()
+    [Theory]
+    [InlineData(-1000, 80000)]
+    [InlineData(0, 50)]
+    public void Range_WithInvalidMinAmount_ShouldReturnFailure(decimal minAmount, decimal maxAmount)
     {
-        var minAmount = -1000m;
-        var maxAmount = 80000m;
         var currency = "USD";
 
         var result = Salary.Range(minAmount, maxAmount, currency);
@@ -60,10 +60,11 @@ public class SalaryTests
         Assert.NotNull(result.Error);
     }
 
-    [Fact]
-    public void Fixed_WithValidInputs_ShouldReturnSuccess()
+    [Theory]
+    [InlineData(75000)]
+    [InlineData(1)]
+    public void Fixed_WithValidInputs_ShouldReturnSuccess(decimal amount)
     {
-        var amount = 75000m;
         var currency = "EUR";
 
         var result = Salary.Fixed(amount, currency);
@@ -74,10 +75,11 @@ public class SalaryTests
         Assert.Equal(currency, result.Value.Currency);
     }
 
-    [Fact]
-    public void Fixed_WithNegativeAmount_ShouldReturnFailure()
+    [Theory]
+    [InlineData(-5000)]
+    [InlineData(0)]
+    public void Fixed_WithInvalidAmount_ShouldReturnFailure(decimal amount)
     {
-        var amount = -5000m;
         var currency = "USD";
 
         var result = Salary.Fixed(amount, currency);

@@ -62,7 +62,7 @@ public class Vacancy : AggregateRoot<VacancyId>
 
     public DateTime LastUpdatedAt { get; private set; }
 
-    public static Result<Vacancy> CreateDraft(
+    internal static Result<Vacancy> CreateDraft(
         VacancyTitle title,
         RichTextContent descripiton,
         Salary salary,
@@ -73,7 +73,7 @@ public class Vacancy : AggregateRoot<VacancyId>
         return Create(title, descripiton, VacancyStatus.Draft, salary, companyId, location, recruiterInfo);
     }
 
-    public static Result<Vacancy> CreateAndRegister(
+    internal static Result<Vacancy> CreateAndRegister(
         VacancyTitle title,
         RichTextContent descripiton,
         Salary salary,
@@ -95,6 +95,11 @@ public class Vacancy : AggregateRoot<VacancyId>
         if (!Status.IsEditable)
         {
             return Result.Failure(Error.Conflict("Vacancy.InvalidStatus", $"Cannot update description when vacancy is in '{Status}' status."));
+        }
+
+        if (!IsValidDescription(newDescripiton))
+        {
+            return Result.Failure(Error.Problem("Vacancy.InvalidDescription", "Description cannot be null or empty."));
         }
 
         return UpdateProperty(newDescripiton, desc => Description = desc, nameof(Description));
@@ -225,9 +230,9 @@ public class Vacancy : AggregateRoot<VacancyId>
             return Result.Failure(Error.Problem("Vacancy.InvalidTitle", "Title cannot be null."));
         }
 
-        if (descripiton == null)
+        if (!IsValidDescription(descripiton))
         {
-            return Result.Failure(Error.Problem("Vacancy.InvalidDescription", "Description cannot be null."));
+            return Result.Failure(Error.Problem("Vacancy.InvalidDescription", "Description cannot be null or empty."));
         }
 
         if (salary == null)
@@ -252,6 +257,8 @@ public class Vacancy : AggregateRoot<VacancyId>
 
         return Result.Success();
     }
+
+    private static bool IsValidDescription(RichTextContent description) => description is not null && !string.IsNullOrWhiteSpace(description.Markdown);
 
     private Result UpdateProperty<T>(T newValue, Action<T> updateAction, string propertyName)
     {

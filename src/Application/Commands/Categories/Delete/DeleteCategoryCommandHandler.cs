@@ -5,7 +5,7 @@ using Domain.Shared.ErrorHandling;
 
 namespace Application.Commands.Categories.Delete;
 
-internal class DeleteCategoryCommandHandler : ICommandHandler<DeleteCategoryCommand>
+internal sealed class DeleteCategoryCommandHandler : ICommandHandler<DeleteCategoryCommand>
 {
     private readonly ICategoryRepository _categoryRepository;
     private readonly IUnitOfWork _unitOfWork;

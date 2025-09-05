@@ -17,6 +17,14 @@ internal class CompanyUserRepository : GenericRepository<CompanyUser, CompanyUse
         return await _dbSet.FirstOrDefaultAsync(x => x.Id.Value == id, ct);
     }
 
+    public async Task<Guid?> GetCompanyIdByUserId(Guid userId, CancellationToken ct)
+    {
+        return await _dbSet
+            .Where(x => x.RecruiterId.Value == userId)
+            .Select(x => x.CompanyId.Value)
+            .FirstOrDefaultAsync(ct);
+    }
+
     public async Task<bool> IsAlreadyAssignedAsync(Guid userId, Guid companyId, CancellationToken ct)
     {
         return await _dbSet.AnyAsync(x => x.RecruiterId.Value == userId && x.CompanyId.Value == companyId, ct);

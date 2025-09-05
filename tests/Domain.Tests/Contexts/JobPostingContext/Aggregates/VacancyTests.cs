@@ -1,10 +1,14 @@
 ﻿using Domain.Abstraction.Interfaces;
-using Domain.Contexts.IdentityContext.IDs;
+using Domain.Contexts.IdentityContext.Aggregates;
+using Domain.Contexts.IdentityContext.Enums;
 using Domain.Contexts.JobPostingContext.Aggregates;
 using Domain.Contexts.JobPostingContext.Enums;
 using Domain.Contexts.JobPostingContext.IDs;
 using Domain.Contexts.JobPostingContext.ValueObjects;
 using Domain.Contexts.RecruitmentContext.IDs;
+using Domain.Repos.CompanyUsers;
+using Domain.Repos.Users;
+using Domain.Services;
 using Domain.Shared.ValueObjects;
 using Moq;
 
@@ -12,18 +16,31 @@ namespace Domain.Tests.Contexts.JobPostingContext.Aggregates;
 
 public class VacancyTests
 {
-    private readonly Mock<IMarkdownParser> _markdownParserMock;
+    private readonly Mock<IMarkdownParser> _markdownParserMock = new();
     private readonly VacancyTitle _validTitle;
     private readonly RichTextContent _validDescription;
     private readonly Salary _validSalary;
     private readonly CompanyId _validCompanyId;
     private readonly Location _validLocation;
     private readonly RecruiterInfo _validRecruiterInfo;
+    private readonly UserService _userService;
+    private User _validEmployerUser;
+    private readonly Mock<ICompanyUserRepository> _companyUserRepositoryMock = new();
+    private readonly Mock<IPasswordHasher> _passwordHasherMock = new();
+    private Vacancy _validVacancy;
+    private readonly VacancyService _vacancyService;
+    private readonly Mock<IUserRepository> _userRepositoryMock = new();
 
     public VacancyTests()
     {
-        _markdownParserMock = new Mock<IMarkdownParser>();
-        SetupMarkdownParserMock();
+        _vacancyService = new VacancyService(_companyUserRepositoryMock.Object);
+        _userService = new UserService(_userRepositoryMock.Object);
+
+        _markdownParserMock.Setup(x => x.ToPlainText(It.IsAny<string>()))
+            .Returns<string>(markdown =>
+            {
+                return markdown + " (plain text)";
+            });
 
         _validTitle = VacancyTitle.Create("Software Engineer").Value;
         _validDescription = RichTextContent.Create("Job description", _markdownParserMock.Object).Value;
@@ -34,305 +51,75 @@ public class VacancyTests
             "John Doe",
             Email.Create("recruiter@company.com").Value,
             PhoneNumber.Create("+14156667777", "US").Value).Value;
+
+        _userRepositoryMock.Setup(x => x.IsUniqueEmailAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        _userRepositoryMock.Setup(x => x.IsUniquePhoneNumberAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        _passwordHasherMock.Setup(x => x.HashPassword(It.IsAny<string>()))
+            .Returns<string>(p => p + "_hashed");
+
+        CreateValidEmployerUserAsync();
+
+        _companyUserRepositoryMock.Setup(repo => repo.GetCompanyIdByUserId(_validEmployerUser.Id.Value, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(_validCompanyId.Value);
+
+        SetupTestVacancy();
     }
 
-    private void SetupMarkdownParserMock()
+    private async Task CreateValidEmployerUserAsync()
     {
-        _markdownParserMock.Setup(x => x.ToPlainText(It.IsAny<string>()))
-            .Returns<string>(markdown =>
-            {
-                return markdown + " (plain text)";
-            });
+        var employerEmail = Email.Create("employer@example.com").Value;
+        var employerPhoneNumber = PhoneNumber.Create("+14156667777", "US").Value;
+        _validEmployerUser = (await _userService.CreateUserAsync("Jane", "Smith", UserRole.Employer, employerEmail, employerPhoneNumber, CancellationToken.None)).Value;
+        _validEmployerUser.CreateAccount("employer_account", _passwordHasherMock.Object);
     }
 
-    #region CreateDraft Tests
-
-    [Fact]
-    public void CreateDraft_WithValidInputs_ShouldReturnSuccess()
+    private async Task SetupTestVacancy()
     {
-        var result = Vacancy.CreateDraft(
+        _validVacancy = (await _vacancyService.CreateVacancyInDraftStatusAsync(
+            _validEmployerUser,
             _validTitle,
             _validDescription,
             _validSalary,
-            _validCompanyId,
             _validLocation,
-            _validRecruiterInfo);
-
-        Assert.True(result.IsSuccess);
-        Assert.Equal(_validTitle, result.Value.Title);
-        Assert.Equal(_validDescription, result.Value.Description);
-        Assert.Equal(VacancyStatus.Draft, result.Value.Status);
-        Assert.Equal(_validSalary, result.Value.Salary);
-        Assert.Equal(_validCompanyId, result.Value.CompanyId);
-        Assert.Equal(_validLocation, result.Value.Location);
-        Assert.Equal(_validRecruiterInfo, result.Value.RecruiterInfo);
-        Assert.Null(result.Value.CategoryId);
-        Assert.Null(result.Value.RegisteredAt);
-        Assert.Null(result.Value.PublishedAt);
+            _validRecruiterInfo,
+            CancellationToken.None)).Value;
     }
-
-    [Fact]
-    public void CreateDraft_WithNullTitle_ShouldReturnFailure()
-    {
-        var result = Vacancy.CreateDraft(
-            null,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo);
-
-        Assert.True(result.IsFailure);
-        Assert.NotNull(result.Error);
-    }
-
-    [Fact]
-    public void CreateDraft_WithNullDescription_ShouldReturnFailure()
-    {
-        var result = Vacancy.CreateDraft(
-            _validTitle,
-            null,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo);
-
-        Assert.True(result.IsFailure);
-        Assert.NotNull(result.Error);
-    }
-
-    [Fact]
-    public void CreateDraft_WithNullSalary_ShouldReturnFailure()
-    {
-        var result = Vacancy.CreateDraft(
-            _validTitle,
-            _validDescription,
-            null,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo);
-
-        Assert.True(result.IsFailure);
-        Assert.NotNull(result.Error);
-    }
-
-    [Fact]
-    public void CreateDraft_WithNullCompanyId_ShouldReturnFailure()
-    {
-        var result = Vacancy.CreateDraft(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            null,
-            _validLocation,
-            _validRecruiterInfo);
-
-        Assert.True(result.IsFailure);
-        Assert.NotNull(result.Error);
-    }
-
-    [Fact]
-    public void CreateDraft_WithNullLocation_ShouldReturnFailure()
-    {
-        var result = Vacancy.CreateDraft(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            null,
-            _validRecruiterInfo);
-
-        Assert.True(result.IsFailure);
-        Assert.NotNull(result.Error);
-    }
-
-    [Fact]
-    public void CreateDraft_WithNullRecruiterInfo_ShouldReturnFailure()
-    {
-        var result = Vacancy.CreateDraft(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            null);
-
-        Assert.True(result.IsFailure);
-        Assert.NotNull(result.Error);
-    }
-
-    #endregion
-
-    #region CreateAndRegister Tests
-
-    [Fact]
-    public void CreateAndRegister_WithValidInputs_ShouldReturnSuccess()
-    {
-        var result = Vacancy.CreateAndRegister(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo);
-
-        Assert.True(result.IsSuccess);
-        Assert.Equal(VacancyStatus.Registered, result.Value.Status);
-        Assert.Equal(_validTitle, result.Value.Title);
-        Assert.Equal(_validDescription, result.Value.Description);
-        Assert.Equal(_validSalary, result.Value.Salary);
-        Assert.Equal(_validCompanyId, result.Value.CompanyId);
-        Assert.Equal(_validLocation, result.Value.Location);
-        Assert.Equal(_validRecruiterInfo, result.Value.RecruiterInfo);
-        Assert.NotNull(result.Value.RegisteredAt);
-        Assert.Null(result.Value.PublishedAt);
-        Assert.Null(result.Value.CategoryId);
-    }
-
-    [Fact]
-    public void CreateAndRegister_WithNullTitle_ShouldReturnFailure()
-    {
-        var result = Vacancy.CreateAndRegister(
-            null,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo);
-
-        Assert.True(result.IsFailure);
-        Assert.NotNull(result.Error);
-    }
-
-    [Fact]
-    public void CreateAndRegister_WithNullDescription_ShouldReturnFailure()
-    {
-        var result = Vacancy.CreateAndRegister(
-            _validTitle,
-            null,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo);
-
-        Assert.True(result.IsFailure);
-        Assert.NotNull(result.Error);
-    }
-
-    [Fact]
-    public void CreateAndRegister_WithNullSalary_ShouldReturnFailure()
-    {
-        var result = Vacancy.CreateAndRegister(
-            _validTitle,
-            _validDescription,
-            null,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo);
-
-        Assert.True(result.IsFailure);
-        Assert.NotNull(result.Error);
-    }
-
-    [Fact]
-    public void CreateAndRegister_WithNullCompanyId_ShouldReturnFailure()
-    {
-        var result = Vacancy.CreateAndRegister(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            null,
-            _validLocation,
-            _validRecruiterInfo);
-
-        Assert.True(result.IsFailure);
-        Assert.NotNull(result.Error);
-    }
-
-    [Fact]
-    public void CreateAndRegister_WithNullLocation_ShouldReturnFailure()
-    {
-        var result = Vacancy.CreateAndRegister(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            null,
-            _validRecruiterInfo);
-
-        Assert.True(result.IsFailure);
-        Assert.NotNull(result.Error);
-    }
-
-    [Fact]
-    public void CreateAndRegister_WithNullRecruiterInfo_ShouldReturnFailure()
-    {
-        var result = Vacancy.CreateAndRegister(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            null);
-
-        Assert.True(result.IsFailure);
-        Assert.NotNull(result.Error);
-    }
-
-    #endregion
 
     #region Update Title Tests
 
     [Fact]
     public void UpdateTitle_WithValidTitleInDraftStatus_ShouldReturnSuccess()
     {
-        var vacancy = Vacancy.CreateDraft(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo).Value;
         var newTitle = VacancyTitle.Create("Senior Software Engineer").Value;
-        var originalLastUpdated = vacancy.LastUpdatedAt;
+        var originalLastUpdated = _validVacancy.LastUpdatedAt;
 
-        var result = vacancy.UpdateTitle(newTitle);
+        var result = _validVacancy.UpdateTitle(newTitle);
 
         Assert.True(result.IsSuccess);
-        Assert.Equal(newTitle, vacancy.Title);
-        Assert.True(vacancy.LastUpdatedAt >= originalLastUpdated);
+        Assert.Equal(newTitle, _validVacancy.Title);
+        Assert.True(_validVacancy.LastUpdatedAt >= originalLastUpdated);
     }
 
     [Fact]
     public void UpdateTitle_WithNullTitle_ShouldReturnFailure()
     {
-        var vacancy = Vacancy.CreateDraft(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo).Value;
-        var originalTitle = vacancy.Title;
+        var originalTitle = _validVacancy.Title;
 
-        var result = vacancy.UpdateTitle(null);
+        var result = _validVacancy.UpdateTitle(null!);
 
         Assert.True(result.IsFailure);
         Assert.NotNull(result.Error);
-        Assert.Equal(originalTitle, vacancy.Title);
+        Assert.Equal(originalTitle, _validVacancy.Title);
     }
 
     [Fact]
-    public void UpdateTitle_WhenRegistered_ShouldReturnFailure()
+    public async Task UpdateTitle_WhenRegistered_ShouldReturnFailure()
     {
-        var vacancy = Vacancy.CreateAndRegister(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo).Value;
-        var originalTitle = vacancy.Title;
+        var vacancy = await CreateRegisteredVacancy();
+        var originalTitle = _validVacancy.Title;
         var newTitle = VacancyTitle.Create("Senior Software Engineer").Value;
 
         var result = vacancy.UpdateTitle(newTitle);
@@ -343,9 +130,9 @@ public class VacancyTests
     }
 
     [Fact]
-    public void UpdateTitle_WhenPublished_ShouldReturnSuccess()
+    public async Task UpdateTitle_WhenPublished_ShouldReturnSuccess()
     {
-        var vacancy = CreatePublishedVacancy();
+        var vacancy = await CreatePublishedVacancy();
         var newTitle = VacancyTitle.Create("Senior Software Engineer").Value;
 
         var result = vacancy.UpdateTitle(newTitle);
@@ -355,9 +142,9 @@ public class VacancyTests
     }
 
     [Fact]
-    public void UpdateTitle_WhenArchived_ShouldReturnFailure()
+    public async Task UpdateTitle_WhenArchived_ShouldReturnFailure()
     {
-        var vacancy = CreateArchivedVacancy();
+        var vacancy = await CreateArchivedVacancy();
         var originalTitle = vacancy.Title;
         var newTitle = VacancyTitle.Create("Senior Software Engineer").Value;
 
@@ -375,13 +162,7 @@ public class VacancyTests
     [Fact]
     public void UpdateDescription_WithValidDescription_ShouldReturnSuccess()
     {
-        var vacancy = Vacancy.CreateDraft(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo).Value;
+        var vacancy = _validVacancy;
         var newDescription = RichTextContent.Create("Updated job description", _markdownParserMock.Object).Value;
 
         var result = vacancy.UpdateDescripiton(newDescription);
@@ -393,16 +174,10 @@ public class VacancyTests
     [Fact]
     public void UpdateDescription_WithNullDescription_ShouldReturnFailure()
     {
-        var vacancy = Vacancy.CreateDraft(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo).Value;
+        var vacancy = _validVacancy;
         var originalDescription = vacancy.Description;
 
-        var result = vacancy.UpdateDescripiton(null);
+        var result = vacancy.UpdateDescripiton(null!);
 
         Assert.True(result.IsFailure);
         Assert.NotNull(result.Error);
@@ -410,29 +185,36 @@ public class VacancyTests
     }
 
     [Fact]
-    public void UpdateDescription_WhenRegistered_ShouldReturnFailure()
+    public void UpdateDescription_WithEmptyDescription_ShouldReturnFailure()
     {
-        var vacancy = Vacancy.CreateAndRegister(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo).Value;
+        var vacancy = _validVacancy;
+        var originalDescription = vacancy.Description;
+
+        var result = vacancy.UpdateDescripiton(RichTextContent.Create("", _markdownParserMock.Object).Value);
+
+        Assert.True(result.IsFailure);
+        Assert.NotNull(result.Error);
+        Assert.Equal(originalDescription, vacancy.Description);
+    }
+
+    [Fact]
+    public async Task UpdateDescription_WhenRegistered_ShouldReturnFailure()
+    {
+        var vacancy = await CreateRegisteredVacancy();
         var originalDescription = vacancy.Description;
         var newDescription = RichTextContent.Create("Updated job description", _markdownParserMock.Object).Value;
-        
+
         var result = vacancy.UpdateDescripiton(newDescription);
-        
+
         Assert.True(result.IsFailure);
         Assert.NotNull(result.Error);
         Assert.Equal(originalDescription, vacancy.Description);
     }
 
     [Fact]
-    public void UpdateDescription_WhenPublished_ShouldReturnSuccess()
+    public async Task UpdateDescription_WhenPublished_ShouldReturnSuccess()
     {
-        var vacancy = CreatePublishedVacancy();
+        var vacancy = await CreatePublishedVacancy();
         var newDescription = RichTextContent.Create("Updated job description", _markdownParserMock.Object).Value;
 
         var result = vacancy.UpdateDescripiton(newDescription);
@@ -442,9 +224,9 @@ public class VacancyTests
     }
 
     [Fact]
-    public void UpdateDescription_WhenArchived_ShouldReturnFailure()
+    public async Task UpdateDescription_WhenArchived_ShouldReturnFailure()
     {
-        var vacancy = CreateArchivedVacancy();
+        var vacancy = await CreateArchivedVacancy();
         var originalDescription = vacancy.Description;
         var newDescription = RichTextContent.Create("Updated job description", _markdownParserMock.Object).Value;
 
@@ -462,13 +244,7 @@ public class VacancyTests
     [Fact]
     public void UpdateSalary_WithValidSalary_ShouldReturnSuccess()
     {
-        var vacancy = Vacancy.CreateDraft(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo).Value;
+        var vacancy = _validVacancy;
         var newSalary = Salary.Range(60000m, 90000m, "USD").Value;
 
         var result = vacancy.UpdateSalary(newSalary);
@@ -480,16 +256,10 @@ public class VacancyTests
     [Fact]
     public void UpdateSalary_WithNullSalary_ShouldReturnFailure()
     {
-        var vacancy = Vacancy.CreateDraft(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo).Value;
+        var vacancy = _validVacancy;
         var originalSalary = vacancy.Salary;
 
-        var result = vacancy.UpdateSalary(null);
+        var result = vacancy.UpdateSalary(null!);
 
         Assert.True(result.IsFailure);
         Assert.NotNull(result.Error);
@@ -497,15 +267,9 @@ public class VacancyTests
     }
 
     [Fact]
-    public void UpdateSalary_WhenRegistered_ShouldReturnFailure()
+    public async Task UpdateSalary_WhenRegistered_ShouldReturnFailure()
     {
-        var vacancy = Vacancy.CreateAndRegister(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo).Value;
+        var vacancy = await CreateRegisteredVacancy();
         var originalSalary = vacancy.Salary;
         var newSalary = Salary.Range(60000m, 90000m, "USD").Value;
 
@@ -517,9 +281,9 @@ public class VacancyTests
     }
 
     [Fact]
-    public void UpdateSalary_WhenPublished_ShouldReturnSuccess()
+    public async Task UpdateSalary_WhenPublished_ShouldReturnSuccess()
     {
-        var vacancy = CreatePublishedVacancy();
+        var vacancy = await CreatePublishedVacancy();
         var newSalary = Salary.Range(60000m, 90000m, "USD").Value;
 
         var result = vacancy.UpdateSalary(newSalary);
@@ -529,9 +293,9 @@ public class VacancyTests
     }
 
     [Fact]
-    public void UpdateSalary_WhenArchived_ShouldReturnFailure()
+    public async Task UpdateSalary_WhenArchived_ShouldReturnFailure()
     {
-        var vacancy = CreateArchivedVacancy();
+        var vacancy = await CreateArchivedVacancy();
         var originalSalary = vacancy.Salary;
         var newSalary = Salary.Range(60000m, 90000m, "USD").Value;
 
@@ -549,13 +313,7 @@ public class VacancyTests
     [Fact]
     public void UpdateLocation_WithValidLocation_ShouldReturnSuccess()
     {
-        var vacancy = Vacancy.CreateDraft(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo).Value;
+        var vacancy = _validVacancy;
         var newLocation = Location.Create("Canada", "Toronto").Value;
 
         var result = vacancy.UpdateLocation(newLocation);
@@ -567,16 +325,10 @@ public class VacancyTests
     [Fact]
     public void UpdateLocation_WithNullLocation_ShouldReturnFailure()
     {
-        var vacancy = Vacancy.CreateDraft(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo).Value;
+        var vacancy = _validVacancy;
         var originalLocation = vacancy.Location;
 
-        var result = vacancy.UpdateLocation(null);
+        var result = vacancy.UpdateLocation(null!);
 
         Assert.True(result.IsFailure);
         Assert.NotNull(result.Error);
@@ -584,15 +336,9 @@ public class VacancyTests
     }
 
     [Fact]
-    public void UpdateLocation_WhenRegistered_ShouldReturnFailure()
+    public async Task UpdateLocation_WhenRegistered_ShouldReturnFailure()
     {
-        var vacancy = Vacancy.CreateAndRegister(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo).Value;
+        var vacancy = await CreateRegisteredVacancy();
         var originalLocation = vacancy.Location;
         var newLocation = Location.Create("Canada", "Toronto").Value;
 
@@ -604,9 +350,9 @@ public class VacancyTests
     }
 
     [Fact]
-    public void UpdateLocation_WhenPublished_ShouldReturnSuccess()
+    public async Task UpdateLocation_WhenPublished_ShouldReturnSuccess()
     {
-        var vacancy = CreatePublishedVacancy();
+        var vacancy = await CreatePublishedVacancy();
         var newLocation = Location.Create("Canada", "Toronto").Value;
 
         var result = vacancy.UpdateLocation(newLocation);
@@ -616,9 +362,9 @@ public class VacancyTests
     }
 
     [Fact]
-    public void UpdateLocation_WhenArchived_ShouldReturnFailure()
+    public async Task UpdateLocation_WhenArchived_ShouldReturnFailure()
     {
-        var vacancy = CreateArchivedVacancy();
+        var vacancy = await CreateArchivedVacancy();
         var originalLocation = vacancy.Location;
         var newLocation = Location.Create("Canada", "Toronto").Value;
 
@@ -636,13 +382,7 @@ public class VacancyTests
     [Fact]
     public void UpdateRecruiterInfo_WithValidRecruiterInfo_ShouldReturnSuccess()
     {
-        var vacancy = Vacancy.CreateDraft(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo).Value;
+        var vacancy = _validVacancy;
         var newRecruiterInfo = RecruiterInfo.Create(
             "Jane Smith",
             Email.Create("newrecruiter@company.com").Value,
@@ -657,16 +397,10 @@ public class VacancyTests
     [Fact]
     public void UpdateRecruiterInfo_WithNullRecruiterInfo_ShouldReturnFailure()
     {
-        var vacancy = Vacancy.CreateDraft(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo).Value;
+        var vacancy = _validVacancy;
         var originalRecruiterInfo = vacancy.RecruiterInfo;
 
-        var result = vacancy.UpdateRecruiterInfo(null);
+        var result = vacancy.UpdateRecruiterInfo(null!);
 
         Assert.True(result.IsFailure);
         Assert.NotNull(result.Error);
@@ -674,15 +408,9 @@ public class VacancyTests
     }
 
     [Fact]
-    public void UpdateRecruiterInfo_WhenRegistered_ShouldReturnFailure()
+    public async Task UpdateRecruiterInfo_WhenRegistered_ShouldReturnFailure()
     {
-        var vacancy = Vacancy.CreateAndRegister(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo).Value;
+        var vacancy = await CreateRegisteredVacancy();
         var originalRecruiterInfo = vacancy.RecruiterInfo;
         var newRecruiterInfo = RecruiterInfo.Create(
             "Test Recruiter",
@@ -697,10 +425,9 @@ public class VacancyTests
     }
 
     [Fact]
-    public void UpdateRecruiterInfo_WhenPublished_ShouldReturnSuccess()
+    public async Task UpdateRecruiterInfo_WhenPublished_ShouldReturnSuccess()
     {
-        var vacancy = CreatePublishedVacancy();
-        var originalRecruiterInfo = vacancy.RecruiterInfo;
+        var vacancy = await CreatePublishedVacancy();
         var newRecruiterInfo = RecruiterInfo.Create(
             "Test Recruiter",
             Email.Create("test@example.com").Value,
@@ -713,9 +440,9 @@ public class VacancyTests
     }
 
     [Fact]
-    public void UpdateRecruiterInfo_WhenArchived_ShouldReturnFailure()
+    public async Task UpdateRecruiterInfo_WhenArchived_ShouldReturnFailure()
     {
-        var vacancy = CreateArchivedVacancy();
+        var vacancy = await CreateArchivedVacancy();
         var originalRecruiterInfo = vacancy.RecruiterInfo;
         var newRecruiterInfo = RecruiterInfo.Create(
             "Test Recruiter",
@@ -734,15 +461,9 @@ public class VacancyTests
     #region UpdateCategoryId Tests
 
     [Fact]
-    public void UpdateCategoryId_InRegisteredStatus_ShouldReturnSuccess()
+    public async Task UpdateCategoryId_InRegisteredStatus_ShouldReturnSuccess()
     {
-        var vacancy = Vacancy.CreateAndRegister(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo).Value;
+        var vacancy = await CreateRegisteredVacancy();
         var categoryId = new CategoryId();
 
         var result = vacancy.UpdateCategoryId(categoryId);
@@ -754,13 +475,7 @@ public class VacancyTests
     [Fact]
     public void UpdateCategoryId_InDraftStatus_ShouldReturnFailure()
     {
-        var vacancy = Vacancy.CreateDraft(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo).Value;
+        var vacancy = _validVacancy;
         var categoryId = new CategoryId();
 
         var result = vacancy.UpdateCategoryId(categoryId);
@@ -770,9 +485,9 @@ public class VacancyTests
     }
 
     [Fact]
-    public void UpdateCategoryId_InPublishedStatus_ShouldReturnFailure()
+    public async Task UpdateCategoryId_InPublishedStatus_ShouldReturnFailure()
     {
-        var vacancy = CreatePublishedVacancy();
+        var vacancy = await CreatePublishedVacancy();
         var categoryId = new CategoryId();
 
         var result = vacancy.UpdateCategoryId(categoryId);
@@ -782,9 +497,9 @@ public class VacancyTests
     }
 
     [Fact]
-    public void UpdateCategoryId_InArchivedStatus_ShouldReturnFailure()
+    public async Task UpdateCategoryId_InArchivedStatus_ShouldReturnFailure()
     {
-        var vacancy = CreateArchivedVacancy();
+        var vacancy = await CreateArchivedVacancy();
         var categoryId = new CategoryId();
 
         var result = vacancy.UpdateCategoryId(categoryId);
@@ -794,17 +509,11 @@ public class VacancyTests
     }
 
     [Fact]
-    public void UpdateCategoryId_WithNullCategoryId_ShouldReturnFailure()
+    public async Task UpdateCategoryId_WithNullCategoryId_ShouldReturnFailure()
     {
-        var vacancy = Vacancy.CreateAndRegister(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo).Value;
+        var vacancy = await CreateRegisteredVacancy();
 
-        var result = vacancy.UpdateCategoryId(null);
+        var result = vacancy.UpdateCategoryId(null!);
 
         Assert.True(result.IsFailure);
         Assert.NotNull(result.Error);
@@ -817,13 +526,7 @@ public class VacancyTests
     [Fact]
     public void Register_FromDraftStatus_ShouldReturnSuccess()
     {
-        var vacancy = Vacancy.CreateDraft(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo).Value;
+        var vacancy = _validVacancy;
 
         var result = vacancy.Register();
 
@@ -834,15 +537,9 @@ public class VacancyTests
     }
 
     [Fact]
-    public void Register_FromRegisteredStatus_ShouldReturnFailure()
+    public async Task Register_FromRegisteredStatus_ShouldReturnFailure()
     {
-        var vacancy = Vacancy.CreateAndRegister(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo).Value;
+        var vacancy = await CreateRegisteredVacancy();
 
         var result = vacancy.Register();
 
@@ -851,15 +548,9 @@ public class VacancyTests
     }
 
     [Fact]
-    public void Publish_FromRegisteredStatusWithCategory_ShouldReturnSuccess()
+    public async Task Publish_FromRegisteredStatusWithCategory_ShouldReturnSuccess()
     {
-        var vacancy = Vacancy.CreateAndRegister(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo).Value;
+        var vacancy = await CreateRegisteredVacancy();
         var categoryId = new CategoryId();
         vacancy.UpdateCategoryId(categoryId);
 
@@ -872,15 +563,9 @@ public class VacancyTests
     }
 
     [Fact]
-    public void Publish_FromRegisteredStatusWithoutCategory_ShouldReturnFailure()
+    public async Task Publish_FromRegisteredStatusWithoutCategory_ShouldReturnFailure()
     {
-        var vacancy = Vacancy.CreateAndRegister(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo).Value;
+        var vacancy = await CreateRegisteredVacancy();
 
         var result = vacancy.Publish();
 
@@ -891,13 +576,7 @@ public class VacancyTests
     [Fact]
     public void Publish_FromDraftStatus_ShouldReturnFailure()
     {
-        var vacancy = Vacancy.CreateDraft(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo).Value;
+        var vacancy = _validVacancy;
 
         var result = vacancy.Publish();
 
@@ -906,9 +585,9 @@ public class VacancyTests
     }
 
     [Fact]
-    public void Archive_FromPublishedStatus_ShouldReturnSuccess()
+    public async Task Archive_FromPublishedStatus_ShouldReturnSuccess()
     {
-        var vacancy = CreatePublishedVacancy();
+        var vacancy = await CreatePublishedVacancy();
 
         var result = vacancy.Archive();
 
@@ -919,13 +598,7 @@ public class VacancyTests
     [Fact]
     public void Archive_FromDraftStatus_ShouldReturnFailure()
     {
-        var vacancy = Vacancy.CreateDraft(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo).Value;
+        var vacancy = _validVacancy;
 
         var result = vacancy.Archive();
 
@@ -934,16 +607,10 @@ public class VacancyTests
     }
 
     [Fact]
-    public void Archive_FromRegisteredStatus_ShouldReturnFailure()
+    public async Task Archive_FromRegisteredStatus_ShouldReturnFailure()
     {
-        var vacancy = Vacancy.CreateAndRegister(
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validCompanyId,
-            _validLocation,
-            _validRecruiterInfo).Value;
-        
+        var vacancy = await CreateRegisteredVacancy();
+
         var result = vacancy.Archive();
 
         Assert.True(result.IsFailure);
@@ -957,33 +624,32 @@ public class VacancyTests
     [Fact]
     public void FullWorkflow_DraftToPublished_ShouldWork()
     {
-        var vacancy = Vacancy.CreateDraft(_validTitle, _validDescription, _validSalary, _validCompanyId, _validLocation, _validRecruiterInfo).Value;
-        Assert.Equal(VacancyStatus.Draft, vacancy.Status);
+        Assert.Equal(VacancyStatus.Draft, _validVacancy.Status);
 
-        var registerResult = vacancy.Register();
+        var registerResult = _validVacancy.Register();
         Assert.True(registerResult.IsSuccess);
-        Assert.Equal(VacancyStatus.Registered, vacancy.Status);
-        Assert.NotNull(vacancy.RegisteredAt);
+        Assert.Equal(VacancyStatus.Registered, _validVacancy.Status);
+        Assert.NotNull(_validVacancy.RegisteredAt);
 
         var categoryId = new CategoryId();
-        var categoryResult = vacancy.UpdateCategoryId(categoryId);
+        var categoryResult = _validVacancy.UpdateCategoryId(categoryId);
         Assert.True(categoryResult.IsSuccess);
-        Assert.Equal(categoryId, vacancy.CategoryId);
+        Assert.Equal(categoryId, _validVacancy.CategoryId);
 
-        var publishResult = vacancy.Publish();
+        var publishResult = _validVacancy.Publish();
         Assert.True(publishResult.IsSuccess);
-        Assert.Equal(VacancyStatus.Published, vacancy.Status);
-        Assert.NotNull(vacancy.PublishedAt);
+        Assert.Equal(VacancyStatus.Published, _validVacancy.Status);
+        Assert.NotNull(_validVacancy.PublishedAt);
 
-        var archiveResult = vacancy.Archive();
+        var archiveResult = _validVacancy.Archive();
         Assert.True(archiveResult.IsSuccess);
-        Assert.Equal(VacancyStatus.Archived, vacancy.Status);
+        Assert.Equal(VacancyStatus.Archived, _validVacancy.Status);
     }
 
     [Fact]
-    public void FullWorkflow_ArchivedToPublished_ShouldWork()
+    public async Task FullWorkflow_ArchivedToPublished_ShouldWork()
     {
-        var vacancy = CreateArchivedVacancy();
+        var vacancy = await CreateArchivedVacancy();
 
         var publishResult = vacancy.Publish();
 
@@ -996,24 +662,31 @@ public class VacancyTests
 
     #region Helper Methods
 
-    private Vacancy CreatePublishedVacancy()
+    private async Task<Vacancy> CreateRegisteredVacancy()
     {
-        var vacancy = Vacancy.CreateAndRegister(
+        var vacancy = (await _vacancyService.CreateVacancyInRegisteredStatusAsync(
+            _validEmployerUser,
             _validTitle,
             _validDescription,
             _validSalary,
-            _validCompanyId,
             _validLocation,
-            _validRecruiterInfo).Value;
+            _validRecruiterInfo,
+            CancellationToken.None)).Value;
+        return vacancy;
+    }
+
+    private async Task<Vacancy> CreatePublishedVacancy()
+    {
+        var vacancy = await CreateRegisteredVacancy();
         var categoryId = new CategoryId();
         vacancy.UpdateCategoryId(categoryId);
         vacancy.Publish();
         return vacancy;
     }
 
-    private Vacancy CreateArchivedVacancy()
+    private async Task<Vacancy> CreateArchivedVacancy()
     {
-        var vacancy = CreatePublishedVacancy();
+        var vacancy = await CreatePublishedVacancy();
         vacancy.Archive();
         return vacancy;
     }

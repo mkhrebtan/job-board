@@ -6,7 +6,7 @@ using Domain.Shared.ErrorHandling;
 
 namespace Application.Commands.Categories.Create;
 
-internal class CreateCategoryCommandHandler : ICommandHandler<CreateCategoryCommand, CreateCategoryRepsonse>
+internal sealed class CreateCategoryCommandHandler : ICommandHandler<CreateCategoryCommand, CreateCategoryRepsonse>
 {
     private readonly ICategoryRepository _categoryRepository;
     private readonly CategoryService _categoryService;
