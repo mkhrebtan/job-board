@@ -1,5 +1,6 @@
 ﻿using Application.Abstraction.Behaviour;
 using Application.Abstractions.Messaging;
+using Domain.Services;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -28,5 +29,7 @@ public static class DependencyInjection
         services.TryDecorate(typeof(ICommandHandler<,>), typeof(ValidationDecorator.CommandHandler<,>));
 
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly, includeInternalTypes: true);
+
+        services.AddTransient<VacancyService>();
     }
 }
