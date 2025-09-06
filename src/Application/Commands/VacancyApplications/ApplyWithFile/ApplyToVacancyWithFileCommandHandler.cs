@@ -2,7 +2,6 @@
 using Application.Common.Helpers;
 using Domain.Abstraction.Interfaces;
 using Domain.Contexts.ApplicationContext.ValueObjects;
-using Domain.Contexts.IdentityContext.Aggregates;
 using Domain.Contexts.IdentityContext.IDs;
 using Domain.Contexts.JobPostingContext.IDs;
 using Domain.Repos.Users;
@@ -42,21 +41,11 @@ internal sealed class ApplyToVacancyWithFileCommandHandler : ICommandHandler<App
             return Result<ApplyToVacancyCommandResponse>.Failure(Error.NotFound("ApplyToVacancyWithFileCommandHandler.VacancyNotFound", $"Vacancy was not found."));
         }
 
-        User? user = default;
-        if (command.ApplicationInfo.Anonymous)
+        var user = await _userRepository.GetByIdAsync(new UserId(command.UserId), cancellationToken);
+        if (user is null)
         {
-
+            return Result<ApplyToVacancyCommandResponse>.Failure(Error.NotFound("ApplyToVacancyWithFileCommandHandler.UserNotFound", $"User was not found."));
         }
-        else
-        {
-
-        }
-            
-        //var user = await _userRepository.GetByIdAsync(new UserId(command.UserId), cancellationToken);
-        //if (user is null)
-        //{
-        //    return Result<ApplyToVacancyCommandResponse>.Failure(Error.NotFound("ApplyToVacancyWithFileCommandHandler.UserNotFound", $"User was not found."));
-        //}
 
         if (!Helpers.TryCreateVO(() => CoverLetter.Create(command.CoverLetterContent ?? string.Empty), out CoverLetter coverLetter, out Error error))
         {
