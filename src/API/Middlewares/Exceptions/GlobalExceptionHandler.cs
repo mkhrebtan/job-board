@@ -21,6 +21,7 @@ internal sealed class GlobalExceptionHandler : IExceptionHandler
         {
             Status = StatusCodes.Status500InternalServerError,
             Title = "Server error",
+            Detail = "An unexpected error occurred. Please try again later."
         };
 
         httpContext.Response.StatusCode = problemDetails.Status.Value;

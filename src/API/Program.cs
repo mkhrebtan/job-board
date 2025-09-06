@@ -37,6 +37,8 @@ internal class Program
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddProblemDetails();
 
+            builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
+
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
@@ -53,20 +55,7 @@ internal class Program
             app.UseHttpsRedirection();
             app.MapSwagger().RequireAuthorization();
 
-            app.MapGet("/testquery", async (IQueryHandler<TestQuery, string> queryHandler, CancellationToken cancellationToken) =>
-            {
-                var query = new TestQuery();
-                var result = await queryHandler.Handle(query, cancellationToken);
-                return result.IsSuccess ? Results.Ok(result.Value) : result.GetProblem();
-            })
-            .WithName("GetTestQuery");
-
-            app.MapPost("/testcommand", async (TestCommand command, ICommandHandler<TestCommand, string> commandHandler) =>
-            {
-                var result = await commandHandler.Handle(command);
-                return result.IsSuccess ? Results.Ok(result.Value) : result.GetProblem();
-            })
-            .WithName("ExecuteTestCommand");
+            app.MapEndpoints();
 
             app.UseSerilogRequestLogging();
 

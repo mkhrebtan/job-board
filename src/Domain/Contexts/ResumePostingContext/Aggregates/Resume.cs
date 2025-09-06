@@ -160,6 +160,11 @@ public class Resume : AggregateRoot<ResumeId>
             return Result.Failure(Error.Problem("Resume.EmploymentTypeNotFound", "EmploymentType not found."));
         }
 
+        if (_employmentTypes.Count == 1)
+        {
+            return Result.Failure(Error.Problem("Resume.AtLeastOneEmploymentTypeRequired", "At least one EmploymentType must be specified."));
+        }
+
         _employmentTypes.Remove(employmentType);
         LastUpdatedAt = DateTime.UtcNow;
         return Result.Success();
@@ -194,22 +199,27 @@ public class Resume : AggregateRoot<ResumeId>
             return Result.Failure(Error.Problem("Resume.WorkArrangementNotFound", "WorkArrangement not found."));
         }
 
+        if (_workArrangements.Count == 1)
+        {
+            return Result.Failure(Error.Problem("Resume.AtLeastOneWorkArrangementRequired", "At least one WorkArrangement must be specified."));
+        }
+
         _workArrangements.Remove(workArrangement);
         LastUpdatedAt = DateTime.UtcNow;
         return Result.Success();
     }
 
-    public Result AddWorkExperience(string companyName, string position, DateRange dateRange, RichTextContent description)
+    public Result<WorkExperienceId> AddWorkExperience(string companyName, string position, DateRange dateRange, RichTextContent description)
     {
         var creationResult = WorkExperience.Create(Id, companyName, position, dateRange, description);
         if (creationResult.IsFailure)
         {
-            return Result.Failure(creationResult.Error);
+            return Result<WorkExperienceId>.Failure(creationResult.Error);
         }
 
         _workExperiences.Add(creationResult.Value.Id, creationResult.Value);
         LastUpdatedAt = DateTime.UtcNow;
-        return Result.Success();
+        return Result<WorkExperienceId>.Success(creationResult.Value.Id);
     }
 
     public Result RemoveWorkExperience(WorkExperienceId workExperienceId)
@@ -229,17 +239,17 @@ public class Resume : AggregateRoot<ResumeId>
         return Result.Success();
     }
 
-    public Result AddEducation(string institutionName, string degree, string fieldOfStudy, DateRange dateRange)
+    public Result<EducationId> AddEducation(string institutionName, string degree, string fieldOfStudy, DateRange dateRange)
     {
         var creationResult = Education.Create(Id, institutionName, degree, fieldOfStudy, dateRange);
         if (creationResult.IsFailure)
         {
-            return Result.Failure(creationResult.Error);
+            return Result<EducationId>.Failure(creationResult.Error);
         }
 
         _educations.Add(creationResult.Value.Id, creationResult.Value);
         LastUpdatedAt = DateTime.UtcNow;
-        return Result.Success();
+        return Result<EducationId>.Success(creationResult.Value.Id);
     }
 
     public Result RemoveEducation(EducationId educationId)
@@ -259,22 +269,22 @@ public class Resume : AggregateRoot<ResumeId>
         return Result.Success();
     }
 
-    public Result AddLanguage(string name, LanguageLevel proficiency)
+    public Result<LanguageId> AddLanguage(string name, LanguageLevel proficiency)
     {
         var creationResult = LanguageSkill.Create(Id, name, proficiency);
         if (creationResult.IsFailure)
         {
-            return Result.Failure(creationResult.Error);
+            return Result<LanguageId>.Failure(creationResult.Error);
         }
 
         if (_languages.Values.Any(lang => lang.Language.Equals(name, StringComparison.OrdinalIgnoreCase)))
         {
-            return Result.Failure(Error.Problem("Resume.DuplicateLanguage", "Language already exists."));
+            return Result<LanguageId>.Failure(Error.Problem("Resume.DuplicateLanguage", "Language already exists."));
         }
 
         _languages.Add(creationResult.Value.Id, creationResult.Value);
         LastUpdatedAt = DateTime.UtcNow;
-        return Result.Success();
+        return Result<LanguageId>.Success(creationResult.Value.Id);
     }
 
     public Result RemoveLanguage(LanguageId languageId)
