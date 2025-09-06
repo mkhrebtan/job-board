@@ -1,5 +1,4 @@
 ﻿using Domain.Contexts.IdentityContext.Aggregates;
-using Domain.Contexts.IdentityContext.Entities;
 using Domain.Contexts.IdentityContext.Enums;
 using Domain.Contexts.IdentityContext.IDs;
 using Domain.Shared.ValueObjects;
@@ -43,14 +42,14 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
             numberBuilder.Property(n => n.Number).IsRequired().HasMaxLength(PhoneNumber.MaxNumberLength);
         });
 
-        builder.HasOne(u => u.Account)
-            .WithOne()
-            .HasForeignKey<Account>(a => a.UserId);
-
         builder.Property(u => u.Role)
             .HasConversion(
                 role => role.ToString(),
                 value => UserRole.FromCode(value)!)
             .IsRequired();
+
+        builder.Property(a => a.PasswordHash)
+            .IsRequired()
+            .HasMaxLength(256);
     }
 }

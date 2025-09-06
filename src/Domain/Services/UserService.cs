@@ -1,4 +1,5 @@
-﻿using Domain.Contexts.IdentityContext.Aggregates;
+﻿using Domain.Abstraction.Interfaces;
+using Domain.Contexts.IdentityContext.Aggregates;
 using Domain.Contexts.IdentityContext.Enums;
 using Domain.Repos.Users;
 using Domain.Shared.ErrorHandling;
@@ -15,7 +16,7 @@ public class UserService
         _repository = repository;
     }
 
-    public async Task<Result<User>> CreateUserAsync(string firstName, string lastName, UserRole role, Email email, PhoneNumber phoneNumber, CancellationToken ct)
+    public async Task<Result<User>> CreateUserAsync(string firstName, string lastName, UserRole role, Email email, PhoneNumber phoneNumber, string password, IPasswordHasher passwordHasher, CancellationToken ct)
     {
         var emailValidation = await ValidateEmailAsync(email, ct);
         if (emailValidation.IsFailure)
@@ -29,7 +30,7 @@ public class UserService
             return Result<User>.Failure(phoneValidation.Error);
         }
 
-        return User.Create(firstName, lastName, role, email, phoneNumber);
+        return User.Create(firstName, lastName, role, email, phoneNumber, password, passwordHasher);
     }
 
     public async Task<Result> UpdateUserEmailAsync(User user, Email newEmail, CancellationToken ct)

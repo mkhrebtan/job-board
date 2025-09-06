@@ -11,16 +11,16 @@ public class RefreshToken : AggregateRoot<RefreshTokenId>
     {
     }
 
-    private RefreshToken(AccountId accountId, string token, DateTime expiresAt)
+    private RefreshToken(UserId userId, string token, DateTime expiresAt)
         : base(new RefreshTokenId())
     {
-        AccountId = accountId;
+        UserId = userId;
         Token = token;
         ExpiresAt = expiresAt;
         IsRevoked = false;
     }
 
-    public AccountId AccountId { get; private set; }
+    public UserId UserId { get; private set; }
 
     public string Token { get; private set; }
 
@@ -28,11 +28,11 @@ public class RefreshToken : AggregateRoot<RefreshTokenId>
 
     public bool IsRevoked { get; private set; }
 
-    public static Result<RefreshToken> Create(AccountId accountId, string token, DateTime expiresAt)
+    public static Result<RefreshToken> Create(UserId userId, string token, DateTime expiresAt)
     {
-        if (accountId == null || accountId.Value == Guid.Empty)
+        if (userId == null || userId.Value == Guid.Empty)
         {
-            return Result<RefreshToken>.Failure(Error.Problem("RefreshToken.InvalidAccountId", "AccountId cannot be null or empty."));
+            return Result<RefreshToken>.Failure(Error.Problem("RefreshToken.InvalidUserId", "UserId cannot be null or empty."));
         }
 
         if (string.IsNullOrWhiteSpace(token))
@@ -45,7 +45,7 @@ public class RefreshToken : AggregateRoot<RefreshTokenId>
             return Result<RefreshToken>.Failure(Error.Problem("RefreshToken.InvalidExpiry", "Expiry date must be in the future."));
         }
 
-        var refreshToken = new RefreshToken(accountId, token, expiresAt);
+        var refreshToken = new RefreshToken(userId, token, expiresAt);
         return Result<RefreshToken>.Success(refreshToken);
     }
 

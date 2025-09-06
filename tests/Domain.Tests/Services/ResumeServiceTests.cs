@@ -8,7 +8,6 @@ using Domain.Repos.Users;
 using Domain.Services;
 using Domain.Shared.ValueObjects;
 using Moq;
-using System.Threading.Tasks;
 
 namespace Domain.Tests.Services;
 
@@ -60,17 +59,11 @@ public class ResumeServiceTests
     {
         var jobSeekerEmail = Email.Create("jobseeker@example.com").Value;
         var jobSeekerPhoneNumber = PhoneNumber.Create("+14155552671", "US").Value;
-        _validJobSeekerUser = (await _userService.CreateUserAsync("John", "Doe", UserRole.JobSeeker, jobSeekerEmail, jobSeekerPhoneNumber, CancellationToken.None)).Value;
-        _validJobSeekerUser.CreateAccount("password123", _passwordHasherMock.Object);
+        _validJobSeekerUser = (await _userService.CreateUserAsync("John", "Doe", UserRole.JobSeeker, jobSeekerEmail, jobSeekerPhoneNumber, "password123", _passwordHasherMock.Object, CancellationToken.None)).Value;
 
         var employerEmail = Email.Create("employer@example.com").Value;
         var employerPhoneNumber = PhoneNumber.Create("+14155552672", "US").Value;
-        _validEmployerUser = (await _userService.CreateUserAsync("Jane", "Smith", UserRole.Employer, employerEmail, employerPhoneNumber, CancellationToken.None)).Value;
-        _validEmployerUser.CreateAccount("password123", _passwordHasherMock.Object);
-
-        var userWithoutAccountEmail = Email.Create("noAccount@example.com").Value;
-        var userWithoutAccountNumber = PhoneNumber.Create("+14155552673", "US").Value;
-        _userWithoutAccount = (await _userService.CreateUserAsync("Bob", "Wilson", UserRole.JobSeeker, userWithoutAccountEmail, userWithoutAccountNumber, CancellationToken.None)).Value;
+        _validEmployerUser = (await _userService.CreateUserAsync("Jane", "Smith", UserRole.Employer, employerEmail, employerPhoneNumber, "password123", _passwordHasherMock.Object, CancellationToken.None)).Value;
 
         _validPersonalInfo = PersonalInfo.Create("John", "Doe").Value;
         _validLocation = Location.Create("USA", "New York").Value;

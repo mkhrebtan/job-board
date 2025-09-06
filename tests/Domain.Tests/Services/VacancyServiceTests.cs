@@ -72,8 +72,7 @@ public class VacancyServiceTests
     {
         var employerEmail = Email.Create("employer@example.com").Value;
         var employerPhoneNumber = PhoneNumber.Create("+14156667777", "US").Value;
-        _validEmployerUser = (await _userService.CreateUserAsync("Jane", "Smith", UserRole.Employer, employerEmail, employerPhoneNumber, CancellationToken.None)).Value;
-        _validEmployerUser.CreateAccount("employer_account", _passwordHasherMock.Object);
+        _validEmployerUser = (await _userService.CreateUserAsync("Jane", "Smith", UserRole.Employer, employerEmail, employerPhoneNumber, "password123", _passwordHasherMock.Object, CancellationToken.None)).Value;
     }
 
     #region CreateDraft Tests
@@ -188,25 +187,6 @@ public class VacancyServiceTests
     public async Task CreateVacancyInDraftStatusAsync_WithNotEmployerUser_ShouldReturnFailure()
     {
         var invalidUser = await CreateNotEmployerUser();
-
-        var result = await _vacancyService.CreateVacancyInDraftStatusAsync(
-            invalidUser,
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validLocation,
-            _validRecruiterInfo,
-            CancellationToken.None);
-
-        Assert.True(result.IsFailure);
-        Assert.NotNull(result.Error);
-        _companyUserRepositoryMock.Verify(repo => repo.GetCompanyIdByUserId(It.IsAny<UserId>(), It.IsAny<CancellationToken>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task CreateVacancyInDraftStatusAsync_WithEmployerWithoutAccount_ShouldReturnFailure()
-    {
-        var invalidUser = await CreateEmployerUserWithoutAccount();
 
         var result = await _vacancyService.CreateVacancyInDraftStatusAsync(
             invalidUser,
@@ -371,25 +351,6 @@ public class VacancyServiceTests
     }
 
     [Fact]
-    public async Task CreateVacancyInRegisteredStatusAsync_WithEmployerWithoutAccount_ShouldReturnFailure()
-    {
-        var invalidUser = await CreateEmployerUserWithoutAccount();
-
-        var result = await _vacancyService.CreateVacancyInRegisteredStatusAsync(
-            invalidUser,
-            _validTitle,
-            _validDescription,
-            _validSalary,
-            _validLocation,
-            _validRecruiterInfo,
-            CancellationToken.None);
-
-        Assert.True(result.IsFailure);
-        Assert.NotNull(result.Error);
-        _companyUserRepositoryMock.Verify(repo => repo.GetCompanyIdByUserId(It.IsAny<UserId>(), It.IsAny<CancellationToken>()), Times.Never);
-    }
-
-    [Fact]
     public async Task CreateVacancyInRegisteredStatusAsync_WhenUseHasNoCompany_ShouldReturnFailure()
     {
         _companyUserRepositoryMock.Setup(repo => repo.GetCompanyIdByUserId(_validEmployerUser.Id, It.IsAny<CancellationToken>()))
@@ -415,13 +376,6 @@ public class VacancyServiceTests
     {
         var userEmail = Email.Create("employer@example.com").Value;
         var userNumber = PhoneNumber.Create("+14156667777", "US").Value;
-        return (await _userService.CreateUserAsync("Jane", "Smith", UserRole.JobSeeker, userEmail, userNumber, CancellationToken.None)).Value;
-    }
-
-    private async Task<User> CreateEmployerUserWithoutAccount()
-    {
-        var userEmail = Email.Create("employer@example.com").Value;
-        var userNumber = PhoneNumber.Create("+14156667777", "US").Value;
-        return (await _userService.CreateUserAsync("Jane", "Smith", UserRole.Employer, userEmail, userNumber, CancellationToken.None)).Value;
+        return (await _userService.CreateUserAsync("Jane", "Smith", UserRole.JobSeeker, userEmail, userNumber, "password123", _passwordHasherMock.Object, CancellationToken.None)).Value;
     }
 }

@@ -1,6 +1,5 @@
 ﻿using Domain.Abstraction;
 using Domain.Abstraction.Interfaces;
-using Domain.Contexts.IdentityContext.Entities;
 using Domain.Contexts.IdentityContext.Enums;
 using Domain.Contexts.IdentityContext.IDs;
 using Domain.Shared.ErrorHandling;
@@ -12,13 +11,15 @@ public class User : AggregateRoot<UserId>
 {
     public const int MaxFirstNameLength = 50;
     public const int MaxLastNameLength = 50;
+    public const int MinPasswordLength = 8;
+    public const int MaxPasswordLength = 100;
 
     private User()
         : base(new UserId())
     {
     }
 
-    private User(string firstName, string lastName, Email email, PhoneNumber phoneNumber, UserRole role)
+    private User(string firstName, string lastName, Email email, PhoneNumber phoneNumber, UserRole role, string passwordHash)
         : base(new UserId())
     {
         FirstName = firstName;
@@ -26,6 +27,7 @@ public class User : AggregateRoot<UserId>
         Email = email;
         PhoneNumber = phoneNumber;
         Role = role;
+        PasswordHash = passwordHash;
     }
 
     public string FirstName { get; private set; }
@@ -36,26 +38,9 @@ public class User : AggregateRoot<UserId>
 
     public PhoneNumber PhoneNumber { get; private set; }
 
-    public Account? Account { get; private set; }
+    public string PasswordHash { get; private set; }
 
     public UserRole Role { get; private set; }
-
-    public Result CreateAccount(string password, IPasswordHasher passwordHasher)
-    {
-        if (Account != null)
-        {
-            return Result.Failure(Error.Conflict("User.AccountAlreadyExists", "User already has an associated account."));
-        }
-
-        var accountResult = Account.Create(Id, password, passwordHasher);
-        if (accountResult.IsFailure)
-        {
-            return Result.Failure(accountResult.Error);
-        }
-
-        Account = accountResult.Value;
-        return Result.Success();
-    }
 
     public Result UpdateFirstName(string newFirstName)
     {
@@ -81,34 +66,29 @@ public class User : AggregateRoot<UserId>
 
     public Result UpdatePassword(string newPassword, IPasswordHasher passwordHasher)
     {
-        if (Account == null)
+        if (string.IsNullOrWhiteSpace(newPassword))
         {
-            return Result.Failure(Error.Conflict("User.NoAssociatedAccount", "User does not have an associated account."));
+            return Result.Failure(Error.Problem("Account.InvalidPassword", "New password cannot be null or empty."));
         }
 
-        return Account.UpdatePassword(newPassword, passwordHasher);
-    }
-
-    public Result DeleteAccount()
-    {
-        if (Account == null)
+        if (newPassword.Length < 8 || newPassword.Length > 100)
         {
-            return Result.Failure(Error.Conflict("User.NoAssociatedAccount", "User does not have an associated account."));
+            return Result.Failure(Error.Problem("Account.InvalidPasswordLength", $"Password must be between {MinPasswordLength} and {MaxPasswordLength} characters long."));
         }
 
-        Account = null;
+        PasswordHash = passwordHasher.HashPassword(newPassword);
         return Result.Success();
     }
 
-    internal static Result<User> Create(string firstName, string lastName, UserRole role, Email email, PhoneNumber phoneNumber)
+    internal static Result<User> Create(string firstName, string lastName, UserRole role, Email email, PhoneNumber phoneNumber, string password, IPasswordHasher passwordHasher)
     {
-        var validationResult = ValidateCreationParameters(firstName, lastName, role, email, phoneNumber);
+        var validationResult = ValidateCreationParameters(firstName, lastName, role, email, phoneNumber, password);
         if (validationResult.IsFailure)
         {
             return Result<User>.Failure(validationResult.Error);
         }
 
-        var user = new User(firstName, lastName, email, phoneNumber, role);
+        var user = new User(firstName, lastName, email, phoneNumber, role, passwordHasher.HashPassword(password));
         return Result<User>.Success(user);
     }
 
@@ -134,7 +114,7 @@ public class User : AggregateRoot<UserId>
         return Result.Success();
     }
 
-    private static Result ValidateCreationParameters(string firstName, string LastName, UserRole role, Email email, PhoneNumber phoneNumber)
+    private static Result ValidateCreationParameters(string firstName, string LastName, UserRole role, Email email, PhoneNumber phoneNumber, string password)
     {
         if (string.IsNullOrWhiteSpace(firstName))
         {
@@ -169,6 +149,11 @@ public class User : AggregateRoot<UserId>
         if (role == UserRole.Admin)
         {
             return Result.Failure(Error.Problem("User.InaccesibleRole", "Cannot create user with Admin role."));
+        }
+
+        if (password.Length < MinPasswordLength || password.Length > MaxPasswordLength)
+        {
+            return Result.Failure(Error.Problem("User.InvalidPasswordLength", $"Password must be between {MinPasswordLength} and {MaxPasswordLength} characters long."));
         }
 
         return Result.Success();

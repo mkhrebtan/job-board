@@ -16,21 +16,18 @@ internal class UserRepository : GenericRepository<User, UserId>, IUserRepository
     public async Task<User?> GetByEmailAsync(string email, CancellationToken ct)
     {
         return await _dbSet
-            .Include(x => x.Account)
             .FirstOrDefaultAsync(x => x.Email.Address == email, ct);
     }
 
     public async Task<User?> GetByIdAsync(UserId id, CancellationToken ct)
     {
         return await _dbSet
-            .Include(x => x.Account)
             .FirstOrDefaultAsync(x => x.Id == id, ct);
     }
 
     public async Task<User?> GetByPhoneNumberAsync(string phoneNumber, CancellationToken ct)
     {
         return await _dbSet
-            .Include(x => x.Account)
             .FirstOrDefaultAsync(x => x.PhoneNumber.Number == phoneNumber, ct);
     }
 

@@ -72,8 +72,7 @@ public class VacancyTests
     {
         var employerEmail = Email.Create("employer@example.com").Value;
         var employerPhoneNumber = PhoneNumber.Create("+14156667777", "US").Value;
-        _validEmployerUser = (await _userService.CreateUserAsync("Jane", "Smith", UserRole.Employer, employerEmail, employerPhoneNumber, CancellationToken.None)).Value;
-        _validEmployerUser.CreateAccount("employer_account", _passwordHasherMock.Object);
+        _validEmployerUser = (await _userService.CreateUserAsync("Jane", "Smith", UserRole.Employer, employerEmail, employerPhoneNumber, "employer_account", _passwordHasherMock.Object, CancellationToken.None)).Value;
     }
 
     private async Task SetupTestVacancy()

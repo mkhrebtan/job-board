@@ -23,6 +23,7 @@ public class CompanyUserServiceTests
     private Company _validCompany;
     private readonly Mock<IUserRepository> _userRepositoryMock = new();
     private readonly UserService _userService;
+    private readonly Mock<IPasswordHasher> _passwordHasher = new();
 
     public CompanyUserServiceTests()
     {
@@ -51,17 +52,22 @@ public class CompanyUserServiceTests
 
         _userRepositoryMock.Setup(x => x.IsUniquePhoneNumberAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
+
+        _passwordHasher.Setup(x => x.HashPassword(It.IsAny<string>()))
+            .Returns<string>(password => password + "_hashed");
+        _passwordHasher.Setup(x => x.VerifyHashedPassword(It.IsAny<string>(), It.IsAny<string>()))
+            .Returns<string, string>((hashedPassword, providedPassword) => hashedPassword == providedPassword + "_hashed");
     }
 
     private async Task SetupTestData()
     {
         var email = Email.Create("employer@example.com").Value;
         var phoneNumber = PhoneNumber.Create("+14156667777", "US").Value;
-        _validEmployerUser = (await _userService.CreateUserAsync("John", "Doe", UserRole.Employer, email, phoneNumber, CancellationToken.None)).Value;
+        _validEmployerUser = (await _userService.CreateUserAsync("John", "Doe", UserRole.Employer, email, phoneNumber, "password123!", _passwordHasher.Object, CancellationToken.None)).Value;
 
         var jobSeekerEmail = Email.Create("jobseeker@example.com").Value;
         var jobSeekerPhoneNumber = PhoneNumber.Create("+14158889999", "US").Value;
-        _validJobSeekerUser = (await _userService.CreateUserAsync("Jane", "Smith", UserRole.JobSeeker, jobSeekerEmail, jobSeekerPhoneNumber, CancellationToken.None)).Value;
+        _validJobSeekerUser = (await _userService.CreateUserAsync("Jane", "Smith", UserRole.JobSeeker, jobSeekerEmail, jobSeekerPhoneNumber, "password123!", _passwordHasher.Object, CancellationToken.None)).Value;
 
         var description = RichTextContent.Create("Company description", _markdownParserMock.Object).Value;
         var websiteUrl = WebsiteUrl.Create("https://example.com").Value;

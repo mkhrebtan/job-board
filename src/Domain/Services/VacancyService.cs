@@ -61,11 +61,6 @@ public sealed class VacancyService
             return Result<CompanyId>.Failure(Error.Problem("VacancyService.Unauthorized", "Only users with the Employer role can create vacancies."));
         }
 
-        if (user.Account is null)
-        {
-            return Result<CompanyId>.Failure(Error.Problem("VacancyService.NoAccount", "The employer user must must have an account to create a vacancy."));
-        }
-
         CompanyId? userCompanyId = await _companyUserRepository.GetCompanyIdByUserId(user.Id, cancellationToken);
         if (userCompanyId is null)
         {

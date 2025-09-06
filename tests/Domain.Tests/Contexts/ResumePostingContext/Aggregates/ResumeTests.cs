@@ -62,13 +62,27 @@ public class ResumeTests
     {
         var jobSeekerEmail = Email.Create("jobseeker@example.com").Value;
         var jobSeekerPhoneNumber = PhoneNumber.Create("+14155551234", "US").Value;
-        _validJobSeekerUser = (await _userService.CreateUserAsync("John", "Doe", UserRole.JobSeeker, jobSeekerEmail, jobSeekerPhoneNumber, CancellationToken.None)).Value;
-        _validJobSeekerUser.CreateAccount("password123", _passwordHasherMock.Object);
+        _validJobSeekerUser = (await _userService.CreateUserAsync(
+            "John",
+            "Doe",
+            UserRole.JobSeeker,
+            jobSeekerEmail,
+            jobSeekerPhoneNumber,
+            "password123",
+            _passwordHasherMock.Object,
+            CancellationToken.None)).Value;
 
         var employerEmail = Email.Create("employer@example.com").Value;
         var employerPhoneNumber = PhoneNumber.Create("+14155559876", "US").Value;
-        _validEmployerUser = (await _userService.CreateUserAsync("Jane", "Smith", UserRole.Employer, employerEmail, employerPhoneNumber, CancellationToken.None)).Value;
-        _validEmployerUser.CreateAccount("password123", _passwordHasherMock.Object);
+        _validEmployerUser = (await _userService.CreateUserAsync(
+            "Jane",
+            "Smith",
+            UserRole.Employer,
+            employerEmail,
+            employerPhoneNumber,
+            "password123",
+            _passwordHasherMock.Object,
+            CancellationToken.None)).Value;
 
         _validPersonalInfo = PersonalInfo.Create("John", "Doe").Value;
         _validLocation = Location.Create("USA", "New York").Value;

@@ -8,28 +8,28 @@ public class RefreshTokenTests
     [Fact]
     public void Create_WithValidInputs_ShouldReturnSuccess()
     {
-        var accountId = new AccountId();
+        var userId = new UserId();
         var token = "valid-refresh-token";
         var expiresAt = DateTime.UtcNow.AddHours(1);
 
-        var result = RefreshToken.Create(accountId, token, expiresAt);
+        var result = RefreshToken.Create(userId, token, expiresAt);
 
         Assert.True(result.IsSuccess);
         Assert.NotNull(result.Value);
-        Assert.Equal(accountId, result.Value.AccountId);
+        Assert.Equal(userId, result.Value.UserId);
         Assert.Equal(token, result.Value.Token);
         Assert.Equal(expiresAt, result.Value.ExpiresAt);
         Assert.False(result.Value.IsRevoked);
     }
 
     [Fact]
-    public void Create_WithNullAccountId_ShouldReturnFailure()
+    public void Create_WithNullUserId_ShouldReturnFailure()
     {
-        AccountId? accountId = null;
+        UserId? userId = null;
         var token = "valid-refresh-token";
         var expiresAt = DateTime.UtcNow.AddHours(1);
 
-        var result = RefreshToken.Create(accountId!, token, expiresAt);
+        var result = RefreshToken.Create(userId!, token, expiresAt);
 
         Assert.True(result.IsFailure);
         Assert.NotNull(result.Error);
@@ -41,10 +41,10 @@ public class RefreshTokenTests
     [InlineData("   ")]
     public void Create_WithInvalidToken_ShouldReturnFailure(string invalidToken)
     {
-        var accountId = new AccountId();
+        var userId = new UserId();
         var expiresAt = DateTime.UtcNow.AddHours(1);
 
-        var result = RefreshToken.Create(accountId, invalidToken, expiresAt);
+        var result = RefreshToken.Create(userId, invalidToken, expiresAt);
 
         Assert.True(result.IsFailure);
         Assert.NotNull(result.Error);
@@ -53,11 +53,11 @@ public class RefreshTokenTests
     [Fact]
     public void Create_WithPastExpiryDate_ShouldReturnFailure()
     {
-        var accountId = new AccountId();
+        var userId = new UserId();
         var token = "valid-refresh-token";
         var expiresAt = DateTime.UtcNow.AddHours(-1);
 
-        var result = RefreshToken.Create(accountId, token, expiresAt);
+        var result = RefreshToken.Create(userId, token, expiresAt);
 
         Assert.True(result.IsFailure);
         Assert.NotNull(result.Error);
@@ -66,11 +66,11 @@ public class RefreshTokenTests
     [Fact]
     public void Create_WithCurrentTime_ShouldReturnFailure()
     {
-        var accountId = new AccountId();
+        var userId = new UserId();
         var token = "valid-refresh-token";
         var expiresAt = DateTime.UtcNow;
 
-        var result = RefreshToken.Create(accountId, token, expiresAt);
+        var result = RefreshToken.Create(userId, token, expiresAt);
 
         Assert.True(result.IsFailure);
         Assert.NotNull(result.Error);
@@ -79,10 +79,10 @@ public class RefreshTokenTests
     [Fact]
     public void Revoke_WhenNotRevoked_ShouldReturnSuccessAndMarkAsRevoked()
     {
-        var accountId = new AccountId();
+        var userId = new UserId();
         var token = "valid-refresh-token";
         var expiresAt = DateTime.UtcNow.AddHours(1);
-        var refreshToken = RefreshToken.Create(accountId, token, expiresAt).Value;
+        var refreshToken = RefreshToken.Create(userId, token, expiresAt).Value;
 
         var result = refreshToken.Revoke();
 
@@ -93,10 +93,10 @@ public class RefreshTokenTests
     [Fact]
     public void Revoke_WhenAlreadyRevoked_ShouldReturnFailure()
     {
-        var accountId = new AccountId();
+        var userId = new UserId();
         var token = "valid-refresh-token";
         var expiresAt = DateTime.UtcNow.AddHours(1);
-        var refreshToken = RefreshToken.Create(accountId, token, expiresAt).Value;
+        var refreshToken = RefreshToken.Create(userId, token, expiresAt).Value;
         refreshToken.Revoke();
 
         var result = refreshToken.Revoke();

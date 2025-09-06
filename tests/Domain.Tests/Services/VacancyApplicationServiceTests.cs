@@ -1,8 +1,6 @@
 ﻿using Domain.Abstraction.Interfaces;
-using Domain.Contexts.ApplicationContext.Aggregates;
 using Domain.Contexts.ApplicationContext.ValueObjects;
 using Domain.Contexts.IdentityContext.Aggregates;
-using Domain.Contexts.IdentityContext.Entities;
 using Domain.Contexts.IdentityContext.Enums;
 using Domain.Contexts.IdentityContext.IDs;
 using Domain.Contexts.JobPostingContext.Aggregates;
@@ -19,7 +17,6 @@ using Domain.Repos.VacancyApplications;
 using Domain.Services;
 using Domain.Shared.ValueObjects;
 using Moq;
-using System.Threading.Tasks;
 
 namespace Domain.Tests.Services;
 
@@ -60,7 +57,7 @@ public class VacancyApplicationServiceTests
                           .Returns<string>(password => $"hashed_{password}");
 
         _passwordHasherMock.Setup(x => x.VerifyHashedPassword(It.IsAny<string>(), It.IsAny<string>()))
-                          .Returns<string, string>((hashedPassword, providedPassword) => 
+                          .Returns<string, string>((hashedPassword, providedPassword) =>
                               hashedPassword == $"hashed_{providedPassword}");
 
         _vacancyApplicationRepositoryMock.Setup(x => x.HasAlreadyAppliedToVacancyAsync(It.IsAny<UserId>(), It.IsAny<VacancyId>(), It.IsAny<CancellationToken>()))
@@ -80,13 +77,11 @@ public class VacancyApplicationServiceTests
     {
         var jobSeekerEmail = Email.Create("jobseeker@example.com").Value;
         var jobSeekerPhoneNumber = PhoneNumber.Create("+14156667777", "US").Value;
-        _validJobSeekerUser = (await _userService.CreateUserAsync("John", "Doe", UserRole.JobSeeker, jobSeekerEmail, jobSeekerPhoneNumber, CancellationToken.None)).Value;
-        _validJobSeekerUser.CreateAccount("password123", _passwordHasherMock.Object);
+        _validJobSeekerUser = (await _userService.CreateUserAsync("John", "Doe", UserRole.JobSeeker, jobSeekerEmail, jobSeekerPhoneNumber, "password123", _passwordHasherMock.Object, CancellationToken.None)).Value;
 
         var employerEmail = Email.Create("employer@example.com").Value;
         var employerPhoneNumber = PhoneNumber.Create("+14156667777", "US").Value;
-        _validEmployerUser = (await _userService.CreateUserAsync("Jane", "Smith", UserRole.Employer, employerEmail, employerPhoneNumber, CancellationToken.None)).Value;
-        _validEmployerUser.CreateAccount("password123", _passwordHasherMock.Object);
+        _validEmployerUser = (await _userService.CreateUserAsync("Jane", "Smith", UserRole.Employer, employerEmail, employerPhoneNumber, "password123", _passwordHasherMock.Object, CancellationToken.None)).Value;
 
         var title = VacancyTitle.Create("Software Engineer").Value;
         var description = RichTextContent.Create("Job description", _markdownParserMock.Object).Value;
@@ -149,8 +144,8 @@ public class VacancyApplicationServiceTests
         Assert.Equal(_validResume.Id, result.Value.ResumeId);
 
         _vacancyApplicationRepositoryMock.Verify(x => x.HasAlreadyAppliedToVacancyAsync(
-            _validJobSeekerUser.Id, 
-            _validPublishedVacancy.Id, 
+            _validJobSeekerUser.Id,
+            _validPublishedVacancy.Id,
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -190,8 +185,8 @@ public class VacancyApplicationServiceTests
     public async Task ApplyToVacancyWithCreatedResumeAsync_WhenUserAlreadyApplied_ShouldReturnFailure()
     {
         _vacancyApplicationRepositoryMock.Setup(x => x.HasAlreadyAppliedToVacancyAsync(
-            _validJobSeekerUser.Id, 
-            _validPublishedVacancy.Id, 
+            _validJobSeekerUser.Id,
+            _validPublishedVacancy.Id,
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
@@ -205,8 +200,8 @@ public class VacancyApplicationServiceTests
         Assert.NotNull(result.Error);
 
         _vacancyApplicationRepositoryMock.Verify(x => x.HasAlreadyAppliedToVacancyAsync(
-            _validJobSeekerUser.Id, 
-            _validPublishedVacancy.Id, 
+            _validJobSeekerUser.Id,
+            _validPublishedVacancy.Id,
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -230,8 +225,8 @@ public class VacancyApplicationServiceTests
         Assert.Equal(_validFileUrl, result.Value.FileUrl);
 
         _vacancyApplicationRepositoryMock.Verify(x => x.HasAlreadyAppliedToVacancyAsync(
-            _validJobSeekerUser.Id, 
-            _validPublishedVacancy.Id, 
+            _validJobSeekerUser.Id,
+            _validPublishedVacancy.Id,
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -286,8 +281,8 @@ public class VacancyApplicationServiceTests
         Assert.NotNull(result.Error);
 
         _vacancyApplicationRepositoryMock.Verify(x => x.HasAlreadyAppliedToVacancyAsync(
-            _validJobSeekerUser.Id, 
-            _validPublishedVacancy.Id, 
+            _validJobSeekerUser.Id,
+            _validPublishedVacancy.Id,
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -418,8 +413,7 @@ public class VacancyApplicationServiceTests
 
         var employerEmail = Email.Create("test-employer@test.com").Value;
         var employerPhoneNumber = PhoneNumber.Create("+14156667778", "US").Value;
-        var employerUser = (await _userService.CreateUserAsync("Test", "Employer", UserRole.Employer, employerEmail, employerPhoneNumber, CancellationToken.None)).Value;
-        employerUser.CreateAccount("password123", _passwordHasherMock.Object);
+        var employerUser = (await _userService.CreateUserAsync("Test", "Employer", UserRole.Employer, employerEmail, employerPhoneNumber, "password123", _passwordHasherMock.Object, CancellationToken.None)).Value;
 
         if (status == VacancyStatus.Draft)
         {

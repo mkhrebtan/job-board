@@ -1,5 +1,4 @@
 ﻿using Domain.Contexts.IdentityContext.Aggregates;
-using Domain.Contexts.IdentityContext.Entities;
 using Domain.Contexts.IdentityContext.IDs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -25,15 +24,15 @@ internal sealed class RefreshTokenConfiguration : IEntityTypeConfiguration<Refre
         builder.Property(rt => rt.ExpiresAt)
             .IsRequired();
 
-        builder.HasIndex(rt => rt.AccountId).IsUnique();
+        builder.HasIndex(rt => rt.UserId).IsUnique();
 
-        builder.HasOne<Account>()
+        builder.HasOne<User>()
             .WithMany()
-            .HasForeignKey(rt => rt.AccountId)
+            .HasForeignKey(rt => rt.UserId)
             .IsRequired();
 
-        builder.Property(rt => rt.AccountId).HasConversion(
-            accountId => accountId.Value,
-            value => new AccountId(value));
+        builder.Property(rt => rt.UserId).HasConversion(
+            userId => userId.Value,
+            value => new UserId(value));
     }
 }
