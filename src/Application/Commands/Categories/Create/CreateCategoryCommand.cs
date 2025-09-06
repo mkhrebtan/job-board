@@ -2,6 +2,6 @@
 
 namespace Application.Commands.Categories.Create;
 
-public record CreateCategoryCommand(string Name) : ICommand<CreateCategoryRepsonse>;
+public record CreateCategoryCommand(string Name) : ICommand<CreateCategoryResponse>;
 
-public record CreateCategoryRepsonse(Guid Id, string Name);
+public record CreateCategoryResponse(Guid Id, string Name);

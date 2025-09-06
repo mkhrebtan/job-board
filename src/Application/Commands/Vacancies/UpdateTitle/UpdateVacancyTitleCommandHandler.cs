@@ -1,5 +1,6 @@
 ﻿using Application.Abstractions.Messaging;
 using Domain.Abstraction.Interfaces;
+using Domain.Contexts.JobPostingContext.IDs;
 using Domain.Contexts.JobPostingContext.ValueObjects;
 using Domain.Repos.Vacancies;
 using Domain.Shared.ErrorHandling;
@@ -19,7 +20,7 @@ internal sealed class UpdateVacancyTitleCommandHandler : ICommandHandler<UpdateV
 
     public async Task<Result> Handle(UpdateVacancyTitleCommand command, CancellationToken cancellationToken = default)
     {
-        var vacancy = await _vacancyRepository.GetByIdAsync(command.Id, cancellationToken);
+        var vacancy = await _vacancyRepository.GetByIdAsync(new VacancyId(command.Id), cancellationToken);
         if (vacancy is null)
         {
             return Result.Failure(Error.NotFound("Vacancy.NotFound", $"Vacancy with ID {command.Id} was not found."));

@@ -19,7 +19,7 @@ internal sealed class RemoveResumeWorkExperienceCommandHandler : ICommandHandler
 
     public async Task<Result> Handle(RemoveResumeWorkExperienceCommand command, CancellationToken cancellationToken = default)
     {
-        var resume = await _resumeRepository.GetByIdAsync(command.Id, cancellationToken);
+        var resume = await _resumeRepository.GetByIdAsync(new ResumeId(command.Id), cancellationToken);
         if (resume is null)
         {
             return Result.Failure(Error.NotFound("Resume.NotFound", "The resume was not found."));

@@ -3,4 +3,4 @@ using Application.Commands.VacancyApplications.ApplyWithFile;
 
 namespace Application.Commands.VacancyApplications.ApplyWithResume;
 
-public record ApplyToVacancyWithResumeCommand(Guid UserId, Guid VacancyId, string? CoverLetterContent, Guid ResumeId) : ICommand<ApplyToVacancyCommandResponse>;
+public record ApplyToVacancyWithResumeCommand(IApplicationInfo ApplicationInfo, Guid VacancyId, string? CoverLetterContent, Guid ResumeId) : ICommand<ApplyToVacancyCommandResponse>;

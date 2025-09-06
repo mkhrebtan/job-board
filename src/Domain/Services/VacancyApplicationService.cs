@@ -58,7 +58,7 @@ public sealed class VacancyApplicationService
             return Result.Failure(Error.Problem("VacancyApplicationService.NullCoverLetter", "Cover letter cannot be null."));
         }
 
-        if (await _vacancyApplicationRepository.HasAlreadyAppliedToVacancyAsync(user.Id.Value, vacancy.Id.Value, ct))
+        if (await _vacancyApplicationRepository.HasAlreadyAppliedToVacancyAsync(user.Id, vacancy.Id, ct))
         {
             return Result.Failure(Error.Conflict("VacancyApplicationService.AlreadyApplied", "User has already applied to this vacancy."));
         }

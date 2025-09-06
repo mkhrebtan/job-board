@@ -1,6 +1,7 @@
 ﻿using Domain.Abstraction.Interfaces;
 using Domain.Contexts.IdentityContext.Aggregates;
 using Domain.Contexts.IdentityContext.Enums;
+using Domain.Contexts.IdentityContext.IDs;
 using Domain.Contexts.JobPostingContext.Enums;
 using Domain.Contexts.JobPostingContext.ValueObjects;
 using Domain.Contexts.RecruitmentContext.IDs;
@@ -60,8 +61,8 @@ public class VacancyServiceTests
                 return markdown + " (plain text)";
             });
 
-        _companyUserRepositoryMock.Setup(repo => repo.GetCompanyIdByUserId(_validEmployerUser.Id.Value, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(_validCompanyId.Value);
+        _companyUserRepositoryMock.Setup(repo => repo.GetCompanyIdByUserId(_validEmployerUser.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(_validCompanyId);
 
         _passwordHasherMock.Setup(x => x.HashPassword(It.IsAny<string>()))
             .Returns<string>(p => p + "_hashed");
@@ -100,7 +101,7 @@ public class VacancyServiceTests
         Assert.Null(result.Value.CategoryId);
         Assert.Null(result.Value.RegisteredAt);
         Assert.Null(result.Value.PublishedAt);
-        _companyUserRepositoryMock.Verify(repo => repo.GetCompanyIdByUserId(_validEmployerUser.Id.Value, It.IsAny<CancellationToken>()), Times.Once);
+        _companyUserRepositoryMock.Verify(repo => repo.GetCompanyIdByUserId(_validEmployerUser.Id, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -199,7 +200,7 @@ public class VacancyServiceTests
 
         Assert.True(result.IsFailure);
         Assert.NotNull(result.Error);
-        _companyUserRepositoryMock.Verify(repo => repo.GetCompanyIdByUserId(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
+        _companyUserRepositoryMock.Verify(repo => repo.GetCompanyIdByUserId(It.IsAny<UserId>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -218,14 +219,14 @@ public class VacancyServiceTests
 
         Assert.True(result.IsFailure);
         Assert.NotNull(result.Error);
-        _companyUserRepositoryMock.Verify(repo => repo.GetCompanyIdByUserId(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
+        _companyUserRepositoryMock.Verify(repo => repo.GetCompanyIdByUserId(It.IsAny<UserId>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
     public async Task CreateVacancyInDraftStatusAsync_WhenUseHasNoCompany_ShouldReturnFailure()
     {
-        _companyUserRepositoryMock.Setup(repo => repo.GetCompanyIdByUserId(_validEmployerUser.Id.Value, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Guid?)null);
+        _companyUserRepositoryMock.Setup(repo => repo.GetCompanyIdByUserId(_validEmployerUser.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((CompanyId?)null);
 
         var result = await _vacancyService.CreateVacancyInDraftStatusAsync(
             _validEmployerUser,
@@ -238,7 +239,7 @@ public class VacancyServiceTests
 
         Assert.True(result.IsFailure);
         Assert.NotNull(result.Error);
-        _companyUserRepositoryMock.Verify(repo => repo.GetCompanyIdByUserId(_validEmployerUser.Id.Value, It.IsAny<CancellationToken>()), Times.Once);
+        _companyUserRepositoryMock.Verify(repo => repo.GetCompanyIdByUserId(_validEmployerUser.Id, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     #endregion
@@ -267,7 +268,7 @@ public class VacancyServiceTests
         Assert.Equal(_validRecruiterInfo, result.Value.RecruiterInfo);
         Assert.Null(result.Value.CategoryId);
         Assert.Null(result.Value.PublishedAt);
-        _companyUserRepositoryMock.Verify(repo => repo.GetCompanyIdByUserId(_validEmployerUser.Id.Value, It.IsAny<CancellationToken>()), Times.Once);
+        _companyUserRepositoryMock.Verify(repo => repo.GetCompanyIdByUserId(_validEmployerUser.Id, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -366,7 +367,7 @@ public class VacancyServiceTests
 
         Assert.True(result.IsFailure);
         Assert.NotNull(result.Error);
-        _companyUserRepositoryMock.Verify(repo => repo.GetCompanyIdByUserId(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
+        _companyUserRepositoryMock.Verify(repo => repo.GetCompanyIdByUserId(It.IsAny<UserId>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -385,14 +386,14 @@ public class VacancyServiceTests
 
         Assert.True(result.IsFailure);
         Assert.NotNull(result.Error);
-        _companyUserRepositoryMock.Verify(repo => repo.GetCompanyIdByUserId(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
+        _companyUserRepositoryMock.Verify(repo => repo.GetCompanyIdByUserId(It.IsAny<UserId>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
     public async Task CreateVacancyInRegisteredStatusAsync_WhenUseHasNoCompany_ShouldReturnFailure()
     {
-        _companyUserRepositoryMock.Setup(repo => repo.GetCompanyIdByUserId(_validEmployerUser.Id.Value, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Guid?)null);
+        _companyUserRepositoryMock.Setup(repo => repo.GetCompanyIdByUserId(_validEmployerUser.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((CompanyId?)null);
 
         var result = await _vacancyService.CreateVacancyInRegisteredStatusAsync(
             _validEmployerUser,
@@ -405,7 +406,7 @@ public class VacancyServiceTests
 
         Assert.True(result.IsFailure);
         Assert.NotNull(result.Error);
-        _companyUserRepositoryMock.Verify(repo => repo.GetCompanyIdByUserId(_validEmployerUser.Id.Value, It.IsAny<CancellationToken>()), Times.Once);
+        _companyUserRepositoryMock.Verify(repo => repo.GetCompanyIdByUserId(_validEmployerUser.Id, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     #endregion

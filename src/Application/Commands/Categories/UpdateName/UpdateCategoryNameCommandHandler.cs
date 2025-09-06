@@ -1,6 +1,7 @@
 ﻿using Application.Abstractions.Messaging;
 using Application.Commands.Categories.Create;
 using Domain.Abstraction.Interfaces;
+using Domain.Contexts.JobPostingContext.IDs;
 using Domain.Repos.Categories;
 using Domain.Services;
 using Domain.Shared.ErrorHandling;
@@ -22,7 +23,7 @@ internal sealed class UpdateCategoryNameCommandHandler : ICommandHandler<UpdateC
 
     public async Task<Result> Handle(UpdateCategoryNameCommand command, CancellationToken cancellationToken = default)
     {
-        var category = await _categoryRepository.GetByIdAsync(command.Id, cancellationToken);
+        var category = await _categoryRepository.GetByIdAsync(new CategoryId(command.Id), cancellationToken);
         if (category is null)
         {
             return Result.Failure(Error.NotFound("Category.NotFound", $"Category with ID '{command.Id}' not found."));

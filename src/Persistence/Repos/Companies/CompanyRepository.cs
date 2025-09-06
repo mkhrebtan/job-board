@@ -12,8 +12,8 @@ internal class CompanyRepository : GenericRepository<Company, CompanyId>, ICompa
     {
     }
 
-    public async Task<Company?> GetByIdAsync(Guid id, CancellationToken ct)
+    public async Task<Company?> GetByIdAsync(CompanyId id, CancellationToken ct)
     {
-        return await _dbSet.FirstOrDefaultAsync(x => x.Id.Value == id, ct);
+        return await _dbSet.FirstOrDefaultAsync(x => x.Id == id, ct);
     }
 }

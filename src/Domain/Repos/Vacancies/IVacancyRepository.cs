@@ -5,5 +5,5 @@ namespace Domain.Repos.Vacancies;
 
 public interface IVacancyRepository : IRepository<Vacancy, VacancyId>
 {
-    Task<Vacancy?> GetByIdAsync(Guid id, CancellationToken ct);
+    Task<Vacancy?> GetByIdAsync(VacancyId id, CancellationToken ct);
 }

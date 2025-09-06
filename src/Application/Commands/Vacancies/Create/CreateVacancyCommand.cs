@@ -20,6 +20,6 @@ public record CreateVacancyCommand(
     string RecruiterEmail,
     string RecruiterPhoneNumber,
     string RecruiterPhoneNumberRegionCode,
-    bool IsDraft) : ICommand<CreateVacancyResponse>;
+    bool IsDraft) : ICommand<CreateVacancyCommandResponse>;
 
-public record CreateVacancyResponse(Guid Id);
+public record CreateVacancyCommandResponse(Guid Id);

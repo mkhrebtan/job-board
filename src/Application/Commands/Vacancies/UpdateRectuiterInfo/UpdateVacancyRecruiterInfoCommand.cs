@@ -2,7 +2,7 @@
 
 namespace Application.Commands.Vacancies.UpdateRectuiterInfo;
 
-public record UpdateVacancyRecruiterInfo(
+public record UpdateVacancyRecruiterInfoCommand(
     Guid Id,
     string RecruiterFirstName,
     string RecruiterEmail,

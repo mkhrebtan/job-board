@@ -3,6 +3,6 @@ using Application.Commands.Resumes.Create;
 
 namespace Application.Commands.Resumes.Updates.UpdateSkillsDescription;
 
-public record UpdateResumeSkillsDescription(
+public record UpdateResumeSkillsDescriptionCommand(
     Guid Id,
     string SkillsDescripitonMarkdown) : ICommand;

@@ -66,13 +66,12 @@ public sealed class VacancyService
             return Result<CompanyId>.Failure(Error.Problem("VacancyService.NoAccount", "The employer user must must have an account to create a vacancy."));
         }
 
-        Guid? userCompanyId = await _companyUserRepository.GetCompanyIdByUserId(user.Id.Value, cancellationToken);
+        CompanyId? userCompanyId = await _companyUserRepository.GetCompanyIdByUserId(user.Id, cancellationToken);
         if (userCompanyId is null)
         {
             return Result<CompanyId>.Failure(Error.Problem("VacancyService.NoCompany", "The employer user must be associated with a company to create a vacancy."));
         }
 
-        CompanyId companyId = new CompanyId((Guid)userCompanyId);
-        return Result<CompanyId>.Success(companyId);
+        return Result<CompanyId>.Success(userCompanyId);
     }
 }

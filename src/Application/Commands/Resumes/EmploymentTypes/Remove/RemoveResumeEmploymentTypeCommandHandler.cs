@@ -2,6 +2,7 @@
 using Application.Common.Helpers;
 using Domain.Abstraction.Interfaces;
 using Domain.Contexts.ResumePostingContext.Enums;
+using Domain.Contexts.ResumePostingContext.IDs;
 using Domain.Repos.Resumes;
 using Domain.Shared.ErrorHandling;
 
@@ -20,7 +21,7 @@ internal sealed class RemoveResumeEmploymentTypeCommandHandler : ICommandHandler
 
     public async Task<Result> Handle(RemoveResumeEmploymentTypeCommand command, CancellationToken cancellationToken = default)
     {
-        var resume = await _resumeRepository.GetByIdAsync(command.Id, cancellationToken);
+        var resume = await _resumeRepository.GetByIdAsync(new ResumeId(command.Id), cancellationToken);
         if (resume is null)
         {
             return Result.Failure(Error.NotFound("Resume.NotFound", "The resume was not found."));

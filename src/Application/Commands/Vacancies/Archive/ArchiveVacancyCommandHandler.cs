@@ -1,5 +1,7 @@
 ﻿using Application.Abstractions.Messaging;
 using Domain.Abstraction.Interfaces;
+using Domain.Contexts.JobPostingContext.IDs;
+using Domain.Contexts.ResumePostingContext.IDs;
 using Domain.Repos.Vacancies;
 using Domain.Shared.ErrorHandling;
 
@@ -18,7 +20,7 @@ internal sealed class ArchiveVacancyCommandHandler : ICommandHandler<ArchiveVaca
 
     public async Task<Result> Handle(ArchiveVacancyCommand command, CancellationToken cancellationToken = default)
     {
-        var vacancy = await _vacancyRepository.GetByIdAsync(command.Id, cancellationToken);
+        var vacancy = await _vacancyRepository.GetByIdAsync(new VacancyId(command.Id), cancellationToken);
         if (vacancy is null)
         {
             return Result.Failure(Error.NotFound("Vacancy.NotFound", "The vacancy was not found."));

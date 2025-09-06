@@ -2,6 +2,7 @@
 using Application.Common.Helpers;
 using Domain.Abstraction;
 using Domain.Abstraction.Interfaces;
+using Domain.Contexts.IdentityContext.IDs;
 using Domain.Contexts.JobPostingContext.ValueObjects;
 using Domain.Contexts.ResumePostingContext.Enums;
 using Domain.Contexts.ResumePostingContext.ValueObjects;
@@ -30,7 +31,7 @@ internal sealed class CreateResumeCommandHandler : ICommandHandler<CreateResumeC
 
     public async Task<Result<CreateResumeCommandResponse>> Handle(CreateResumeCommand command, CancellationToken cancellationToken = default)
     {
-        var user = await _userRepository.GetByIdAsync(command.SeekerId, cancellationToken);
+        var user = await _userRepository.GetByIdAsync(new UserId(command.SeekerId), cancellationToken);
         if (user is null)
         {
             return Result<CreateResumeCommandResponse>.Failure(Error.NotFound("User.NotFound", "The user was not found."));

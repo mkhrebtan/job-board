@@ -1,6 +1,7 @@
 ﻿using Application.Abstractions.Messaging;
 using Application.Common.Helpers;
 using Domain.Abstraction.Interfaces;
+using Domain.Contexts.ResumePostingContext.IDs;
 using Domain.Contexts.ResumePostingContext.ValueObjects;
 using Domain.Repos.Resumes;
 using Domain.Shared.ErrorHandling;
@@ -20,7 +21,7 @@ internal sealed class UpdateResumeDesiredPositionCommandHandler : ICommandHandle
 
     public async Task<Result> Handle(UpdateResumeDesiredPositionCommand command, CancellationToken cancellationToken = default)
     {
-        var resume = await _resumeRepository.GetByIdAsync(command.Id, cancellationToken);
+        var resume = await _resumeRepository.GetByIdAsync(new ResumeId(command.Id), cancellationToken);
         if (resume is null)
         {
             return Result.Failure(Error.NotFound("Resume.NotFound", "The resume was not found."));

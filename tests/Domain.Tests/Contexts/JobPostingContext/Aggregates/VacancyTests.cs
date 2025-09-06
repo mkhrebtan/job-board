@@ -62,8 +62,8 @@ public class VacancyTests
 
         CreateValidEmployerUserAsync();
 
-        _companyUserRepositoryMock.Setup(repo => repo.GetCompanyIdByUserId(_validEmployerUser.Id.Value, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(_validCompanyId.Value);
+        _companyUserRepositoryMock.Setup(repo => repo.GetCompanyIdByUserId(_validEmployerUser.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(_validCompanyId);
 
         SetupTestVacancy();
     }

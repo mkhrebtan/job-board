@@ -4,7 +4,7 @@ using FluentValidation;
 
 namespace Application.Commands.Vacancies.UpdateRectuiterInfo;
 
-internal class UpdateVacancyRecruiterInfoCommandValidator : AbstractValidator<UpdateVacancyRecruiterInfo>
+internal class UpdateVacancyRecruiterInfoCommandValidator : AbstractValidator<UpdateVacancyRecruiterInfoCommand>
 {
     public UpdateVacancyRecruiterInfoCommandValidator()
     {

@@ -5,7 +5,7 @@ namespace Domain.Repos.Users;
 
 public interface IUserRepository : IRepository<User, UserId>
 {
-    Task<User?> GetByIdAsync(Guid id, CancellationToken ct);
+    Task<User?> GetByIdAsync(UserId id, CancellationToken ct);
 
     Task<User?> GetByEmailAsync(string email, CancellationToken ct);
 

@@ -22,13 +22,13 @@ internal sealed class UpdateVacancyCategoryCommandHandler : ICommandHandler<Upda
 
     public async Task<Result> Handle(UpdateVacancyCategoryCommand command, CancellationToken cancellationToken = default)
     {
-        var vacancy = await _vacancyRepository.GetByIdAsync(command.Id, cancellationToken);
+        var vacancy = await _vacancyRepository.GetByIdAsync(new VacancyId(command.Id), cancellationToken);
         if (vacancy is null)
         {
             return Result.Failure(Error.NotFound("Vacancy.NotFound", $"Vacancy with ID {command.Id} was not found."));
         }
 
-        var category = await _categoryRepository.GetByIdAsync(command.CategoryId, cancellationToken);
+        var category = await _categoryRepository.GetByIdAsync(new CategoryId(command.CategoryId), cancellationToken);
         if (category is null)
         {
             return Result.Failure(Error.NotFound("Category.NotFound", "The category was not found."));

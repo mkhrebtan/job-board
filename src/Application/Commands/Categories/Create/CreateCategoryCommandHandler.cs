@@ -6,7 +6,7 @@ using Domain.Shared.ErrorHandling;
 
 namespace Application.Commands.Categories.Create;
 
-internal sealed class CreateCategoryCommandHandler : ICommandHandler<CreateCategoryCommand, CreateCategoryRepsonse>
+internal sealed class CreateCategoryCommandHandler : ICommandHandler<CreateCategoryCommand, CreateCategoryResponse>
 {
     private readonly ICategoryRepository _categoryRepository;
     private readonly CategoryService _categoryService;
@@ -19,17 +19,17 @@ internal sealed class CreateCategoryCommandHandler : ICommandHandler<CreateCateg
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Result<CreateCategoryRepsonse>> Handle(CreateCategoryCommand command, CancellationToken cancellationToken = default)
+    public async Task<Result<CreateCategoryResponse>> Handle(CreateCategoryCommand command, CancellationToken cancellationToken = default)
     {
         var creationResult = await _categoryService.CreateCategoryAsync(command.Name, cancellationToken);
         if (creationResult.IsFailure)
         {
-            return Result<CreateCategoryRepsonse>.Failure(creationResult.Error);
+            return Result<CreateCategoryResponse>.Failure(creationResult.Error);
         }
 
         var category = creationResult.Value;
         _categoryRepository.Add(category);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return Result<CreateCategoryRepsonse>.Success(new CreateCategoryRepsonse(category.Id.Value, category.Name));
+        return Result<CreateCategoryResponse>.Success(new CreateCategoryResponse(category.Id.Value, category.Name));
     }
 }

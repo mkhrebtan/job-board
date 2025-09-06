@@ -2,12 +2,13 @@
 using Application.Commands.Resumes.Create;
 using Domain.Abstraction.Interfaces;
 using Domain.Contexts.ResumePostingContext.Enums;
+using Domain.Contexts.ResumePostingContext.IDs;
 using Domain.Repos.Resumes;
 using Domain.Shared.ErrorHandling;
 
 namespace Application.Commands.Resumes.Languages.Add;
 
-internal sealed class AddResumeLanguageCommandHandler : ICommandHandler<AddResumeLanguageCommand>
+internal sealed class AddResumeLanguageCommandHandler : ICommandHandler<AddResumeLanguageCommand, AddResumeLanguageCommandResponse>
 {
     private readonly IResumeRepository _resumeRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -18,28 +19,28 @@ internal sealed class AddResumeLanguageCommandHandler : ICommandHandler<AddResum
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Result> Handle(AddResumeLanguageCommand command, CancellationToken cancellationToken = default)
+    public async Task<Result<AddResumeLanguageCommandResponse>> Handle(AddResumeLanguageCommand command, CancellationToken cancellationToken = default)
     {
-        var resume = await _resumeRepository.GetByIdAsync(command.Id, cancellationToken);
+        var resume = await _resumeRepository.GetByIdAsync(new ResumeId(command.Id), cancellationToken);
         if (resume is null)
         {
-            return Result.Failure(Error.NotFound("Resume.NotFound", "The resume was not found."));
+            return Result<AddResumeLanguageCommandResponse>.Failure(Error.NotFound("Resume.NotFound", "The resume was not found."));
         }
 
         var proficiencyResult = LanguageLevel.FromCode(command.Language.ProficiencyLevel);
         if (proficiencyResult is null)
         {
-            return Result<CreateResumeCommandResponse>.Failure(Error.Validation("CreateResumeCommand.InvalidLanguageProficiency", $"Invalid language proficiency: '{lang.ProficiencyLevel}'."));
+            return Result<AddResumeLanguageCommandResponse>.Failure(Error.Validation("CreateResumeCommand.InvalidLanguageProficiency", $"Invalid language proficiency: '{command.Language.ProficiencyLevel}'."));
         }
 
         var langResult = resume.AddLanguage(command.Language.Language, proficiencyResult);
         if (langResult.IsFailure)
         {
-            return Result.Failure(langResult.Error);
+            return Result<AddResumeLanguageCommandResponse>.Failure(langResult.Error);
         }
 
         _resumeRepository.Update(resume);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return Result.Success();
+        return Result<AddResumeLanguageCommandResponse>.Success(new AddResumeLanguageCommandResponse(langResult.Value.Value));
     }
 }

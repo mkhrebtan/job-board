@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Application.Commands.Resumes.Updates.UpdateSkillsDescription;
 
-internal class UpdateResumeSkillsDescriptionValidator : AbstractValidator<UpdateResumeSkillsDescription>
+internal class UpdateResumeSkillsDescriptionValidator : AbstractValidator<UpdateResumeSkillsDescriptionCommand>
 {
     public UpdateResumeSkillsDescriptionValidator()
     {

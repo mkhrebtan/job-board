@@ -19,7 +19,7 @@ internal sealed class RemoveResumeLanguageCommandHandler : ICommandHandler<Remov
 
     public async Task<Result> Handle(RemoveResumeLanguageCommand command, CancellationToken cancellationToken = default)
     {
-        var resume = await _resumeRepository.GetByIdAsync(command.Id, cancellationToken);
+        var resume = await _resumeRepository.GetByIdAsync(new ResumeId(command.Id), cancellationToken);
         if (resume is null)
         {
             return Result.Failure(Error.NotFound("Resume.NotFound", "The resume was not found."));

@@ -1,5 +1,6 @@
 ﻿using Application.Abstractions.Messaging;
 using Domain.Abstraction.Interfaces;
+using Domain.Contexts.IdentityContext.IDs;
 using Domain.Contexts.RecruitmentContext.Aggregates;
 using Domain.Contexts.RecruitmentContext.IDs;
 using Domain.Repos.Companies;
@@ -35,13 +36,13 @@ internal sealed class AssignEmployerCommandHandler : ICommandHandler<AssignEmplo
 
     public async Task<Result> Handle(AssignEmployerCommand command, CancellationToken cancellationToken = default)
     {
-        var user = await _userRepository.GetByIdAsync(command.EmployerId, cancellationToken);
+        var user = await _userRepository.GetByIdAsync(new UserId(command.EmployerId), cancellationToken);
         if (user is null)
         {
             return Result.Failure(Error.NotFound("AssignEmployer.UserNotFound", "The specified user was not found."));
         }
 
-        var company = await _companyRepository.GetByIdAsync(command.CompanyId, cancellationToken);
+        var company = await _companyRepository.GetByIdAsync(new CompanyId(command.CompanyId), cancellationToken);
         if (company is null)
         {
             return Result.Failure(Error.NotFound("AssignEmployer.CompanyNotFound", "The specified company was not found."));

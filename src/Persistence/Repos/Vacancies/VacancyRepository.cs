@@ -12,8 +12,8 @@ internal class VacancyRepository : GenericRepository<Vacancy, VacancyId>, IVacan
     {
     }
 
-    public Task<Vacancy?> GetByIdAsync(Guid id, CancellationToken ct)
+    public async Task<Vacancy?> GetByIdAsync(VacancyId id, CancellationToken ct)
     {
-        return _dbSet.FirstOrDefaultAsync(x => x.Id.Value == id, ct);
+        return await _dbSet.FirstOrDefaultAsync(x => x.Id == id, ct);
     }
 }

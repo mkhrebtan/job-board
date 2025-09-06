@@ -1,5 +1,6 @@
 ﻿using Application.Abstractions.Messaging;
 using Domain.Abstraction.Interfaces;
+using Domain.Contexts.RecruitmentContext.IDs;
 using Domain.Repos.Companies;
 using Domain.Shared.ErrorHandling;
 
@@ -20,7 +21,7 @@ internal sealed class UpdateCompanySizeCommandHandler : ICommandHandler<UpdateCo
 
     public async Task<Result> Handle(UpdateCompanySizeCommand command, CancellationToken cancellationToken = default)
     {
-        var company = await _companyRepository.GetByIdAsync(command.Id, cancellationToken);
+        var company = await _companyRepository.GetByIdAsync(new CompanyId(command.Id), cancellationToken);
         if (company is null)
         {
             return Result.Failure(Error.NotFound("Company.NotFound", "The company was not found."));

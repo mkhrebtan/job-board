@@ -1,5 +1,6 @@
 ﻿using Application.Abstractions.Messaging;
 using Domain.Abstraction.Interfaces;
+using Domain.Contexts.ResumePostingContext.IDs;
 using Domain.Repos.Resumes;
 using Domain.Shared.ErrorHandling;
 
@@ -18,7 +19,7 @@ internal sealed class PublishResumeCommandHandler : ICommandHandler<PublishResum
 
     public async Task<Result> Handle(PublishResumeCommand command, CancellationToken cancellationToken = default)
     {
-        var resume = await _resumeRepository.GetByIdAsync(command.Id, cancellationToken);
+        var resume = await _resumeRepository.GetByIdAsync(new ResumeId(command.Id), cancellationToken);
         if (resume is null)
         {
             return Result.Failure(Error.NotFound("Resume.NotFound", "Resume not found."));

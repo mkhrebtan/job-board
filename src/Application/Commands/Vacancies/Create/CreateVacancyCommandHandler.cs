@@ -1,5 +1,6 @@
 ﻿using Application.Abstractions.Messaging;
 using Domain.Abstraction.Interfaces;
+using Domain.Contexts.IdentityContext.IDs;
 using Domain.Contexts.JobPostingContext.Aggregates;
 using Domain.Contexts.JobPostingContext.ValueObjects;
 using Domain.Repos.Users;
@@ -10,7 +11,7 @@ using Domain.Shared.ValueObjects;
 
 namespace Application.Commands.Vacancies.Create;
 
-internal class CreateVacancyCommandHandler : ICommandHandler<CreateVacancyCommand, CreateVacancyResponse>
+internal class CreateVacancyCommandHandler : ICommandHandler<CreateVacancyCommand, CreateVacancyCommandResponse>
 {
     private readonly VacancyService _vacancyService;
     private readonly IUserRepository _userRepository;
@@ -32,24 +33,24 @@ internal class CreateVacancyCommandHandler : ICommandHandler<CreateVacancyComman
         _vacancyRepository = vacancyRepository;
     }
 
-    public async Task<Result<CreateVacancyResponse>> Handle(CreateVacancyCommand command, CancellationToken cancellationToken = default)
+    public async Task<Result<CreateVacancyCommandResponse>> Handle(CreateVacancyCommand command, CancellationToken cancellationToken = default)
     {
-        var employer = await _userRepository.GetByIdAsync(command.EmployerId, cancellationToken);
+        var employer = await _userRepository.GetByIdAsync(new UserId(command.EmployerId), cancellationToken);
         if (employer is null)
         {
-            return Result<CreateVacancyResponse>.Failure(Error.NotFound("CreateVacancyCommandHandler.UserNotFound", "The specified employer user was not found."));
+            return Result<CreateVacancyCommandResponse>.Failure(Error.NotFound("CreateVacancyCommandHandler.UserNotFound", "The specified employer user was not found."));
         }
 
         var vacancyTitleResult = VacancyTitle.Create(command.Title);
         if (vacancyTitleResult.IsFailure)
         {
-            return Result<CreateVacancyResponse>.Failure(vacancyTitleResult.Error);
+            return Result<CreateVacancyCommandResponse>.Failure(vacancyTitleResult.Error);
         }
 
         var descriptionResult = RichTextContent.Create(command.DescriptionMarkdown, _markdownParser);
         if (descriptionResult.IsFailure)
         {
-            return Result<CreateVacancyResponse>.Failure(descriptionResult.Error);
+            return Result<CreateVacancyCommandResponse>.Failure(descriptionResult.Error);
         }
 
         Result<Salary> salaryResult = default!;
@@ -67,12 +68,12 @@ internal class CreateVacancyCommandHandler : ICommandHandler<CreateVacancyComman
         }
         else
         {
-            return Result<CreateVacancyResponse>.Failure(Error.Problem("CreateVacancyCommandHandler.InvalidSalary", "Invalid salary range provided."));
+            return Result<CreateVacancyCommandResponse>.Failure(Error.Problem("CreateVacancyCommandHandler.InvalidSalary", "Invalid salary range provided."));
         }
 
         if (salaryResult.IsFailure)
         {
-            return Result<CreateVacancyResponse>.Failure(salaryResult.Error);
+            return Result<CreateVacancyCommandResponse>.Failure(salaryResult.Error);
         }
 
         var locationResult = Location.Create(
@@ -85,19 +86,19 @@ internal class CreateVacancyCommandHandler : ICommandHandler<CreateVacancyComman
             command.Longitude);
         if (locationResult.IsFailure)
         {
-            return Result<CreateVacancyResponse>.Failure(locationResult.Error);
+            return Result<CreateVacancyCommandResponse>.Failure(locationResult.Error);
         }
 
         var emailResult = Email.Create(command.RecruiterEmail);
         if (emailResult.IsFailure)
         {
-            return Result<CreateVacancyResponse>.Failure(emailResult.Error);
+            return Result<CreateVacancyCommandResponse>.Failure(emailResult.Error);
         }
 
         var phoneNumberResult = PhoneNumber.Create(command.RecruiterPhoneNumber, command.RecruiterPhoneNumberRegionCode);
         if (phoneNumberResult.IsFailure)
         {
-            return Result<CreateVacancyResponse>.Failure(phoneNumberResult.Error);
+            return Result<CreateVacancyCommandResponse>.Failure(phoneNumberResult.Error);
         }
 
         var recruiterInfoResult = RecruiterInfo.Create(
@@ -106,7 +107,7 @@ internal class CreateVacancyCommandHandler : ICommandHandler<CreateVacancyComman
             phoneNumberResult.Value);
         if (recruiterInfoResult.IsFailure)
         {
-            return Result<CreateVacancyResponse>.Failure(recruiterInfoResult.Error);
+            return Result<CreateVacancyCommandResponse>.Failure(recruiterInfoResult.Error);
         }
 
         Result<Vacancy> vacancyResult = command.IsDraft ?
@@ -128,11 +129,11 @@ internal class CreateVacancyCommandHandler : ICommandHandler<CreateVacancyComman
                 cancellationToken);
         if (vacancyResult.IsFailure)
         {
-            return Result<CreateVacancyResponse>.Failure(vacancyResult.Error);
+            return Result<CreateVacancyCommandResponse>.Failure(vacancyResult.Error);
         }
 
         _vacancyRepository.Add(vacancyResult.Value);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return Result<CreateVacancyResponse>.Success(new CreateVacancyResponse(vacancyResult.Value.Id.Value));
+        return Result<CreateVacancyCommandResponse>.Success(new CreateVacancyCommandResponse(vacancyResult.Value.Id.Value));
     }
 }

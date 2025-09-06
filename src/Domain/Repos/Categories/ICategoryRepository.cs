@@ -7,7 +7,7 @@ public interface ICategoryRepository : IRepository<Category, CategoryId>
 {
     Task<bool> IsUniqueNameAsync(string normalizedName, CancellationToken ct);
 
-    Task<Category?> GetByIdAsync(Guid id, CancellationToken ct);
+    Task<Category?> GetByIdAsync(CategoryId id, CancellationToken ct);
 
     Task<bool> HasAssignedVacancies(Category category, CancellationToken ct);
 }

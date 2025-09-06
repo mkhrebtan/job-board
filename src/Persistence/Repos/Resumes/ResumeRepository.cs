@@ -12,12 +12,12 @@ internal class ResumeRepository : GenericRepository<Resume, ResumeId>, IResumeRe
     {
     }
 
-    public async Task<Resume?> GetByIdAsync(Guid id, CancellationToken ct)
+    public async Task<Resume?> GetByIdAsync(ResumeId id, CancellationToken ct)
     {
         return await _dbSet
             .Include(x => x.Educations)
             .Include(x => x.WorkExperiences)
             .Include(x => x.Languages)
-            .FirstOrDefaultAsync(x => x.Id.Value == id, ct);
+            .FirstOrDefaultAsync(x => x.Id == id, ct);
     }
 }

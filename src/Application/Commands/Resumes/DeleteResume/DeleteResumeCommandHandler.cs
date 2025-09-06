@@ -1,5 +1,6 @@
 ﻿using Application.Abstractions.Messaging;
 using Domain.Abstraction.Interfaces;
+using Domain.Contexts.ResumePostingContext.IDs;
 using Domain.Repos.Resumes;
 using Domain.Shared.ErrorHandling;
 
@@ -18,7 +19,7 @@ internal sealed class DeleteResumeCommandHandler : ICommandHandler<DeleteResumeC
 
     public async Task<Result> Handle(DeleteResumeCommand command, CancellationToken cancellationToken = default)
     {
-        var resume = await _resumeRepository.GetByIdAsync(command.Id, cancellationToken);
+        var resume = await _resumeRepository.GetByIdAsync(new ResumeId(command.Id), cancellationToken);
         if (resume is null)
         {
             return Result.Failure(Error.NotFound("DeleteResumeCommandHandler.ResumeNotFound", $"Resume with ID '{command.Id}' was not found."));

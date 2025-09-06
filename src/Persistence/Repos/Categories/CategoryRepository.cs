@@ -12,14 +12,14 @@ internal class CategoryRepository : GenericRepository<Category, CategoryId>, ICa
     {
     }
 
-    public async Task<Category?> GetByIdAsync(Guid id, CancellationToken ct)
+    public async Task<Category?> GetByIdAsync(CategoryId id, CancellationToken ct)
     {
-        return await _dbSet.FirstOrDefaultAsync(x => x.Id.Value == id, ct);
+        return await _dbSet.FirstOrDefaultAsync(x => x.Id == id, ct);
     }
 
     public async Task<bool> IsUniqueNameAsync(string normalizedName, CancellationToken ct)
     {
-        return await _dbSet.AnyAsync(x => x.NormalizedName == normalizedName, ct);
+        return !await _dbSet.AnyAsync(x => x.NormalizedName == normalizedName, ct);
     }
 
     public async Task<bool> HasAssignedVacancies(Category category, CancellationToken ct)

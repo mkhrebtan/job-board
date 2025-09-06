@@ -13,34 +13,34 @@ internal class UserRepository : GenericRepository<User, UserId>, IUserRepository
     {
     }
 
-    public Task<User?> GetByEmailAsync(string email, CancellationToken ct)
+    public async Task<User?> GetByEmailAsync(string email, CancellationToken ct)
     {
-        return _dbSet
+        return await _dbSet
             .Include(x => x.Account)
             .FirstOrDefaultAsync(x => x.Email.Address == email, ct);
     }
 
-    public Task<User?> GetByIdAsync(Guid id, CancellationToken ct)
+    public async Task<User?> GetByIdAsync(UserId id, CancellationToken ct)
     {
-        return _dbSet
+        return await _dbSet
             .Include(x => x.Account)
-            .FirstOrDefaultAsync(x => x.Id.Value == id, ct);
+            .FirstOrDefaultAsync(x => x.Id == id, ct);
     }
 
-    public Task<User?> GetByPhoneNumberAsync(string phoneNumber, CancellationToken ct)
+    public async Task<User?> GetByPhoneNumberAsync(string phoneNumber, CancellationToken ct)
     {
-        return _dbSet
+        return await _dbSet
             .Include(x => x.Account)
             .FirstOrDefaultAsync(x => x.PhoneNumber.Number == phoneNumber, ct);
     }
 
-    public Task<bool> IsUniqueEmailAsync(string email, CancellationToken ct)
+    public async Task<bool> IsUniqueEmailAsync(string email, CancellationToken ct)
     {
-        return _dbSet.AnyAsync(x => x.Email.Address == email, ct);
+        return await _dbSet.AnyAsync(x => x.Email.Address == email, ct);
     }
 
-    public Task<bool> IsUniquePhoneNumberAsync(string phoneNumber, CancellationToken ct)
+    public async Task<bool> IsUniquePhoneNumberAsync(string phoneNumber, CancellationToken ct)
     {
-        return _dbSet.AnyAsync(x => x.PhoneNumber.Number == phoneNumber, ct);
+        return await _dbSet.AnyAsync(x => x.PhoneNumber.Number == phoneNumber, ct);
     }
 }

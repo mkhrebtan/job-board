@@ -4,6 +4,7 @@ using Domain.Contexts.ApplicationContext.ValueObjects;
 using Domain.Contexts.IdentityContext.Aggregates;
 using Domain.Contexts.IdentityContext.Entities;
 using Domain.Contexts.IdentityContext.Enums;
+using Domain.Contexts.IdentityContext.IDs;
 using Domain.Contexts.JobPostingContext.Aggregates;
 using Domain.Contexts.JobPostingContext.Enums;
 using Domain.Contexts.JobPostingContext.IDs;
@@ -62,7 +63,7 @@ public class VacancyApplicationServiceTests
                           .Returns<string, string>((hashedPassword, providedPassword) => 
                               hashedPassword == $"hashed_{providedPassword}");
 
-        _vacancyApplicationRepositoryMock.Setup(x => x.HasAlreadyAppliedToVacancyAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+        _vacancyApplicationRepositoryMock.Setup(x => x.HasAlreadyAppliedToVacancyAsync(It.IsAny<UserId>(), It.IsAny<VacancyId>(), It.IsAny<CancellationToken>()))
                                         .ReturnsAsync(false);
 
         _userRepositoryMock.Setup(x => x.IsUniqueEmailAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -71,8 +72,8 @@ public class VacancyApplicationServiceTests
         _userRepositoryMock.Setup(x => x.IsUniquePhoneNumberAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
-        _companyUserRepositoryMock.Setup(x => x.GetCompanyIdByUserId(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Guid.NewGuid());
+        _companyUserRepositoryMock.Setup(x => x.GetCompanyIdByUserId(It.IsAny<UserId>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new CompanyId());
     }
 
     private async Task SetupTestData()
@@ -148,8 +149,8 @@ public class VacancyApplicationServiceTests
         Assert.Equal(_validResume.Id, result.Value.ResumeId);
 
         _vacancyApplicationRepositoryMock.Verify(x => x.HasAlreadyAppliedToVacancyAsync(
-            _validJobSeekerUser.Id.Value, 
-            _validPublishedVacancy.Id.Value, 
+            _validJobSeekerUser.Id, 
+            _validPublishedVacancy.Id, 
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -166,7 +167,7 @@ public class VacancyApplicationServiceTests
         Assert.NotNull(result.Error);
 
         _vacancyApplicationRepositoryMock.Verify(x => x.HasAlreadyAppliedToVacancyAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
+            It.IsAny<UserId>(), It.IsAny<VacancyId>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -182,15 +183,15 @@ public class VacancyApplicationServiceTests
         Assert.NotNull(result.Error);
 
         _vacancyApplicationRepositoryMock.Verify(x => x.HasAlreadyAppliedToVacancyAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
+            It.IsAny<UserId>(), It.IsAny<VacancyId>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
     public async Task ApplyToVacancyWithCreatedResumeAsync_WhenUserAlreadyApplied_ShouldReturnFailure()
     {
         _vacancyApplicationRepositoryMock.Setup(x => x.HasAlreadyAppliedToVacancyAsync(
-            _validJobSeekerUser.Id.Value, 
-            _validPublishedVacancy.Id.Value, 
+            _validJobSeekerUser.Id, 
+            _validPublishedVacancy.Id, 
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
@@ -204,8 +205,8 @@ public class VacancyApplicationServiceTests
         Assert.NotNull(result.Error);
 
         _vacancyApplicationRepositoryMock.Verify(x => x.HasAlreadyAppliedToVacancyAsync(
-            _validJobSeekerUser.Id.Value, 
-            _validPublishedVacancy.Id.Value, 
+            _validJobSeekerUser.Id, 
+            _validPublishedVacancy.Id, 
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -229,8 +230,8 @@ public class VacancyApplicationServiceTests
         Assert.Equal(_validFileUrl, result.Value.FileUrl);
 
         _vacancyApplicationRepositoryMock.Verify(x => x.HasAlreadyAppliedToVacancyAsync(
-            _validJobSeekerUser.Id.Value, 
-            _validPublishedVacancy.Id.Value, 
+            _validJobSeekerUser.Id, 
+            _validPublishedVacancy.Id, 
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -247,7 +248,7 @@ public class VacancyApplicationServiceTests
         Assert.NotNull(result.Error);
 
         _vacancyApplicationRepositoryMock.Verify(x => x.HasAlreadyAppliedToVacancyAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
+            It.IsAny<UserId>(), It.IsAny<VacancyId>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -263,15 +264,15 @@ public class VacancyApplicationServiceTests
         Assert.NotNull(result.Error);
 
         _vacancyApplicationRepositoryMock.Verify(x => x.HasAlreadyAppliedToVacancyAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
+            It.IsAny<UserId>(), It.IsAny<VacancyId>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
     public async Task ApplyToVacancyWithFileAsync_WhenUserAlreadyApplied_ShouldReturnFailure()
     {
         _vacancyApplicationRepositoryMock.Setup(x => x.HasAlreadyAppliedToVacancyAsync(
-            _validJobSeekerUser.Id.Value, 
-            _validPublishedVacancy.Id.Value, 
+            _validJobSeekerUser.Id,
+            _validPublishedVacancy.Id,
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
@@ -285,8 +286,8 @@ public class VacancyApplicationServiceTests
         Assert.NotNull(result.Error);
 
         _vacancyApplicationRepositoryMock.Verify(x => x.HasAlreadyAppliedToVacancyAsync(
-            _validJobSeekerUser.Id.Value, 
-            _validPublishedVacancy.Id.Value, 
+            _validJobSeekerUser.Id, 
+            _validPublishedVacancy.Id, 
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -385,8 +386,8 @@ public class VacancyApplicationServiceTests
         Assert.True(result1.IsSuccess);
 
         _vacancyApplicationRepositoryMock.Setup(x => x.HasAlreadyAppliedToVacancyAsync(
-            _validJobSeekerUser.Id.Value,
-            _validPublishedVacancy.Id.Value,
+            _validJobSeekerUser.Id,
+            _validPublishedVacancy.Id,
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 

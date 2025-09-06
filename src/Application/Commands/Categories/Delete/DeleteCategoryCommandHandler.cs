@@ -1,5 +1,6 @@
 ﻿using Application.Abstractions.Messaging;
 using Domain.Abstraction.Interfaces;
+using Domain.Contexts.JobPostingContext.IDs;
 using Domain.Repos.Categories;
 using Domain.Shared.ErrorHandling;
 
@@ -18,7 +19,7 @@ internal sealed class DeleteCategoryCommandHandler : ICommandHandler<DeleteCateg
 
     public async Task<Result> Handle(DeleteCategoryCommand command, CancellationToken cancellationToken = default)
     {
-        var category = await _categoryRepository.GetByIdAsync(command.Id, cancellationToken);
+        var category = await _categoryRepository.GetByIdAsync(new CategoryId(command.Id), cancellationToken);
         if (category is null)
         {
             return Result.Failure(Error.NotFound("Category.NotFound", "The category was not found."));

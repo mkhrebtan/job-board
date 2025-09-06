@@ -1,45 +1,40 @@
 ﻿using Application.Abstractions.Messaging;
-using Application.Commands.VacancyApplications.ApplyWithFile;
 using Application.Common.Helpers;
 using Domain.Abstraction.Interfaces;
 using Domain.Contexts.ApplicationContext.ValueObjects;
+using Domain.Contexts.IdentityContext.Aggregates;
 using Domain.Contexts.IdentityContext.IDs;
 using Domain.Contexts.JobPostingContext.IDs;
-using Domain.Contexts.ResumePostingContext.IDs;
-using Domain.Repos.Resumes;
 using Domain.Repos.Users;
 using Domain.Repos.Vacancies;
 using Domain.Repos.VacancyApplications;
 using Domain.Services;
 using Domain.Shared.ErrorHandling;
 
-namespace Application.Commands.VacancyApplications.ApplyWithResume;
+namespace Application.Commands.VacancyApplications.ApplyWithFile;
 
-internal sealed class ApplyToVacancyWithResumeCommandHandler : ICommandHandler<ApplyToVacancyWithResumeCommand, ApplyToVacancyCommandResponse>
+internal sealed class ApplyToVacancyWithFileCommandHandler : ICommandHandler<ApplyToVacancyWithFileCommand, ApplyToVacancyCommandResponse>
 {
     private readonly IVacancyRepository _vacancyRepository;
     private readonly IUserRepository _userRepository;
-    private readonly IResumeRepository _resumeRepository;
     private readonly VacancyApplicationService _vacancyApplicationService;
     private readonly IVacancyApplicationRepository _vacancyApplicationRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public ApplyToVacancyWithResumeCommandHandler(
+    public ApplyToVacancyWithFileCommandHandler(
         IVacancyRepository vacancyRepository,
         IUserRepository userRepository,
-        IResumeRepository resumeRepository,
         IVacancyApplicationRepository vacancyApplicationRepository,
         IUnitOfWork unitOfWork)
     {
         _vacancyRepository = vacancyRepository;
         _userRepository = userRepository;
-        _resumeRepository = resumeRepository;
         _vacancyApplicationRepository = vacancyApplicationRepository;
         _vacancyApplicationService = new VacancyApplicationService(_vacancyApplicationRepository);
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Result<ApplyToVacancyCommandResponse>> Handle(ApplyToVacancyWithResumeCommand command, CancellationToken cancellationToken = default)
+    public async Task<Result<ApplyToVacancyCommandResponse>> Handle(ApplyToVacancyWithFileCommand command, CancellationToken cancellationToken = default)
     {
         var vacancy = await _vacancyRepository.GetByIdAsync(new VacancyId(command.VacancyId), cancellationToken);
         if (vacancy is null)
@@ -47,24 +42,33 @@ internal sealed class ApplyToVacancyWithResumeCommandHandler : ICommandHandler<A
             return Result<ApplyToVacancyCommandResponse>.Failure(Error.NotFound("ApplyToVacancyWithFileCommandHandler.VacancyNotFound", $"Vacancy was not found."));
         }
 
-        var user = await _userRepository.GetByIdAsync(new UserId(command.UserId), cancellationToken);
-        if (user is null)
+        User? user = default;
+        if (command.ApplicationInfo.Anonymous)
         {
-            return Result<ApplyToVacancyCommandResponse>.Failure(Error.NotFound("ApplyToVacancyWithFileCommandHandler.UserNotFound", $"User was not found."));
-        }
 
-        var resume = await _resumeRepository.GetByIdAsync(new ResumeId(command.ResumeId), cancellationToken);
-        if (resume is null || resume.SeekerId != user.Id)
-        {
-            return Result<ApplyToVacancyCommandResponse>.Failure(Error.NotFound("ApplyToVacancyWithFileCommandHandler.ResumeNotFound", $"Resume was not found."));
         }
+        else
+        {
+
+        }
+            
+        //var user = await _userRepository.GetByIdAsync(new UserId(command.UserId), cancellationToken);
+        //if (user is null)
+        //{
+        //    return Result<ApplyToVacancyCommandResponse>.Failure(Error.NotFound("ApplyToVacancyWithFileCommandHandler.UserNotFound", $"User was not found."));
+        //}
 
         if (!Helpers.TryCreateVO(() => CoverLetter.Create(command.CoverLetterContent ?? string.Empty), out CoverLetter coverLetter, out Error error))
         {
             return Result<ApplyToVacancyCommandResponse>.Failure(error);
         }
 
-        var applicationResult = await _vacancyApplicationService.ApplyToVacancyWithCreatedResumeAsync(user, vacancy, coverLetter, resume);
+        if (!Helpers.TryCreateVO(() => FileUrl.Create(command.FileUrl), out FileUrl fileUrl, out error))
+        {
+            return Result<ApplyToVacancyCommandResponse>.Failure(error);
+        }
+
+        var applicationResult = await _vacancyApplicationService.ApplyToVacancyWithFileAsync(user, vacancy, coverLetter, fileUrl);
         if (applicationResult.IsFailure)
         {
             return Result<ApplyToVacancyCommandResponse>.Failure(applicationResult.Error);
