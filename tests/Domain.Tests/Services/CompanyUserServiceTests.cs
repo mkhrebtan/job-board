@@ -63,7 +63,7 @@ public class CompanyUserServiceTests
     {
         var email = Email.Create("employer@example.com").Value;
         var phoneNumber = PhoneNumber.Create("+14156667777", "US").Value;
-        _validEmployerUser = (await _userService.CreateUserAsync("John", "Doe", UserRole.Employer, email, phoneNumber, "password123!", _passwordHasher.Object, CancellationToken.None)).Value;
+        _validEmployerUser = (await _userService.CreateUserAsync("John", "Doe", UserRole.CompanyEmployee, email, phoneNumber, "password123!", _passwordHasher.Object, CancellationToken.None)).Value;
 
         var jobSeekerEmail = Email.Create("jobseeker@example.com").Value;
         var jobSeekerPhoneNumber = PhoneNumber.Create("+14158889999", "US").Value;

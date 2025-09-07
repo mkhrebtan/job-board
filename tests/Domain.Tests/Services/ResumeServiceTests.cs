@@ -63,7 +63,7 @@ public class ResumeServiceTests
 
         var employerEmail = Email.Create("employer@example.com").Value;
         var employerPhoneNumber = PhoneNumber.Create("+14155552672", "US").Value;
-        _validEmployerUser = (await _userService.CreateUserAsync("Jane", "Smith", UserRole.Employer, employerEmail, employerPhoneNumber, "password123", _passwordHasherMock.Object, CancellationToken.None)).Value;
+        _validEmployerUser = (await _userService.CreateUserAsync("Jane", "Smith", UserRole.CompanyAdmin, employerEmail, employerPhoneNumber, "password123", _passwordHasherMock.Object, CancellationToken.None)).Value;
 
         _validPersonalInfo = PersonalInfo.Create("John", "Doe").Value;
         _validLocation = Location.Create("USA", "New York").Value;
