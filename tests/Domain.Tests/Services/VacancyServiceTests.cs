@@ -34,9 +34,9 @@ public class VacancyServiceTests
         _vacancyService = new VacancyService(_companyUserRepositoryMock.Object);
         _userService = new UserService(_userRepositoryMock.Object);
 
-        _userRepositoryMock.Setup(x => x.IsUniqueEmailAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _userRepositoryMock.Setup(x => x.IsUniqueEmailAsync(It.IsAny<Email>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-        _userRepositoryMock.Setup(x => x.IsUniquePhoneNumberAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _userRepositoryMock.Setup(x => x.IsUniquePhoneNumberAsync(It.IsAny<PhoneNumber>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
         SetupTestEmployer();

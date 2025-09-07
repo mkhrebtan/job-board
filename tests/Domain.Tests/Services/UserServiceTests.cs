@@ -24,10 +24,10 @@ public class UserServiceTests
         _validPassword = "ValidPassword123!";
         _userService = new UserService(_userRepositoryMock.Object);
 
-        _userRepositoryMock.Setup(x => x.IsUniqueEmailAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _userRepositoryMock.Setup(x => x.IsUniqueEmailAsync(It.IsAny<Email>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
-        _userRepositoryMock.Setup(x => x.IsUniquePhoneNumberAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _userRepositoryMock.Setup(x => x.IsUniquePhoneNumberAsync(It.IsAny<PhoneNumber>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
         _passwordHasherMock.Setup(x => x.HashPassword(It.IsAny<string>()))
@@ -108,7 +108,7 @@ public class UserServiceTests
     [Fact]
     public async Task CreateUser_WithDuplicateEmail_ShouldReturnFailure()
     {
-        _userRepositoryMock.Setup(x => x.IsUniqueEmailAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _userRepositoryMock.Setup(x => x.IsUniqueEmailAsync(It.IsAny<Email>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
         var result = await _userService.CreateUserAsync("John", "Doe", UserRole.JobSeeker, _validEmail, _validPhoneNumber, _validPassword, _passwordHasherMock.Object,  CancellationToken.None);
@@ -120,7 +120,7 @@ public class UserServiceTests
     [Fact]
     public async Task CreateUser_WithDuplicatePhoneNumber_ShouldReturnFailure()
     {
-        _userRepositoryMock.Setup(x => x.IsUniquePhoneNumberAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _userRepositoryMock.Setup(x => x.IsUniquePhoneNumberAsync(It.IsAny<PhoneNumber>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
         var result = await _userService.CreateUserAsync("John", "Doe", UserRole.JobSeeker, _validEmail, _validPhoneNumber, _validPassword, _passwordHasherMock.Object, CancellationToken.None);

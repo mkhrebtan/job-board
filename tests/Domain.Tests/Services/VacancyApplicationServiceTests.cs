@@ -63,10 +63,10 @@ public class VacancyApplicationServiceTests
         _vacancyApplicationRepositoryMock.Setup(x => x.HasAlreadyAppliedToVacancyAsync(It.IsAny<UserId>(), It.IsAny<VacancyId>(), It.IsAny<CancellationToken>()))
                                         .ReturnsAsync(false);
 
-        _userRepositoryMock.Setup(x => x.IsUniqueEmailAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _userRepositoryMock.Setup(x => x.IsUniqueEmailAsync(It.IsAny<Email>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
-        _userRepositoryMock.Setup(x => x.IsUniquePhoneNumberAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _userRepositoryMock.Setup(x => x.IsUniquePhoneNumberAsync(It.IsAny<PhoneNumber>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
         _companyUserRepositoryMock.Setup(x => x.GetCompanyIdByUserId(It.IsAny<UserId>(), It.IsAny<CancellationToken>()))
