@@ -47,10 +47,10 @@ public class CompanyUserServiceTests
         _companyUserRepositoryMock.Setup(x => x.IsAlreadyAssignedAsync(It.IsAny<UserId>(), It.IsAny<CompanyId>(), It.IsAny<CancellationToken>()))
                                  .ReturnsAsync(false);
 
-        _userRepositoryMock.Setup(x => x.IsUniqueEmailAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _userRepositoryMock.Setup(x => x.IsUniqueEmailAsync(It.IsAny<Email>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
-        _userRepositoryMock.Setup(x => x.IsUniquePhoneNumberAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _userRepositoryMock.Setup(x => x.IsUniquePhoneNumberAsync(It.IsAny<PhoneNumber>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
         _passwordHasher.Setup(x => x.HashPassword(It.IsAny<string>()))

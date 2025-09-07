@@ -52,9 +52,9 @@ public class VacancyTests
             Email.Create("recruiter@company.com").Value,
             PhoneNumber.Create("+14156667777", "US").Value).Value;
 
-        _userRepositoryMock.Setup(x => x.IsUniqueEmailAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _userRepositoryMock.Setup(x => x.IsUniqueEmailAsync(It.IsAny<Email>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-        _userRepositoryMock.Setup(x => x.IsUniquePhoneNumberAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _userRepositoryMock.Setup(x => x.IsUniquePhoneNumberAsync(It.IsAny<PhoneNumber>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
         _passwordHasherMock.Setup(x => x.HashPassword(It.IsAny<string>()))
@@ -72,7 +72,7 @@ public class VacancyTests
     {
         var employerEmail = Email.Create("employer@example.com").Value;
         var employerPhoneNumber = PhoneNumber.Create("+14156667777", "US").Value;
-        _validEmployerUser = (await _userService.CreateUserAsync("Jane", "Smith", UserRole.Employer, employerEmail, employerPhoneNumber, "employer_account", _passwordHasherMock.Object, CancellationToken.None)).Value;
+        _validEmployerUser = (await _userService.CreateUserAsync("Jane", "Smith", UserRole.CompanyEmployee, employerEmail, employerPhoneNumber, "employer_account", _passwordHasherMock.Object, CancellationToken.None)).Value;
     }
 
     private async Task SetupTestVacancy()
