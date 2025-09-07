@@ -1,6 +1,7 @@
 ﻿using API.Extensions;
 using Application.Abstractions.Messaging;
 using Application.Commands.Vacancies.UpdateSalary;
+using Domain.Contexts.IdentityContext.Enums;
 
 namespace API.Endpoints.Vacancies.UpdateSalary;
 
@@ -27,6 +28,9 @@ internal sealed class UpdateSalary : IEndpoint
             var result = await handler.Handle(command, cancellationToken);
             return result.IsSuccess ? Results.Ok() : result.GetProblem();
         })
-        .WithTags("Vacancies");
+        .WithTags("Vacancies")
+        .RequireAuthorization(policy => policy.RequireRole(
+            UserRole.CompanyAdmin.Code,
+            UserRole.CompanyEmployee.Code));
     }
 }

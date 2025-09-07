@@ -17,9 +17,9 @@ public sealed class CompanyUserService
 
     public async Task<Result<CompanyUser>> AssignEmployerToCompanyAsync(User user, Company company, CancellationToken ct)
     {
-        if (user.Role != UserRole.Employer)
+        if (user.Role != UserRole.CompanyAdmin && user.Role != UserRole.CompanyEmployee)
         {
-            return Result<CompanyUser>.Failure(Error.Problem("CompanyUserService.InvalidUserRole", $"Only users with the '{UserRole.Employer.Name}' role can be assigned to a company."));
+            return Result<CompanyUser>.Failure(Error.Problem("CompanyUserService.InvalidUserRole", $"Only users with the '{UserRole.CompanyAdmin.Name}, {UserRole.CompanyEmployee.Name}' roles can be assigned to a company."));
         }
 
         if (await _companyUserRepository.IsAlreadyAssignedToCompanyAsync(user.Id, ct))

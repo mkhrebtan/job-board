@@ -1,6 +1,7 @@
 ﻿using API.Extensions;
 using Application.Abstractions.Messaging;
 using Application.Commands.Companies.UpdateWebsite;
+using Domain.Contexts.IdentityContext.Enums;
 
 namespace API.Endpoints.Companies.UpdateWebsite;
 
@@ -25,6 +26,7 @@ internal sealed class UpdateWebsite : IEndpoint
 
             return Results.NoContent();
         })
-        .WithTags("Companies");
+        .WithTags("Companies")
+        .RequireAuthorization(policy => policy.RequireRole(UserRole.CompanyAdmin.ToString()));
     }
 }

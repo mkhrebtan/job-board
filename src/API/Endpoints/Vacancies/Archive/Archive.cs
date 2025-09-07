@@ -1,6 +1,7 @@
 ﻿using API.Extensions;
 using Application.Abstractions.Messaging;
 using Application.Commands.Vacancies.Archive;
+using Domain.Contexts.IdentityContext.Enums;
 
 namespace API.Endpoints.Vacancies.Archive;
 
@@ -17,6 +18,9 @@ internal sealed class Archive : IEndpoint
             var result = await handler.Handle(command, cancellationToken);
             return result.IsSuccess ? Results.Ok() : result.GetProblem();
         })
-        .WithTags("Vacancies");
+        .WithTags("Vacancies")
+        .RequireAuthorization(policy => policy.RequireRole(
+            UserRole.CompanyAdmin.Code,
+            UserRole.CompanyEmployee.Code));
     }
 }

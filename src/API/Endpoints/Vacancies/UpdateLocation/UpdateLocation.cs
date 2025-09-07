@@ -1,6 +1,7 @@
 ﻿using API.Extensions;
 using Application.Abstractions.Messaging;
 using Application.Commands.Vacancies.UpdateLocation;
+using Domain.Contexts.IdentityContext.Enums;
 
 namespace API.Endpoints.Vacancies.UpdateLocation;
 
@@ -35,6 +36,9 @@ internal sealed class UpdateLocation : IEndpoint
             var result = await handler.Handle(command, cancellationToken);
             return result.IsSuccess ? Results.Ok() : result.GetProblem();
         })
-        .WithTags("Vacancies");
+        .WithTags("Vacancies")
+        .RequireAuthorization(policy => policy.RequireRole(
+            UserRole.CompanyAdmin.Code,
+            UserRole.CompanyEmployee.Code));
     }
 }

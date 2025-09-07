@@ -56,9 +56,9 @@ public sealed class VacancyService
 
     private async Task<Result<CompanyId>> ValidateVacancyCreationAndGetCompanyIdAsync(User user, CancellationToken cancellationToken)
     {
-        if (user.Role != UserRole.Employer)
+        if (user.Role != UserRole.CompanyAdmin && user.Role != UserRole.CompanyEmployee)
         {
-            return Result<CompanyId>.Failure(Error.Problem("VacancyService.Unauthorized", "Only users with the Employer role can create vacancies."));
+            return Result<CompanyId>.Failure(Error.Problem("VacancyService.Unauthorized", $"Only users with the {UserRole.CompanyAdmin.Name} or {UserRole.CompanyEmployee.Name} role can create vacancies."));
         }
 
         CompanyId? userCompanyId = await _companyUserRepository.GetCompanyIdByUserId(user.Id, cancellationToken);

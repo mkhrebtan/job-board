@@ -1,6 +1,7 @@
 ﻿using API.Extensions;
 using Application.Abstractions.Messaging;
 using Application.Commands.Vacancies.Publish;
+using Domain.Contexts.IdentityContext.Enums;
 
 namespace API.Endpoints.Vacancies.PublishVacancy;
 
@@ -17,6 +18,7 @@ internal sealed class Publish : IEndpoint
             var result = await handler.Handle(command, cancellationToken);
             return result.IsSuccess ? Results.Ok() : result.GetProblem();
         })
-        .WithTags("Vacancies");
+        .WithTags("Vacancies")
+        .RequireAuthorization(policy => policy.RequireRole(UserRole.Admin.ToString()));
     }
 }

@@ -1,6 +1,8 @@
-﻿using API.Extensions;
+﻿using API.Authentication;
+using API.Extensions;
 using Application.Abstractions.Messaging;
 using Application.Commands.Vacancies.Create;
+using Domain.Contexts.IdentityContext.Enums;
 
 namespace API.Endpoints.Vacancies.Create;
 
@@ -30,10 +32,11 @@ internal sealed class Create : IEndpoint
         app.MapPost("vacancies/", async (
             CreateVacancyRequest request,
             ICommandHandler<CreateVacancyCommand, CreateVacancyCommandResponse> handler,
+            IUserContext userContext,
             CancellationToken cancellationToken) =>
         {
             var command = new CreateVacancyCommand(
-                Guid.NewGuid(),
+                userContext.UserId,
                 request.Title,
                 request.DescriptionMarkdown,
                 request.MinSalary,
@@ -54,6 +57,9 @@ internal sealed class Create : IEndpoint
             var result = await handler.Handle(command, cancellationToken);
             return result.IsSuccess ? Results.Created($"vacancies/{result.Value.Id}", result.Value) : result.GetProblem();
         })
-        .WithTags("Vacancies");
+        .WithTags("Vacancies")
+        .RequireAuthorization(policy => policy.RequireRole(
+            UserRole.CompanyAdmin.Code,
+            UserRole.CompanyEmployee.Code));
     }
 }

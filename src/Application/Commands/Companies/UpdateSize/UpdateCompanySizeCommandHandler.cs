@@ -1,24 +1,22 @@
 ﻿using API.Authentication;
 using Application.Abstractions.Messaging;
-using Application.Common.Helpers;
 using Domain.Abstraction.Interfaces;
 using Domain.Contexts.IdentityContext.IDs;
 using Domain.Contexts.RecruitmentContext.IDs;
-using Domain.Contexts.RecruitmentContext.ValueObjects;
 using Domain.Repos.Companies;
 using Domain.Repos.CompanyUsers;
 using Domain.Shared.ErrorHandling;
 
-namespace Application.Commands.Companies.UpdateLogo;
+namespace Application.Commands.Companies.UpdateSize;
 
-internal sealed class UpdateCompanyWebsiteCommandHandler : ICommandHandler<UpdateCompanyLogoCommand>
+internal sealed class UpdateCompanySizeCommandHandler : ICommandHandler<UpdateCompanySizeCommand>
 {
     private readonly ICompanyRepository _companyRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserContext _userContext;
     private readonly ICompanyUserRepository _companyUserRepository;
 
-    public UpdateCompanyWebsiteCommandHandler(ICompanyRepository companyRepository, IUnitOfWork unitOfWork, IUserContext userContext, ICompanyUserRepository companyUserRepository)
+    public UpdateCompanySizeCommandHandler(ICompanyRepository companyRepository, IUnitOfWork unitOfWork, IUserContext userContext, ICompanyUserRepository companyUserRepository)
     {
         _companyRepository = companyRepository;
         _unitOfWork = unitOfWork;
@@ -26,7 +24,7 @@ internal sealed class UpdateCompanyWebsiteCommandHandler : ICommandHandler<Updat
         _companyUserRepository = companyUserRepository;
     }
 
-    public async Task<Result> Handle(UpdateCompanyLogoCommand command, CancellationToken cancellationToken = default)
+    public async Task<Result> Handle(UpdateCompanySizeCommand command, CancellationToken cancellationToken = default)
     {
         var companyId = await _companyUserRepository.GetCompanyIdByUserId(new UserId(_userContext.UserId), cancellationToken);
         if (companyId is null || companyId.Value != command.Id)
@@ -40,12 +38,7 @@ internal sealed class UpdateCompanyWebsiteCommandHandler : ICommandHandler<Updat
             return Result.Failure(Error.NotFound("Company.NotFound", "The company was not found."));
         }
 
-        if (!Helpers.TryCreateVO(() => LogoUrl.Create(command.LogoUrl), out LogoUrl logoUrl, out Error error))
-        {
-            return Result.Failure(error);
-        }
-
-        var updateResult = company.UpdateLogoUrl(logoUrl);
+        var updateResult = company.UpdateSize(command.Size);
         if (updateResult.IsFailure)
         {
             return Result.Failure(updateResult.Error);
