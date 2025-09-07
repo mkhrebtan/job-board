@@ -1,4 +1,5 @@
 ﻿using Application.Abstractions.Messaging;
+using Application.Common.Helpers;
 using Domain.Abstraction.Interfaces;
 using Domain.Contexts.IdentityContext.IDs;
 using Domain.Contexts.JobPostingContext.Aggregates;
@@ -41,16 +42,14 @@ internal class CreateVacancyCommandHandler : ICommandHandler<CreateVacancyComman
             return Result<CreateVacancyCommandResponse>.Failure(Error.NotFound("CreateVacancyCommandHandler.UserNotFound", "The specified employer user was not found."));
         }
 
-        var vacancyTitleResult = VacancyTitle.Create(command.Title);
-        if (vacancyTitleResult.IsFailure)
+        if (!Helpers.TryCreateVO(() => VacancyTitle.Create(command.Title), out VacancyTitle vacancyTitle, out Error error))
         {
-            return Result<CreateVacancyCommandResponse>.Failure(vacancyTitleResult.Error);
+            return Result<CreateVacancyCommandResponse>.Failure(error);
         }
 
-        var descriptionResult = RichTextContent.Create(command.DescriptionMarkdown, _markdownParser);
-        if (descriptionResult.IsFailure)
+        if (!Helpers.TryCreateVO(() => RichTextContent.Create(command.DescriptionMarkdown, _markdownParser), out RichTextContent description, out error))
         {
-            return Result<CreateVacancyCommandResponse>.Failure(descriptionResult.Error);
+            return Result<CreateVacancyCommandResponse>.Failure(error);
         }
 
         Result<Salary> salaryResult = default!;
@@ -62,7 +61,7 @@ internal class CreateVacancyCommandHandler : ICommandHandler<CreateVacancyComman
         {
             salaryResult = Salary.Fixed(command.MinSalary, command.SalaryCurrency);
         }
-        else if (command.MinSalary > 0 && command.MaxSalary is not null && command.MaxSalary == command.MinSalary)
+        else if (command.MinSalary > 0 && command.MaxSalary is not null && command.MaxSalary != command.MinSalary)
         {
             salaryResult = Salary.Range(command.MinSalary, command.MaxSalary.Value, command.SalaryCurrency);
         }
@@ -76,56 +75,42 @@ internal class CreateVacancyCommandHandler : ICommandHandler<CreateVacancyComman
             return Result<CreateVacancyCommandResponse>.Failure(salaryResult.Error);
         }
 
-        var locationResult = Location.Create(
-            command.Country,
-            command.City,
-            command.Region,
-            command.District,
-            command.Address,
-            command.Latitude,
-            command.Longitude);
-        if (locationResult.IsFailure)
+        if (!Helpers.TryCreateVO(() => Location.Create(command.Country, command.City, command.Region, command.District, command.Address, command.Latitude, command.Longitude), out Location location, out error))
         {
-            return Result<CreateVacancyCommandResponse>.Failure(locationResult.Error);
+            return Result<CreateVacancyCommandResponse>.Failure(error);
         }
 
-        var emailResult = Email.Create(command.RecruiterEmail);
-        if (emailResult.IsFailure)
+        if (!Helpers.TryCreateVO(() => Email.Create(command.RecruiterEmail), out Email email, out error))
         {
-            return Result<CreateVacancyCommandResponse>.Failure(emailResult.Error);
+            return Result<CreateVacancyCommandResponse>.Failure(error);
         }
 
-        var phoneNumberResult = PhoneNumber.Create(command.RecruiterPhoneNumber, command.RecruiterPhoneNumberRegionCode);
-        if (phoneNumberResult.IsFailure)
+        if (!Helpers.TryCreateVO(() => PhoneNumber.Create(command.RecruiterPhoneNumber, command.RecruiterPhoneNumberRegionCode), out PhoneNumber phoneNumber, out error))
         {
-            return Result<CreateVacancyCommandResponse>.Failure(phoneNumberResult.Error);
+            return Result<CreateVacancyCommandResponse>.Failure(error);
         }
 
-        var recruiterInfoResult = RecruiterInfo.Create(
-            command.RecruiterFirstName,
-            emailResult.Value,
-            phoneNumberResult.Value);
-        if (recruiterInfoResult.IsFailure)
+        if (!Helpers.TryCreateVO(() => RecruiterInfo.Create( command.RecruiterFirstName, email, phoneNumber), out RecruiterInfo recruiterInfo, out error))
         {
-            return Result<CreateVacancyCommandResponse>.Failure(recruiterInfoResult.Error);
+            return Result<CreateVacancyCommandResponse>.Failure(error);
         }
 
         Result<Vacancy> vacancyResult = command.IsDraft ?
             await _vacancyService.CreateVacancyInDraftStatusAsync(
                 employer,
-                vacancyTitleResult.Value,
-                descriptionResult.Value,
+                vacancyTitle,
+                description,
                 salaryResult.Value,
-                locationResult.Value,
-                recruiterInfoResult.Value,
+                location,
+                recruiterInfo,
                 cancellationToken) :
              await _vacancyService.CreateVacancyInRegisteredStatusAsync(
                 employer,
-                vacancyTitleResult.Value,
-                descriptionResult.Value,
+                vacancyTitle,
+                description,
                 salaryResult.Value,
-                locationResult.Value,
-                recruiterInfoResult.Value,
+                location,
+                recruiterInfo,
                 cancellationToken);
         if (vacancyResult.IsFailure)
         {

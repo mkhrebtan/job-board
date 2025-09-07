@@ -20,7 +20,6 @@ internal sealed class CompanyUserConfiguration : IEntityTypeConfiguration<Compan
             value => new CompanyUserId(value));
 
         builder.HasIndex(cu => cu.RecruiterId).IsUnique();
-        builder.HasIndex(cu => cu.CompanyId).IsUnique();
 
         builder.Property(cu => cu.CompanyId)
             .HasConversion(

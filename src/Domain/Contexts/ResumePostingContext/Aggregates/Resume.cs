@@ -14,9 +14,10 @@ public class Resume : AggregateRoot<ResumeId>
 {
     private readonly HashSet<EmploymentType> _employmentTypes;
     private readonly HashSet<WorkArrangement> _workArrangements;
-    private readonly Dictionary<WorkExperienceId, WorkExperience> _workExperiences = [];
-    private readonly Dictionary<EducationId, Education> _educations = [];
-    private readonly Dictionary<LanguageId, LanguageSkill> _languages = [];
+
+    private readonly HashSet<WorkExperience> _workExperiences = [];
+    private readonly HashSet<Education> _educations = [];
+    private readonly HashSet<LanguageSkill> _languages = [];
 
     private Resume()
         : base(new ResumeId())
@@ -76,15 +77,15 @@ public class Resume : AggregateRoot<ResumeId>
 
     public ResumeStatus Status { get; private set; }
 
-    public IReadOnlyCollection<EmploymentType> EmploymentTypes => _employmentTypes.ToList().AsReadOnly();
+    public IReadOnlyCollection<EmploymentType> EmploymentTypes => _employmentTypes;
 
-    public IReadOnlyCollection<WorkArrangement> WorkArrangements => _workArrangements.ToList().AsReadOnly();
+    public IReadOnlyCollection<WorkArrangement> WorkArrangements => _workArrangements;
 
-    public IReadOnlyCollection<WorkExperience> WorkExperiences => _workExperiences.Values.ToList().AsReadOnly();
+    public IReadOnlyCollection<WorkExperience> WorkExperiences => _workExperiences;
 
-    public IReadOnlyCollection<Education> Educations => _educations.Values.ToList().AsReadOnly();
+    public IReadOnlyCollection<Education> Educations => _educations;
 
-    public IReadOnlyCollection<LanguageSkill> Languages => _languages.Values.ToList().AsReadOnly();
+    public IReadOnlyCollection<LanguageSkill> Languages => _languages;
 
     public Result Publish()
     {
@@ -217,7 +218,7 @@ public class Resume : AggregateRoot<ResumeId>
             return Result<WorkExperienceId>.Failure(creationResult.Error);
         }
 
-        _workExperiences.Add(creationResult.Value.Id, creationResult.Value);
+        _workExperiences.Add(creationResult.Value);
         LastUpdatedAt = DateTime.UtcNow;
         return Result<WorkExperienceId>.Success(creationResult.Value.Id);
     }
@@ -229,12 +230,13 @@ public class Resume : AggregateRoot<ResumeId>
             return Result.Failure(Error.Problem("Resume.InvalidWorkExperienceId", "WorkExperienceId cannot be null or empty."));
         }
 
-        if (!_workExperiences.ContainsKey(workExperienceId))
+        var workExperience = _workExperiences.FirstOrDefault(we => we.Id == workExperienceId);
+        if (workExperience is null)
         {
-            return Result.Failure(Error.Problem("Resume.WorkExperienceNotFound", "WorkExperience not found."));
+            return Result.Failure(Error.Problem("Resume.WorkExperienceNotFound", "Work experience not found."));
         }
 
-        _workExperiences.Remove(workExperienceId);
+        _workExperiences.Remove(workExperience);
         LastUpdatedAt = DateTime.UtcNow;
         return Result.Success();
     }
@@ -247,7 +249,7 @@ public class Resume : AggregateRoot<ResumeId>
             return Result<EducationId>.Failure(creationResult.Error);
         }
 
-        _educations.Add(creationResult.Value.Id, creationResult.Value);
+        _educations.Add(creationResult.Value);
         LastUpdatedAt = DateTime.UtcNow;
         return Result<EducationId>.Success(creationResult.Value.Id);
     }
@@ -259,12 +261,13 @@ public class Resume : AggregateRoot<ResumeId>
             return Result.Failure(Error.Problem("Resume.InvalidEducationId", "EducationId cannot be null or empty."));
         }
 
-        if (!_educations.ContainsKey(educationId))
+        var education = _educations.FirstOrDefault(ed => ed.Id == educationId);
+        if (education is null)
         {
             return Result.Failure(Error.Problem("Resume.EducationNotFound", "Education not found."));
         }
 
-        _educations.Remove(educationId);
+        _educations.Remove(education);
         LastUpdatedAt = DateTime.UtcNow;
         return Result.Success();
     }
@@ -277,12 +280,12 @@ public class Resume : AggregateRoot<ResumeId>
             return Result<LanguageId>.Failure(creationResult.Error);
         }
 
-        if (_languages.Values.Any(lang => lang.Language.Equals(name, StringComparison.OrdinalIgnoreCase)))
+        if (_languages.Any(lang => lang.Language.Equals(name, StringComparison.OrdinalIgnoreCase)))
         {
             return Result<LanguageId>.Failure(Error.Problem("Resume.DuplicateLanguage", "Language already exists."));
         }
 
-        _languages.Add(creationResult.Value.Id, creationResult.Value);
+        _languages.Add(creationResult.Value);
         LastUpdatedAt = DateTime.UtcNow;
         return Result<LanguageId>.Success(creationResult.Value.Id);
     }
@@ -294,12 +297,13 @@ public class Resume : AggregateRoot<ResumeId>
             return Result.Failure(Error.Problem("Resume.InvalidLanguageId", "LanguageId cannot be null or empty."));
         }
 
-        if (!_languages.ContainsKey(languageId))
+        var language = _languages.FirstOrDefault(lang => lang.Id == languageId);
+        if (language is null)
         {
             return Result.Failure(Error.Problem("Resume.LanguageNotFound", "Language not found."));
         }
 
-        _languages.Remove(languageId);
+        _languages.Remove(language);
         LastUpdatedAt = DateTime.UtcNow;
         return Result.Success();
     }

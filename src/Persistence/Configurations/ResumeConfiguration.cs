@@ -1,12 +1,15 @@
 ﻿using Domain.Contexts.IdentityContext.Aggregates;
 using Domain.Contexts.JobPostingContext.ValueObjects;
 using Domain.Contexts.ResumePostingContext.Aggregates;
+using Domain.Contexts.ResumePostingContext.Entities;
 using Domain.Contexts.ResumePostingContext.Enums;
 using Domain.Contexts.ResumePostingContext.IDs;
 using Domain.Contexts.ResumePostingContext.ValueObjects;
 using Domain.Shared.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Text.Json;
 
 namespace Persistence.Configurations;
 
@@ -83,8 +86,34 @@ internal sealed class ResumeConfiguration : IEntityTypeConfiguration<Resume>
             status => status.ToString(),
             value => ResumeStatus.FromCode(value)!);
 
-        builder.Property(r => r.EmploymentTypes).HasColumnType("jsonb");
-        builder.Property(r => r.WorkArrangements).HasColumnType("jsonb");
+        var jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+        };
+
+        var employmentConverter = new ValueConverter<IReadOnlyCollection<EmploymentType>, string>(
+            types => JsonSerializer
+                .Serialize(types.Select(t => t.Code), jsonOptions),
+            json => JsonSerializer
+                .Deserialize<string[]>(json, jsonOptions)!
+                .Select(code => EmploymentType.FromCode(code))!
+                .ToHashSet<EmploymentType>());
+
+        builder.Property(r => r.EmploymentTypes)
+            .HasConversion(employmentConverter)
+            .HasColumnType("jsonb");
+
+        var arrangementConverter = new ValueConverter<IReadOnlyCollection<WorkArrangement>, string>(
+            types => JsonSerializer
+                .Serialize(types.Select(t => t.Code), jsonOptions),
+            json => JsonSerializer
+                .Deserialize<string[]>(json, jsonOptions)!
+                .Select(code => WorkArrangement.FromCode(code))!
+                .ToHashSet<WorkArrangement>());
+
+        builder.Property(r => r.WorkArrangements)
+            .HasConversion(arrangementConverter)
+            .HasColumnType("jsonb");
 
         builder.HasMany(r => r.Educations)
             .WithOne()

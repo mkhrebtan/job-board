@@ -44,7 +44,7 @@ internal class UnitOfWork : IUnitOfWork, IDisposable
         }
         catch (DbUpdateException ex)
         {
-            throw new InvalidOperationException(ex.Message);
+            throw new InvalidOperationException(ex.Message, ex.InnerException);
         }
     }
 

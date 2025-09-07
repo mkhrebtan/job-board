@@ -111,21 +111,16 @@ internal sealed class CreateResumeCommandHandler : ICommandHandler<CreateResumeC
                 return Result<CreateResumeCommandResponse>.Failure(dateRangeResult.Error);
             }
 
-            Result<RichTextContent> workDescriptionResult = default!;
-            if (!string.IsNullOrEmpty(workExp.DescriptionMarkdown))
+            if (!Helpers.TryCreateVO(() => RichTextContent.Create(workExp.DescriptionMarkdown, _markdownParser), out RichTextContent workDescription, out error))
             {
-                workDescriptionResult = RichTextContent.Create(workExp.DescriptionMarkdown, _markdownParser);
-                if (workDescriptionResult.IsFailure)
-                {
-                    return Result<CreateResumeCommandResponse>.Failure(workDescriptionResult.Error);
-                }
+                return Result<CreateResumeCommandResponse>.Failure(error);
             }
 
             var workExpResult = resume.AddWorkExperience(
                 workExp.CompanyName,
                 workExp.Position,
                 dateRangeResult.Value,
-                workDescriptionResult.Value);
+                workDescription);
             if (workExpResult.IsFailure)
             {
                 return Result<CreateResumeCommandResponse>.Failure(workExpResult.Error);

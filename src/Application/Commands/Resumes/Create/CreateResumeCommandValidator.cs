@@ -55,7 +55,6 @@ internal class CreateResumeCommandValidator : AbstractValidator<CreateResumeComm
             .Length(PhoneNumber.RegionCodeLength);
 
         RuleFor(x => x.DesiredPositionTitle)
-            .NotEmpty()
             .MaximumLength(DesiredPosition.MaxLength);
 
         RuleFor(x => x.SalaryAmount)
@@ -98,7 +97,6 @@ internal class CreateResumeCommandValidator : AbstractValidator<CreateResumeComm
                 .MaximumLength(WorkExperience.MaxPositionLength);
 
             RuleFor(x => x.DescriptionMarkdown)
-                .NotEmpty()
                 .MaximumLength(RichTextContent.MaxLength);
 
             RuleFor(x => x.StartDate)
