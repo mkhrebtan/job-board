@@ -1,6 +1,7 @@
 ﻿using API.Extensions;
 using Application.Abstractions.Messaging;
 using Application.Commands.Categories.Delete;
+using Domain.Contexts.IdentityContext.Enums;
 
 namespace API.Endpoints.Categories.Delete;
 
@@ -22,6 +23,7 @@ internal sealed class Delete : IEndpoint
 
             return Results.NoContent();
         })
-        .WithTags("Categories");
+        .WithTags("Categories")
+        .RequireAuthorization(policy => policy.RequireRole(UserRole.Admin.ToString()));
     }
 }

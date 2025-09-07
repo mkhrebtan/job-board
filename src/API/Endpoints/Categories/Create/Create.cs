@@ -1,6 +1,7 @@
 ﻿using API.Extensions;
 using Application.Abstractions.Messaging;
 using Application.Commands.Categories.Create;
+using Domain.Contexts.IdentityContext.Enums;
 
 namespace API.Endpoints.Categories.Create;
 
@@ -22,6 +23,7 @@ internal sealed class Create : IEndpoint
 
             return Results.Created($"/categories/{result.Value.Id}", result.Value);
         })
-        .WithTags("Categories");
+        .WithTags("Categories")
+        .RequireAuthorization(policy => policy.RequireRole(UserRole.Admin.ToString()));
     }
 }

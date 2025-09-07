@@ -2,6 +2,7 @@
 using Application.Abstractions.Messaging;
 using Application.Commands.Resumes.Dtos;
 using Application.Commands.Resumes.Educations.Add;
+using Domain.Contexts.IdentityContext.Enums;
 
 namespace API.Endpoints.Resumes.Educations.Add;
 
@@ -19,6 +20,7 @@ internal sealed class AddEducation : IEndpoint
             var result = await handler.Handle(command, cancellationToken);
             return result.IsSuccess ? Results.Ok(result.Value) : result.GetProblem();
         })
-        .WithTags("Resumes");
+        .WithTags("Resumes")
+        .RequireAuthorization(policy => policy.RequireRole(UserRole.JobSeeker.ToString()));
     }
 }

@@ -1,9 +1,8 @@
+using System.Reflection;
 using API.Extensions;
 using Api.Middlewares.Exceptions;
 using Application;
-using Application.Abstractions.Messaging;
-using Application.TestData.Commands.TestCommand;
-using Application.TestData.Queries.TestQuery;
+using Infrastructure;
 using Persistence;
 using Serilog;
 using Serilog.Events;
@@ -29,10 +28,12 @@ internal class Program
 
             builder.Services.AddOpenApi();
 
-            builder.Services.AddPersistence(builder.Configuration);
-            builder.Services.AddApplication();
+            builder.Services
+                .AddPersistence(builder.Configuration)
+                .AddApplication()
+                .AddInfrastructure(builder.Configuration);
 
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGenWithAuth();
 
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddProblemDetails();
@@ -54,6 +55,10 @@ internal class Program
 
             app.UseHttpsRedirection();
             app.MapSwagger().RequireAuthorization();
+
+            app.UseAuthentication();
+
+            app.UseAuthorization();
 
             app.MapEndpoints();
 

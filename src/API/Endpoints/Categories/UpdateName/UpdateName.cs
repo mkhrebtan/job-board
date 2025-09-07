@@ -1,6 +1,7 @@
 ﻿using API.Extensions;
 using Application.Abstractions.Messaging;
 using Application.Commands.Categories.UpdateName;
+using Domain.Contexts.IdentityContext.Enums;
 
 namespace API.Endpoints.Categories.UpdateName;
 
@@ -23,6 +24,7 @@ internal sealed class UpdateName : IEndpoint
 
             return Results.NoContent();
         })
-        .WithTags("Categories");
+        .WithTags("Categories")
+        .RequireAuthorization(policy => policy.RequireRole(UserRole.Admin.ToString()));
     }
 }

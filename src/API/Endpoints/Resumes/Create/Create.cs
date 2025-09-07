@@ -1,7 +1,9 @@
-﻿using API.Extensions;
+﻿using API.Authentication;
+using API.Extensions;
 using Application.Abstractions.Messaging;
 using Application.Commands.Resumes.Create;
 using Application.Commands.Resumes.Dtos;
+using Domain.Contexts.IdentityContext.Enums;
 
 namespace API.Endpoints.Resumes.Create;
 
@@ -34,10 +36,11 @@ internal sealed class Create : IEndpoint
         app.MapPost("/resumes", async (
             CreateResumeRequest request,
             ICommandHandler<CreateResumeCommand, CreateResumeCommandResponse> handler,
+            IUserContext userContext,
             CancellationToken cancellationToken) =>
         {
             var command = new CreateResumeCommand(
-                Guid.NewGuid(), // In a real application, the SeekerId would come from the authenticated user context
+                userContext.UserId,
                 request.FirstName,
                 request.LastName,
                 request.Country,
@@ -61,6 +64,7 @@ internal sealed class Create : IEndpoint
             var result = await handler.Handle(command, cancellationToken);
             return result.IsSuccess ? Results.Ok(result.Value) : result.GetProblem();
         })
-        .WithTags("Resumes");
+        .WithTags("Resumes")
+        .RequireAuthorization(policy => policy.RequireRole(UserRole.JobSeeker.ToString()));
     }
 }

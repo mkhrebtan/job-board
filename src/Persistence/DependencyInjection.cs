@@ -25,7 +25,7 @@ namespace Persistence;
 
 public static class DependencyInjection
 {
-    public static void AddPersistence(this IServiceCollection services, IConfiguration config)
+    public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration config)
     {
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(config["CONNECTION_STRING"]));
@@ -42,5 +42,7 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IVacancyRepository, VacancyRepository>();
         services.AddScoped<IVacancyApplicationRepository, VacancyApplicationRepository>();
+
+        return services;
     }
 }

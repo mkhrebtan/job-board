@@ -1,6 +1,7 @@
 ﻿using API.Extensions;
 using Application.Abstractions.Messaging;
 using Application.Commands.Resumes.DeleteResume;
+using Domain.Contexts.IdentityContext.Enums;
 
 namespace API.Endpoints.Resumes.Delete;
 
@@ -17,6 +18,7 @@ internal sealed class Delete : IEndpoint
             var result = await handler.Handle(command, cancellationToken);
             return result.IsSuccess ? Results.NoContent() : result.GetProblem();
         })
-        .WithTags("Resumes");
+        .WithTags("Resumes")
+        .RequireAuthorization(policy => policy.RequireRole(UserRole.JobSeeker.ToString()));
     }
 }
