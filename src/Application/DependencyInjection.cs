@@ -1,6 +1,7 @@
 ﻿using Application.Abstraction.Behaviour;
 using Application.Abstractions.Messaging;
 using Domain.Services;
+using Domain.Shared.Events;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -31,6 +32,11 @@ public static class DependencyInjection
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly, includeInternalTypes: true);
 
         services.AddTransient<VacancyService>();
+
+        services.Scan(scan => scan.FromAssembliesOf(typeof(DependencyInjection))
+            .AddClasses(classes => classes.AssignableTo(typeof(IDomainEventHandler<>)), publicOnly: false)
+                .AsImplementedInterfaces()
+                .WithScopedLifetime());
 
         return services;
     }

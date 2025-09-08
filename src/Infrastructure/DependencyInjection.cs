@@ -1,8 +1,10 @@
 ﻿using System.Text;
 using API.Authentication;
 using Application.Abstraction.Authentication;
+using Application.Abstraction.Events;
 using Domain.Abstraction.Interfaces;
 using Infrastructure.Authentication;
+using Infrastructure.Events;
 using Infrastructure.Parser;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
@@ -42,6 +44,8 @@ public static class DependencyInjection
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<ITokenProvider, TokenProvider>();
         services.AddScoped<IUserContext, UserContext>();
+
+        services.AddScoped<IDomainEventsDispatcher, DomainEventsDispatcher>();
 
         return services;
     }

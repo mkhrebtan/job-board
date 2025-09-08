@@ -1,5 +1,6 @@
 ﻿using Domain.Abstraction;
 using Domain.Contexts.JobPostingContext.Enums;
+using Domain.Contexts.JobPostingContext.Events;
 using Domain.Contexts.JobPostingContext.IDs;
 using Domain.Contexts.JobPostingContext.ValueObjects;
 using Domain.Contexts.RecruitmentContext.IDs;
@@ -36,6 +37,12 @@ public class Vacancy : AggregateRoot<VacancyId>
         RecruiterInfo = recruiterInfo;
         CreatedAt = DateTime.UtcNow;
         LastUpdatedAt = DateTime.UtcNow;
+
+        RaiseDomainEvent(new VacancyCreatedDomainEvent(Id));
+        if (status == VacancyStatus.Registered)
+        {
+            RaiseDomainEvent(new VacancyRegisteredDomainEvent(Id));
+        }
     }
 
     public VacancyTitle Title { get; private set; }
@@ -165,6 +172,9 @@ public class Vacancy : AggregateRoot<VacancyId>
         Status = VacancyStatus.Registered;
         RegisteredAt = DateTime.UtcNow;
         LastUpdatedAt = DateTime.UtcNow;
+
+        RaiseDomainEvent(new VacancyRegisteredDomainEvent(Id));
+
         return Result.Success();
     }
 
@@ -183,6 +193,9 @@ public class Vacancy : AggregateRoot<VacancyId>
         Status = VacancyStatus.Published;
         PublishedAt = DateTime.UtcNow;
         LastUpdatedAt = DateTime.UtcNow;
+
+        RaiseDomainEvent(new VacancyPublishedDomainEvent(Id));
+
         return Result.Success();
     }
 
@@ -195,6 +208,9 @@ public class Vacancy : AggregateRoot<VacancyId>
 
         Status = VacancyStatus.Archived;
         LastUpdatedAt = DateTime.UtcNow;
+
+        RaiseDomainEvent(new VacancyArchivedDomainEvent(Id));
+
         return Result.Success();
     }
 
@@ -269,6 +285,9 @@ public class Vacancy : AggregateRoot<VacancyId>
 
         updateAction(newValue);
         LastUpdatedAt = DateTime.UtcNow;
+
+        RaiseDomainEvent(new VacancyUpdatedDomainEvent(Id));
+
         return Result.Success();
     }
 }
