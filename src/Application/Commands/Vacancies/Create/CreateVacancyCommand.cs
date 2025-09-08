@@ -8,7 +8,7 @@ public record CreateVacancyCommand(
     string DescriptionMarkdown,
     decimal MinSalary,
     decimal? MaxSalary,
-    string SalaryCurrency,
+    string? SalaryCurrency,
     string Country,
     string City,
     string? Region,

@@ -26,7 +26,8 @@ internal class CreateVacancyCommandValidator : AbstractValidator<CreateVacancyCo
 
         RuleFor(x => x.SalaryCurrency)
             .NotEmpty()
-            .Length(3);
+            .Length(3)
+            .When(x => x.SalaryCurrency is not null);
 
         RuleFor(x => x.Country)
             .NotEmpty()

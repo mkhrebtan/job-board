@@ -57,11 +57,11 @@ internal class CreateVacancyCommandHandler : ICommandHandler<CreateVacancyComman
         {
             salaryResult = Salary.None();
         }
-        else if (command.MinSalary > 0 && (command.MaxSalary is null || command.MaxSalary == command.MinSalary))
+        else if (command.MinSalary > 0 && (command.MaxSalary is null || command.MaxSalary == command.MinSalary) && command.SalaryCurrency is not null)
         {
             salaryResult = Salary.Fixed(command.MinSalary, command.SalaryCurrency);
         }
-        else if (command.MinSalary > 0 && command.MaxSalary is not null && command.MaxSalary != command.MinSalary)
+        else if (command.MinSalary > 0 && command.MaxSalary is not null && command.MaxSalary != command.MinSalary && command.SalaryCurrency is not null)
         {
             salaryResult = Salary.Range(command.MinSalary, command.MaxSalary.Value, command.SalaryCurrency);
         }
