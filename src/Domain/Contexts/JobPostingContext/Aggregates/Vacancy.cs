@@ -286,7 +286,10 @@ public class Vacancy : AggregateRoot<VacancyId>
         updateAction(newValue);
         LastUpdatedAt = DateTime.UtcNow;
 
-        RaiseDomainEvent(new VacancyUpdatedDomainEvent(Id));
+        if (propertyName != nameof(CategoryId))
+        {
+            RaiseDomainEvent(new VacancyUpdatedDomainEvent(Id));
+        }
 
         return Result.Success();
     }

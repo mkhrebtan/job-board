@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Persistence;
@@ -12,9 +13,11 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250908175257_UserResumesReadModelFix")]
+    partial class UserResumesReadModelFix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -615,73 +618,6 @@ namespace Persistence.Migrations
                     b.ToTable("WorkExperiences", "ResumePosting");
                 });
 
-            modelBuilder.Entity("Domain.ReadModels.Resumes.ResumeListingReadModel", b =>
-                {
-                    b.Property<Guid>("ResumeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Country")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("District")
-                        .HasColumnType("text");
-
-                    b.PrimitiveCollection<List<string>>("EmploymentTypes")
-                        .IsRequired()
-                        .HasColumnType("text[]");
-
-                    b.Property<decimal?>("ExpectedSalary")
-                        .HasColumnType("numeric");
-
-                    b.Property<string>("ExpectedSalaryCurrency")
-                        .HasColumnType("text");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("LastUpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<decimal?>("Latitude")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal?>("Longitude")
-                        .HasColumnType("numeric");
-
-                    b.Property<string>("Region")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("TotalMonthsOfExperience")
-                        .HasColumnType("integer");
-
-                    b.PrimitiveCollection<List<string>>("WorkArrangements")
-                        .IsRequired()
-                        .HasColumnType("text[]");
-
-                    b.HasKey("ResumeId");
-
-                    b.HasIndex("City");
-
-                    b.HasIndex("Country");
-
-                    b.HasIndex("District");
-
-                    b.HasIndex("Region");
-
-                    b.ToTable("ResumeListing", "Read");
-                });
-
             modelBuilder.Entity("Domain.ReadModels.Resumes.UserResumesReadModel", b =>
                 {
                     b.Property<Guid>("Id")
@@ -706,176 +642,9 @@ namespace Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ResumeId")
-                        .IsUnique();
-
                     b.HasIndex("UserId");
 
                     b.ToTable("UserResumes", "Read");
-                });
-
-            modelBuilder.Entity("Domain.ReadModels.Vacancies.CompanyVacanciesReadModel", b =>
-                {
-                    b.Property<Guid>("VacancyId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("CategoryId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("CompanyId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Country")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("District")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("LastUpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Region")
-                        .HasColumnType("text");
-
-                    b.Property<string>("SalaryCurrency")
-                        .HasColumnType("text");
-
-                    b.Property<decimal?>("SalaryFrom")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal?>("SalaryTo")
-                        .HasColumnType("numeric");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("VacancyId");
-
-                    b.HasIndex("CategoryId");
-
-                    b.HasIndex("City");
-
-                    b.HasIndex("CompanyId");
-
-                    b.HasIndex("Country");
-
-                    b.HasIndex("District");
-
-                    b.HasIndex("Region");
-
-                    b.HasIndex("Status");
-
-                    b.ToTable("CompanyVacancies", "Read");
-                });
-
-            modelBuilder.Entity("Domain.ReadModels.Vacancies.RegisteredVacanciesReadModel", b =>
-                {
-                    b.Property<Guid>("VacancyId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("CompanyName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("RegisteredAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UserEmail")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UserFullName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UserPhoneNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("VacancyId");
-
-                    b.ToTable("RegisteredVacancies", "Read");
-                });
-
-            modelBuilder.Entity("Domain.ReadModels.Vacancies.VacancyListingReadModel", b =>
-                {
-                    b.Property<Guid>("VacancyId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CategoryId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("CompanyLogoUrl")
-                        .HasColumnType("text");
-
-                    b.Property<string>("CompanyName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Country")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("DescriptionPlainText")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("District")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("LastUpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Region")
-                        .HasColumnType("text");
-
-                    b.Property<string>("SalaryCurrency")
-                        .HasColumnType("text");
-
-                    b.Property<decimal?>("SalaryFrom")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal?>("SalaryTo")
-                        .HasColumnType("numeric");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("VacancyId");
-
-                    b.HasIndex("CategoryId");
-
-                    b.HasIndex("City");
-
-                    b.HasIndex("Country");
-
-                    b.HasIndex("District");
-
-                    b.HasIndex("Region");
-
-                    b.ToTable("VacancyListing", "Read");
                 });
 
             modelBuilder.Entity("Domain.Contexts.ApplicationContext.Aggregates.FileVacancyApplication", b =>

@@ -244,8 +244,6 @@ public class Resume : AggregateRoot<ResumeId>
         _workExperiences.Add(creationResult.Value);
         LastUpdatedAt = DateTime.UtcNow;
 
-        RaiseDomainEvent(new ResumeUpdateDomainEvent(Id));
-
         return Result<WorkExperienceId>.Success(creationResult.Value.Id);
     }
 
@@ -265,8 +263,6 @@ public class Resume : AggregateRoot<ResumeId>
         _workExperiences.Remove(workExperience);
         LastUpdatedAt = DateTime.UtcNow;
 
-        RaiseDomainEvent(new ResumeUpdateDomainEvent(Id));
-
         return Result.Success();
     }
 
@@ -280,8 +276,6 @@ public class Resume : AggregateRoot<ResumeId>
 
         _educations.Add(creationResult.Value);
         LastUpdatedAt = DateTime.UtcNow;
-
-        RaiseDomainEvent(new ResumeUpdateDomainEvent(Id));
 
         return Result<EducationId>.Success(creationResult.Value.Id);
     }
@@ -302,8 +296,6 @@ public class Resume : AggregateRoot<ResumeId>
         _educations.Remove(education);
         LastUpdatedAt = DateTime.UtcNow;
 
-        RaiseDomainEvent(new ResumeUpdateDomainEvent(Id));
-
         return Result.Success();
     }
 
@@ -323,8 +315,6 @@ public class Resume : AggregateRoot<ResumeId>
         _languages.Add(creationResult.Value);
         LastUpdatedAt = DateTime.UtcNow;
 
-        RaiseDomainEvent(new ResumeUpdateDomainEvent(Id));
-
         return Result<LanguageId>.Success(creationResult.Value.Id);
     }
 
@@ -343,8 +333,6 @@ public class Resume : AggregateRoot<ResumeId>
 
         _languages.Remove(language);
         LastUpdatedAt = DateTime.UtcNow;
-
-        RaiseDomainEvent(new ResumeUpdateDomainEvent(Id));
 
         return Result.Success();
     }

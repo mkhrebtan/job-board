@@ -3,4 +3,4 @@ using Domain.Shared.Events;
 
 namespace Domain.Contexts.ResumePostingContext.Events;
 
-public sealed record ResumeDraftedDomainEvent(ResumeId Resume) : IDomainEvent;
+public sealed record ResumeDraftedDomainEvent(ResumeId ResumeId) : IDomainEvent;

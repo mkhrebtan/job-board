@@ -1,5 +1,6 @@
 ﻿using Application.Abstractions.Messaging;
 using Domain.Abstraction.Interfaces;
+using Domain.Contexts.ResumePostingContext.Events;
 using Domain.Contexts.ResumePostingContext.IDs;
 using Domain.Repos.Resumes;
 using Domain.Shared.ErrorHandling;
@@ -26,6 +27,9 @@ internal sealed class DeleteResumeCommandHandler : ICommandHandler<DeleteResumeC
         }
 
         _resumeRepository.Remove(resume);
+
+        resume.RaiseDomainEvent(new ResumeDeletedDomainEvent(resume.Id));
+
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success();
     }
