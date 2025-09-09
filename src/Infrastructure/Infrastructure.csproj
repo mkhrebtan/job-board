@@ -7,6 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AWSSDK.Core" Version="4.0.0.26" />
+    <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.2.2" />
+    <PackageReference Include="AWSSDK.S3" Version="4.0.7" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Markdig" Version="0.41.3" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.8" />

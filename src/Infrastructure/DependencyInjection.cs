@@ -1,15 +1,18 @@
-﻿using System.Text;
+﻿using Amazon.S3;
 using API.Authentication;
 using Application.Abstraction.Authentication;
 using Application.Abstraction.Events;
+using Application.Abstraction.Storage;
 using Domain.Abstraction.Interfaces;
 using Infrastructure.Authentication;
 using Infrastructure.Events;
 using Infrastructure.Parser;
+using Infrastructure.Storage;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace Infrastructure;
 
@@ -46,6 +49,15 @@ public static class DependencyInjection
         services.AddScoped<IUserContext, UserContext>();
 
         services.AddScoped<IDomainEventsDispatcher, DomainEventsDispatcher>();
+
+        services.Configure<S3Settings>(options =>
+        {
+            options.BucketName = configuration.GetSection(S3Settings.SectionName)[nameof(S3Settings.BucketName)]!;
+            options.Region = configuration.GetSection(S3Settings.SectionName)[nameof(S3Settings.Region)]!;
+        });
+        services.AddDefaultAWSOptions(configuration.GetAWSOptions());
+        services.AddAWSService<IAmazonS3>();
+        services.AddScoped<IStorage, S3Storage>();
 
         return services;
     }
