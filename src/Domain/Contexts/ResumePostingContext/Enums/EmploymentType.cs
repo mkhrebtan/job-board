@@ -1,4 +1,5 @@
-﻿using Domain.Abstraction;
+﻿using System.Collections;
+using Domain.Abstraction;
 
 namespace Domain.Contexts.ResumePostingContext.Enums;
 
@@ -13,4 +14,6 @@ public class EmploymentType : Enumeration<EmploymentType>
         : base(code, name)
     {
     }
+
+    public static IEnumerable<EmploymentType> List() => new[] { FullTime, PartTime, Contract, Internship };
 }

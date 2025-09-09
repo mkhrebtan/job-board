@@ -1,20 +1,20 @@
 ﻿using API.Extensions;
 using Application.Abstractions.Messaging;
-using Application.Queries.Vacancies.GetAllCompanyVacancies;
+using Application.Queries.Vacancies.GetVacancyApplications;
 using Domain.Contexts.IdentityContext.Enums;
 
-namespace API.Endpoints.Vacancies.GetByCompany;
+namespace API.Endpoints.Vacancies.GetApplications;
 
-internal sealed class GetByCompany : IEndpoint
+internal sealed class GetApplications : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("vacancies/company/{companyId:guid}", async (
-            IQueryHandler<GetAllCompanyVacanciesQuery, GetAllCompanyVacanciesQueryResponse> queryHandler,
-            Guid companyId,
+        app.MapGet("/vacancies/{vacancyId:guid}/applications", async (
+            Guid vacancyId,
+            IQueryHandler<GetVacancyApplicationsQuery, GetVacancyApplicationsQueryResponse> queryHandler,
             CancellationToken cancellationToken) =>
         {
-            var result = await queryHandler.Handle(new GetAllCompanyVacanciesQuery(companyId), cancellationToken);
+            var result = await queryHandler.Handle(new GetVacancyApplicationsQuery(vacancyId), cancellationToken);
             return result.IsSuccess ? Results.Ok(result.Value) : result.GetProblem();
         })
         .WithTags("Vacancies")

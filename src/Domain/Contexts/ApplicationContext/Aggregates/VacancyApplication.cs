@@ -1,4 +1,5 @@
 ﻿using Domain.Abstraction;
+using Domain.Contexts.ApplicationContext.Events;
 using Domain.Contexts.ApplicationContext.IDs;
 using Domain.Contexts.ApplicationContext.ValueObjects;
 using Domain.Contexts.IdentityContext.IDs;
@@ -15,6 +16,8 @@ public abstract class VacancyApplication : AggregateRoot<VacancyApplicationId>
         SeekerId = seekerId;
         VacancyId = vacancyId;
         CoverLetter = coverLetter;
+
+        RaiseDomainEvent(new VacancyApplicationCreatedDomainEvent(Id));
     }
 
     private VacancyApplication()

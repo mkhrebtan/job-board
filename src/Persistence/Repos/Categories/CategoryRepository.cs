@@ -26,4 +26,9 @@ internal class CategoryRepository : GenericRepository<Category, CategoryId>, ICa
     {
         return await _context.Vacancies.AnyAsync(v => v.CategoryId == category.Id, ct);
     }
+
+    public async Task<IEnumerable<Category>> GetAllAsync(CancellationToken ct)
+    {
+        return await _dbSet.ToListAsync(ct);
+    }
 }

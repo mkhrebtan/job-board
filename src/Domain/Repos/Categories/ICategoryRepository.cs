@@ -10,4 +10,6 @@ public interface ICategoryRepository : IRepository<Category, CategoryId>
     Task<Category?> GetByIdAsync(CategoryId id, CancellationToken ct);
 
     Task<bool> HasAssignedVacancies(Category category, CancellationToken ct);
+
+    Task<IEnumerable<Category>> GetAllAsync(CancellationToken ct);
 }

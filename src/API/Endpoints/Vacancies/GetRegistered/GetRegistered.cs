@@ -14,6 +14,7 @@ internal sealed class GetRegistered : IEndpoint
         {
             var result = await queryHandler.Handle(new GetRegisteredVacanciesQuery(), cancellationToken);
             return result.IsSuccess ? Results.Ok(result.Value) : result.GetProblem();
-        });
+        })
+        .WithTags("Vacancies");
     }
 }

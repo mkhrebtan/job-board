@@ -58,6 +58,8 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<CompanyVacanciesReadModel> CompanyVacancies => Set<CompanyVacanciesReadModel>();
 
+    public DbSet<VacancyApplicationsReadModel> VacancyApplicationsReadModels => Set<VacancyApplicationsReadModel>();
+
     #endregion
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

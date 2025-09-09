@@ -62,6 +62,9 @@ public static class DependencyInjection
         services.AddScoped<IVacancyListingReadModelService, VacancyListingReadModelService>();
         services.AddScoped<IVacancyListingReadModelRepository, VacancyListingReadModelRepository>();
 
+        services.AddScoped<IVacancyApplicationsReadModelService, VacancyApplicationsReadModelService>();
+        services.AddScoped<IVacancyApplicationsReadModelRepository, VacancyApplicationsReadModelRepository>();
+
         return services;
     }
 }

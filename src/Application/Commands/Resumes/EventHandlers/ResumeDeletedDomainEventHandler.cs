@@ -9,15 +9,18 @@ internal sealed class ResumeDeletedDomainEventHandler : IDomainEventHandler<Resu
 {
     private readonly IUserResumesReadModelRepository _userResumesReadModelRepository;
     private readonly IResumeListingReadModelRepository _resumeListingReadModelRepository;
+    private readonly IVacancyApplicationsReadModelRepository _vacancyApplicationsReadModelRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public ResumeDeletedDomainEventHandler(
         IUserResumesReadModelRepository userResumesReadModelRepository,
         IResumeListingReadModelRepository resumeListingReadModelRepository,
+        IVacancyApplicationsReadModelRepository vacancyApplicationsReadModelRepository,
         IUnitOfWork unitOfWork)
     {
         _userResumesReadModelRepository = userResumesReadModelRepository;
         _resumeListingReadModelRepository = resumeListingReadModelRepository;
+        _vacancyApplicationsReadModelRepository = vacancyApplicationsReadModelRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -25,6 +28,7 @@ internal sealed class ResumeDeletedDomainEventHandler : IDomainEventHandler<Resu
     {
         await _userResumesReadModelRepository.Remove(domainEvent.ResumeId.Value);
         await _resumeListingReadModelRepository.Remove(domainEvent.ResumeId.Value);
+        await _vacancyApplicationsReadModelRepository.RemoveByResume(domainEvent.ResumeId.Value);
 
         await _unitOfWork.SaveChangesAsync();
     }

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Persistence;
@@ -12,9 +13,11 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250909103253_VacancyApplicationReadModel3")]
+    partial class VacancyApplicationReadModel3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -815,9 +818,9 @@ namespace Persistence.Migrations
 
             modelBuilder.Entity("Domain.ReadModels.Vacancies.VacancyApplicationsReadModel", b =>
                 {
-                    b.Property<Guid>("VacancyApplicationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                    b.Property<string>("ApplicationType")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("AppliedAt")
                         .HasColumnType("timestamp with time zone");
@@ -846,13 +849,9 @@ namespace Persistence.Migrations
                     b.Property<Guid>("VacancyId")
                         .HasColumnType("uuid");
 
-                    b.HasKey("VacancyApplicationId");
+                    b.HasIndex("ResumeId");
 
-                    b.HasIndex("ResumeId")
-                        .HasDatabaseName("IX_VacancyApplications_ResumeId1");
-
-                    b.HasIndex("VacancyId")
-                        .HasDatabaseName("IX_VacancyApplications_VacancyId1");
+                    b.HasIndex("VacancyId");
 
                     b.ToTable("VacancyApplications", "Read");
                 });

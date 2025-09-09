@@ -9,6 +9,7 @@ public record GetAllResumesQuery() : IQuery<GetAllResumesQueryResponse>;
 public record GetAllResumesQueryResponse(IEnumerable<ResumeDto> Resumes);
 
 public record ResumeDto(
+    Guid Id,
     string Title,
     string FirstName,
     int TotalMonthsOfExperience,
@@ -35,6 +36,7 @@ internal sealed class GetAllResumesQueryHandler : IQueryHandler<GetAllResumesQue
     {
         var resumes = (await _resumeListingReadModelRepository.GetAllAsync(cancellationToken))
             .Select(r => new ResumeDto(
+                r.ResumeId,
                 r.Title,
                 r.FirstName,
                 r.TotalMonthsOfExperience,

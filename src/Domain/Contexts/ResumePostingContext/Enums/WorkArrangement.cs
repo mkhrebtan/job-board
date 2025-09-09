@@ -1,4 +1,5 @@
 ﻿using Domain.Abstraction;
+using System.Collections;
 
 namespace Domain.Contexts.ResumePostingContext.Enums;
 
@@ -13,4 +14,6 @@ public class WorkArrangement : Enumeration<WorkArrangement>
         : base(code, name)
     {
     }
+
+    public static IEnumerable<WorkArrangement> List() => new[] { OnSite, Remote, Hybrid, Shift };
 }
