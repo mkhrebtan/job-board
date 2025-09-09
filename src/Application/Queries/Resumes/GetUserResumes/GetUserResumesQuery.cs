@@ -1,11 +1,12 @@
 ﻿using Application.Abstractions.Messaging;
 using Application.Services;
+using Domain.ReadModels;
 
 namespace Application.Queries.Resumes.GetUserResumes;
 
-public record GetUserResumesQuery(Guid UserId) : IQuery<GetUserResumesResponse>;
+public record GetUserResumesQuery(Guid UserId, bool? NewFirst, int Page, int PageSize) : IQuery<GetUserResumesResponse>;
 
-public record GetUserResumesResponse(IEnumerable<UserResumeDto> Resumes);
+public record GetUserResumesResponse(IPagedList<UserResumeDto> Resumes);
 
 public record UserResumeDto
 {

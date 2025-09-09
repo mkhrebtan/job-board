@@ -1,12 +1,13 @@
 ﻿using Application.Abstractions.Messaging;
+using Domain.ReadModels;
 using Domain.Repos.ReadModels;
 using Domain.Shared.ErrorHandling;
 
 namespace Application.Queries.Vacancies.GetRegisteredVacancies;
 
-public record GetRegisteredVacanciesQuery() : IQuery<GetRegisteredVacanciesQueryResponse>;
+public record GetRegisteredVacanciesQuery(int Page, int PageSize) : IQuery<GetRegisteredVacanciesQueryResponse>;
 
-public record GetRegisteredVacanciesQueryResponse(IEnumerable<RegisteredVacancyDto> RegisteredVacancies);
+public record GetRegisteredVacanciesQueryResponse(IPagedList<RegisteredVacancyDto> RegisteredVacancies);
 
 public record RegisteredVacancyDto(
     Guid Id,
@@ -20,22 +21,27 @@ public record RegisteredVacancyDto(
 internal sealed class GetRegisteredVacanciesQueryHandler : IQueryHandler<GetRegisteredVacanciesQuery, GetRegisteredVacanciesQueryResponse>
 {
     private readonly IRegisteredVacanciesReadModelRepository _registeredVacanciesReadModelRepository;
+    private readonly IPagedList<RegisteredVacancyDto> _pagedList;
 
-    public GetRegisteredVacanciesQueryHandler(IRegisteredVacanciesReadModelRepository registeredVacanciesReadModelRepository)
+    public GetRegisteredVacanciesQueryHandler(IRegisteredVacanciesReadModelRepository registeredVacanciesReadModelRepository, IPagedList<RegisteredVacancyDto> pagedList)
     {
         _registeredVacanciesReadModelRepository = registeredVacanciesReadModelRepository;
+        _pagedList = pagedList;
     }
 
     public async Task<Result<GetRegisteredVacanciesQueryResponse>> Handle(GetRegisteredVacanciesQuery query, CancellationToken cancellationToken = default)
     {
-        var vacancies = await _registeredVacanciesReadModelRepository.GetAllAsync(cancellationToken);
-        return Result<GetRegisteredVacanciesQueryResponse>.Success(new GetRegisteredVacanciesQueryResponse(vacancies.Select(v => new RegisteredVacancyDto(
+        var vacanciesQuery = _registeredVacanciesReadModelRepository.GetRegisteredVacanciesQueryable();
+        var vacanciesDtos = vacanciesQuery.Select(v => new RegisteredVacancyDto(
             v.VacancyId,
             v.Title,
             v.CompanyName,
             v.UserFullName,
             v.UserEmail,
             v.UserPhoneNumber,
-            v.RegisteredAt))));
+            v.RegisteredAt));
+
+        var vacancies = await _pagedList.Create(vacanciesDtos, query.Page, query.PageSize);
+        return Result<GetRegisteredVacanciesQueryResponse>.Success(new GetRegisteredVacanciesQueryResponse(vacancies));
     }
 }

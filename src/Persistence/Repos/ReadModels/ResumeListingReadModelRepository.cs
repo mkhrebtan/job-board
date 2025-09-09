@@ -2,6 +2,7 @@
 using Domain.ReadModels.Resumes;
 using Domain.Repos.ReadModels;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace Persistence.Repos.ReadModels;
 
@@ -24,6 +25,16 @@ internal class ResumeListingReadModelRepository : IResumeListingReadModelReposit
         return await _context.ResumeListing.OrderBy(x => x.LastUpdatedAt).ToListAsync(cancellationToken);
     }
 
+    public IQueryable<ResumeListingReadModel> GetResumesQueryable()
+    {
+        return _context.ResumeListing.AsQueryable();
+    }
+
+    public async Task<IEnumerable<ResumeListingReadModel>> MaterializeAsync(IQueryable<ResumeListingReadModel> resumeListingReadModels)
+    {
+        return await resumeListingReadModels.ToListAsync();
+    }
+
     public async Task Remove(Guid resumeId)
     {
         var modelToRemove = await _context.ResumeListing.FirstOrDefaultAsync(x => x.ResumeId == resumeId);
@@ -44,11 +55,11 @@ internal class ResumeListingReadModelRepository : IResumeListingReadModelReposit
                 {
                     r.DesiredPosition.Title,
                     r.PersonalInfo.FirstName,
-                    TotalMonthsOfExperience = r.WorkExperiences.Sum(we => we.DateRange.Duration.Days) / 30,
+                    WorkExperiences = r.WorkExperiences,
                     r.SalaryExpectation.Value,
                     r.SalaryExpectation.Currency,
-                    EmploymentTypes = r.EmploymentTypes.Select(x => x.Code).ToList(),
-                    WorkArrangements = r.WorkArrangements.Select(x => x.Code).ToList(),
+                    EmploymentTypes = r.EmploymentTypes,
+                    WorkArrangements = r.WorkArrangements,
                     r.Location.Country,
                     r.Location.City,
                     r.Location.Region,
@@ -63,11 +74,11 @@ internal class ResumeListingReadModelRepository : IResumeListingReadModelReposit
             {
                 modelToUpdate.Title = resumeData.Title;
                 modelToUpdate.FirstName = resumeData.FirstName;
-                modelToUpdate.TotalMonthsOfExperience = resumeData.TotalMonthsOfExperience;
+                modelToUpdate.TotalMonthsOfExperience = resumeData.WorkExperiences.Sum(we => we.DateRange.Duration.Days) / 30;
                 modelToUpdate.ExpectedSalary = resumeData.Value;
                 modelToUpdate.ExpectedSalaryCurrency = resumeData.Currency;
-                modelToUpdate.EmploymentTypes = resumeData.EmploymentTypes;
-                modelToUpdate.WorkArrangements = resumeData.WorkArrangements;
+                modelToUpdate.EmploymentTypes = resumeData.EmploymentTypes.Select(x => x.Code).ToList();
+                modelToUpdate.WorkArrangements = resumeData.WorkArrangements.Select(x => x.Code).ToList();
                 modelToUpdate.Country = resumeData.Country;
                 modelToUpdate.City = resumeData.City;
                 modelToUpdate.Region = resumeData.Region;

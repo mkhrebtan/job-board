@@ -59,4 +59,14 @@ internal class UserResumesReadModelRepository : IUserResumesReadModelRepository
             }
         }
     }
+
+    public IQueryable<UserResumesReadModel> GetUserResumesQueryable(Guid userId)
+    {
+        return _context.UserResumes.Where(x => x.UserId == userId).AsQueryable();
+    }
+
+    public async Task<IEnumerable<UserResumesReadModel>> MaterializeAsync(IQueryable<UserResumesReadModel> userResumesReadModels, CancellationToken cancellationToken = default)
+    {
+        return await userResumesReadModels.ToListAsync(cancellationToken);
+    }
 }

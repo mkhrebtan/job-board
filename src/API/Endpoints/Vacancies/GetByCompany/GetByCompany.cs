@@ -12,9 +12,11 @@ internal sealed class GetByCompany : IEndpoint
         app.MapGet("vacancies/company/{companyId:guid}", async (
             IQueryHandler<GetAllCompanyVacanciesQuery, GetAllCompanyVacanciesQueryResponse> queryHandler,
             Guid companyId,
+            int page,
+            int pageSize,
             CancellationToken cancellationToken) =>
         {
-            var result = await queryHandler.Handle(new GetAllCompanyVacanciesQuery(companyId), cancellationToken);
+            var result = await queryHandler.Handle(new GetAllCompanyVacanciesQuery(companyId, page, pageSize), cancellationToken);
             return result.IsSuccess ? Results.Ok(result.Value) : result.GetProblem();
         })
         .WithTags("Vacancies")

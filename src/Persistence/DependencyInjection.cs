@@ -1,5 +1,6 @@
 ﻿using Application.Services;
 using Domain.Abstraction.Interfaces;
+using Domain.ReadModels;
 using Domain.Repos;
 using Domain.Repos.Categories;
 using Domain.Repos.Companies;
@@ -64,6 +65,8 @@ public static class DependencyInjection
 
         services.AddScoped<IVacancyApplicationsReadModelService, VacancyApplicationsReadModelService>();
         services.AddScoped<IVacancyApplicationsReadModelRepository, VacancyApplicationsReadModelRepository>();
+
+        services.AddTransient(typeof(IPagedList<>), typeof(PagedList<>));
 
         return services;
     }

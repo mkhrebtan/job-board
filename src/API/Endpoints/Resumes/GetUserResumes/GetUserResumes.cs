@@ -9,9 +9,14 @@ internal sealed class GetUserResumes : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/resumes/{userId}", async (Guid userId, IQueryHandler<GetUserResumesQuery, GetUserResumesResponse> queryHandler) =>
+        app.MapGet("/resumes/{userId}", async (
+            Guid userId,
+            bool? newFirst,
+            int page,
+            int pageSize,
+            IQueryHandler<GetUserResumesQuery, GetUserResumesResponse> queryHandler) =>
         {
-            var query = new GetUserResumesQuery(userId);
+            var query = new GetUserResumesQuery(userId, newFirst, page, pageSize);
             var result = await queryHandler.Handle(query);
 
             return result.IsSuccess ? Results.Ok(result.Value) : result.GetProblem();

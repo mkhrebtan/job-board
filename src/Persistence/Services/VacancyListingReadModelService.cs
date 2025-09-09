@@ -35,6 +35,8 @@ internal sealed class VacancyListingReadModelService : IVacancyListingReadModelS
                 City = vacancy.Location.City,
                 Region = vacancy.Location.Region,
                 District = vacancy.Location.District,
+                Latitude = vacancy.Location.Latitude,
+                Longitude = vacancy.Location.Longitude,
                 LastUpdatedAt = vacancy.LastUpdatedAt
             };
 

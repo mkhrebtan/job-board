@@ -17,5 +17,7 @@ internal sealed class VacancyListingConfiguration : IEntityTypeConfiguration<Vac
         builder.HasIndex(r => r.City);
         builder.HasIndex(r => r.Region);
         builder.HasIndex(r => r.District);
+        builder.HasIndex(r => r.DescriptionPlainText);
+        builder.HasIndex(r => r.CompanyName);
     }
 }

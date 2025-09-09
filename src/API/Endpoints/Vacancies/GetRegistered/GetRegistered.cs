@@ -9,10 +9,12 @@ internal sealed class GetRegistered : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet("vacancies/registered", async (
+            int page,
+            int pageSize,
             IQueryHandler<GetRegisteredVacanciesQuery, GetRegisteredVacanciesQueryResponse> queryHandler,
             CancellationToken cancellationToken) =>
         {
-            var result = await queryHandler.Handle(new GetRegisteredVacanciesQuery(), cancellationToken);
+            var result = await queryHandler.Handle(new GetRegisteredVacanciesQuery(page, pageSize), cancellationToken);
             return result.IsSuccess ? Results.Ok(result.Value) : result.GetProblem();
         })
         .WithTags("Vacancies");

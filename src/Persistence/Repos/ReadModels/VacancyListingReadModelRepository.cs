@@ -29,6 +29,16 @@ internal class VacancyListingReadModelRepository : IVacancyListingReadModelRepos
         return await _context.VacancyListing.Where(x => x.CategoryId == categoryId).ToListAsync(cancellationToken);
     }
 
+    public IQueryable<VacancyListingReadModel> GetVacanciesQueryable()
+    {
+        return _context.VacancyListing.AsQueryable();
+    }
+
+    public async Task<IEnumerable<VacancyListingReadModel>> MaterializeAsync(IQueryable<VacancyListingReadModel> vacancyListingReadModels, CancellationToken cancellationToken = default)
+    {
+        return await vacancyListingReadModels.ToListAsync(cancellationToken);
+    }
+
     public async Task Remove(Guid vacancyId)
     {
         var modelToRemove = await _context.VacancyListing.FirstOrDefaultAsync(x => x.VacancyId == vacancyId);
@@ -56,6 +66,8 @@ internal class VacancyListingReadModelRepository : IVacancyListingReadModelRepos
                     City = vacancy.Location.City,
                     Region = vacancy.Location.Region,
                     District = vacancy.Location.District,
+                    Latitude = vacancy.Location.Latitude,
+                    Longitude = vacancy.Location.Longitude,
                     LastUpdatedAt = vacancy.LastUpdatedAt
                 })
                 .FirstOrDefaultAsync();
@@ -70,6 +82,8 @@ internal class VacancyListingReadModelRepository : IVacancyListingReadModelRepos
                 modelToUpdate.City = vacancy.City;
                 modelToUpdate.Region = vacancy.Region;
                 modelToUpdate.District = vacancy.District;
+                modelToUpdate.Latitude = vacancy.Latitude;
+                modelToUpdate.Longitude = vacancy.Longitude;
                 modelToUpdate.LastUpdatedAt = vacancy.LastUpdatedAt;
 
                 _context.VacancyListing.Update(modelToUpdate);

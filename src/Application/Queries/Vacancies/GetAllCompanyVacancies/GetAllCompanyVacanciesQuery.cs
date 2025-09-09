@@ -1,8 +1,9 @@
 ﻿using Application.Abstractions.Messaging;
 using Application.Queries.Vacancies.GetPublishedCompanyVacancies;
+using Domain.ReadModels;
 
 namespace Application.Queries.Vacancies.GetAllCompanyVacancies;
 
-public record GetAllCompanyVacanciesQuery(Guid CompanyId) : IQuery<GetAllCompanyVacanciesQueryResponse>;
+public record GetAllCompanyVacanciesQuery(Guid CompanyId, int Page, int PageSize) : IQuery<GetAllCompanyVacanciesQueryResponse>;
 
-public record GetAllCompanyVacanciesQueryResponse(IEnumerable<CompanyVacancyDto> Vacancies);
+public record GetAllCompanyVacanciesQueryResponse(IPagedList<CompanyVacancyDto> Vacancies);

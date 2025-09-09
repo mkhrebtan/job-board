@@ -11,10 +11,12 @@ internal sealed class GetApplications : IEndpoint
     {
         app.MapGet("/vacancies/{vacancyId:guid}/applications", async (
             Guid vacancyId,
+            int page,
+            int pageSize,
             IQueryHandler<GetVacancyApplicationsQuery, GetVacancyApplicationsQueryResponse> queryHandler,
             CancellationToken cancellationToken) =>
         {
-            var result = await queryHandler.Handle(new GetVacancyApplicationsQuery(vacancyId), cancellationToken);
+            var result = await queryHandler.Handle(new GetVacancyApplicationsQuery(vacancyId, page, pageSize), cancellationToken);
             return result.IsSuccess ? Results.Ok(result.Value) : result.GetProblem();
         })
         .WithTags("Vacancies")

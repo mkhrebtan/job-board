@@ -28,5 +28,9 @@ public record VacancyListingReadModel
 
     public string? District { get; set; }
 
+    public decimal? Latitude { get; set; }
+
+    public decimal? Longitude { get; set; }
+
     public DateTime LastUpdatedAt { get; set; }
 }

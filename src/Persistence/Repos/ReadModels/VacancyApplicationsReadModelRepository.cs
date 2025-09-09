@@ -24,6 +24,11 @@ internal class VacancyApplicationsReadModelRepository : IVacancyApplicationsRead
         return await _context.VacancyApplicationsReadModels.Where(x => x.VacancyId == vacancyId).ToListAsync(cancellationToken);
     }
 
+    public IQueryable<VacancyApplicationsReadModel> GetVacancyApplicationsReadModelsQueryable(Guid vacancyId)
+    {
+        return _context.VacancyApplicationsReadModels.Where(x => x.VacancyId == vacancyId).AsQueryable();
+    }
+
     public async Task Remove(Guid vacancyId)
     {
         var modelsToRemove = await _context.VacancyApplicationsReadModels.Where(x => x.VacancyId == vacancyId).ToListAsync();

@@ -25,6 +25,11 @@ internal class CompanyVacanciesReadModelRepository : ICompanyVacanciesReadModelR
         return await _context.CompanyVacancies.Where(x => x.CompanyId == companyId).ToListAsync(cancellationToken);
     }
 
+    public IQueryable<CompanyVacanciesReadModel> GetCompanyVacanciesQueryable(Guid companyId)
+    {
+        return _context.CompanyVacancies.Where(x => x.CompanyId == companyId).AsQueryable();
+    }
+
     public async Task<IEnumerable<CompanyVacanciesReadModel>> GetPublishedByCompanyIdAsync(Guid companyId, CancellationToken cancellationToken = default)
     {
         return await _context.CompanyVacancies.Where(x => x.CompanyId == companyId && x.Status == VacancyStatus.Published.Code).ToListAsync(cancellationToken);

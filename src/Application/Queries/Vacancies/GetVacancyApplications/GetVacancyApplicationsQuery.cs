@@ -1,10 +1,11 @@
 ﻿using Application.Abstractions.Messaging;
+using Domain.ReadModels;
 
 namespace Application.Queries.Vacancies.GetVacancyApplications;
 
-public record GetVacancyApplicationsQuery(Guid VacancyId) : IQuery<GetVacancyApplicationsQueryResponse>;
+public record GetVacancyApplicationsQuery(Guid VacancyId, int Page, int PageSize) : IQuery<GetVacancyApplicationsQueryResponse>;
 
-public record GetVacancyApplicationsQueryResponse(IEnumerable<VacancyApplicationDto> VacancyApplications);
+public record GetVacancyApplicationsQueryResponse(IPagedList<VacancyApplicationDto> VacancyApplications);
 
 public record VacancyApplicationDto(
     Guid Id,

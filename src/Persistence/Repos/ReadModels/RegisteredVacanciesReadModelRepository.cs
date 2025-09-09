@@ -23,6 +23,11 @@ internal class RegisteredVacanciesReadModelRepository : IRegisteredVacanciesRead
         return await _context.RegisteredVacancies.ToListAsync(cancellationToken);
     }
 
+    public IQueryable<RegisteredVacanciesReadModel> GetRegisteredVacanciesQueryable()
+    {
+        return _context.RegisteredVacancies.AsQueryable();
+    }
+
     public async Task Remove(Guid vacancyId)
     {
         var modelToRemove = await _context.RegisteredVacancies.FirstOrDefaultAsync(x => x.VacancyId == vacancyId);

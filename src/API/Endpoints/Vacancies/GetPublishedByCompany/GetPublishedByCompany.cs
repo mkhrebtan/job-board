@@ -11,9 +11,13 @@ internal sealed class GetPublishedByCompany : IEndpoint
         app.MapGet("vacancies/{companyId:guid}/published", async (
             IQueryHandler<GetPublishedCompanyVacanciesQuery, GetPublishedCompanyVacanciesQueryResponse> queryHandler,
             Guid companyId,
+            Guid? categoryId,
+            bool? newFirst,
+            int page,
+            int pageSize,
             CancellationToken cancellationToken) =>
         {
-            var result = await queryHandler.Handle(new GetPublishedCompanyVacanciesQuery(companyId), cancellationToken);
+            var result = await queryHandler.Handle(new GetPublishedCompanyVacanciesQuery(companyId, categoryId, newFirst, page, pageSize), cancellationToken);
             return result.IsSuccess ? Results.Ok(result.Value) : result.GetProblem();
         })
         .WithTags("Vacancies");
